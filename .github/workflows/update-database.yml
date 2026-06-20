@@ -1,0 +1,83 @@
+name: Auto-Update Game Database
+
+on:
+  schedule:
+    # Runs daily at 06:00 UTC
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+    # Allow manual triggering from the Actions tab
+
+permissions:
+  contents: write
+
+jobs:
+  update-database:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download latest API data from Spire Codex
+        shell: pwsh
+        run: |
+          $urls = @{
+            "cards_api.json"      = "https://raw.githubusercontent.com/ptrlrd/spire-codex/main/data/cards.json"
+            "relics_api.json"     = "https://raw.githubusercontent.com/ptrlrd/spire-codex/main/data/relics.json"
+            "monsters_api.json"   = "https://raw.githubusercontent.com/ptrlrd/spire-codex/main/data/monsters.json"
+            "encounters_api.json" = "https://raw.githubusercontent.com/ptrlrd/spire-codex/main/data/encounters.json"
+          }
+
+          $changed = $false
+          foreach ($entry in $urls.GetEnumerator()) {
+            $dest = Join-Path $env:GITHUB_WORKSPACE $entry.Key
+            $tempFile = Join-Path $env:RUNNER_TEMP $entry.Key
+
+            Write-Host "Downloading $($entry.Key) from Spire Codex..."
+            Invoke-WebRequest -Uri $entry.Value -OutFile $tempFile -ErrorAction Stop
+
+            # Normalize JSON for comparison (sort keys, consistent formatting)
+            $newContent = (Get-Content -Raw $tempFile | ConvertFrom-Json | ConvertTo-Json -Depth 20 -Compress)
+            $oldContent = ""
+            if (Test-Path $dest) {
+              $oldContent = (Get-Content -Raw $dest | ConvertFrom-Json | ConvertTo-Json -Depth 20 -Compress)
+            }
+
+            if ($newContent -ne $oldContent) {
+              Write-Host "  -> $($entry.Key) has CHANGED!"
+              Copy-Item $tempFile $dest -Force
+              $changed = $true
+            } else {
+              Write-Host "  -> $($entry.Key) is unchanged."
+            }
+          }
+
+          # Export the result for subsequent steps
+          if ($changed) {
+            Write-Host "`nChanges detected! Will rebuild database and dashboard."
+            "DATA_CHANGED=true" | Out-File -Append -FilePath $env:GITHUB_ENV
+          } else {
+            Write-Host "`nNo changes detected. Skipping rebuild."
+            "DATA_CHANGED=false" | Out-File -Append -FilePath $env:GITHUB_ENV
+          }
+
+      - name: Rebuild database
+        if: env.DATA_CHANGED == 'true'
+        shell: pwsh
+        run: |
+          & "$env:GITHUB_WORKSPACE/compile_db.ps1"
+
+      - name: Regenerate dashboard HTML
+        if: env.DATA_CHANGED == 'true'
+        shell: pwsh
+        run: |
+          & "$env:GITHUB_WORKSPACE/generate_dashboard.ps1"
+
+      - name: Commit and push updates
+        if: env.DATA_CHANGED == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet && echo "No changes to commit" && exit 0
+          git commit -m "Auto-update: Rebuild database from latest Spire Codex data"
+          git push

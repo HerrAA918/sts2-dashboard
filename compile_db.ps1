@@ -3,15 +3,20 @@ $cardsFile = Join-Path $scratchDir "cards_api.json"
 $relicsFile = Join-Path $scratchDir "relics_api.json"
 $monstersFile = Join-Path $scratchDir "monsters_api.json"
 $encountersFile = Join-Path $scratchDir "encounters_api.json"
+$eventsFile = Join-Path $scratchDir "events_api.json"
 $outputFile = Join-Path $scratchDir "sts2_database.json"
 
-Write-Host "Loading cards, relics, monsters, and encounters raw data..."
+Write-Host "Loading cards, relics, monsters, encounters, and events raw data..."
 $cardsData = Get-Content -Raw -Path $cardsFile -Encoding utf8 | ConvertFrom-Json
 $relicsData = Get-Content -Raw -Path $relicsFile -Encoding utf8 | ConvertFrom-Json
 $monstersData = Get-Content -Raw -Path $monstersFile -Encoding utf8 | ConvertFrom-Json
 $encountersData = @()
 if (Test-Path $encountersFile) {
     $encountersData = Get-Content -Raw -Path $encountersFile -Encoding utf8 | ConvertFrom-Json
+}
+$eventsData = @()
+if (Test-Path $eventsFile) {
+    $eventsData = Get-Content -Raw -Path $eventsFile -Encoding utf8 | ConvertFrom-Json
 }
 
 # Build monster-to-encounter map
@@ -41,6 +46,7 @@ $database = @{
     cards = @{}
     relics = @{}
     monsters = @{}
+    events = @{}
 }
 
 Write-Host "Processing $($cardsData.Count) cards..."
@@ -389,6 +395,31 @@ $database.monsters["KAISER_CRAB"] = @{
         @{ name = "Rocket: Precision Beam"; intent = "Attack"; damage = "18 (A: 20)"; desc = "" },
         @{ name = "Rocket: Laser"; intent = "Attack"; damage = "31 (A: 35)"; desc = "" }
     )
+}
+
+Write-Host "Processing $($eventsData.Count) events..."
+foreach ($event in $eventsData) {
+    if (-not $event.id) { continue }
+    
+    $fullId = "EVENT." + $event.id.ToUpper()
+    
+    $options = @()
+    if ($event.options) {
+        foreach ($opt in $event.options) {
+            $options += @{
+                id          = $opt.id
+                title       = $opt.title
+                description = if ($opt.description) { $opt.description } else { "" }
+            }
+        }
+    }
+    
+    $database.events[$fullId] = @{
+        name        = $event.name
+        act         = if ($event.act) { $event.act } else { "Other / Special" }
+        description = if ($event.description) { $event.description } else { "" }
+        options     = $options
+    }
 }
 
 $jsonOut = ConvertTo-Json $database -Depth 10

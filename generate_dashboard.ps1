@@ -1405,6 +1405,98 @@ $htmlTemplate = @'
             font-size: 11.5px;
         }
 
+        /* Events Tab Styles */
+        .events-grid-layout {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 20px;
+            margin-top: 12px;
+        }
+        .event-card {
+            background: rgba(30, 41, 59, 0.25);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .event-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(99, 102, 241, 0.35);
+            box-shadow: 0 8px 30px rgba(99, 102, 241, 0.08);
+        }
+        .event-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 8px;
+        }
+        .event-name {
+            font-family: 'Outfit', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+        .event-desc {
+            font-size: 12.5px;
+            color: #94a3b8;
+            line-height: 1.5;
+            white-space: pre-line;
+            max-height: 120px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+        .event-options-title {
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+            margin-top: 4px;
+        }
+        .event-options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .event-option-row {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            padding: 8px 10px;
+            border-radius: 6px;
+        }
+        .event-option-header {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .event-option-pill {
+            background: rgba(99, 102, 241, 0.15);
+            color: #a5b4fc;
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            padding: 1px 6px;
+            font-size: 10px;
+            border-radius: 4px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .event-option-text {
+            font-size: 12.5px;
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+        .event-option-outcome {
+            font-size: 11.5px;
+            color: #94a3b8;
+            line-height: 1.35;
+        }
+
         .comp-card-header {
             display: flex;
             justify-content: space-between;
@@ -1702,7 +1794,9 @@ $htmlTemplate = @'
         <div class="tab-container">
             <button class="tab-btn active" id="tab-runs" onclick="switchTab('runs')">Run History</button>
             <button class="tab-btn" id="tab-multiplayer" onclick="switchTab('multiplayer')">Co-op History</button>
-            <button class="tab-btn" id="tab-compendium" onclick="switchTab('compendium')">Compendium</button>
+            <button class="tab-btn" id="tab-compendium" onclick="switchTab('compendium')">Cards & Relics</button>
+            <button class="tab-btn" id="tab-enemies" onclick="switchTab('enemies')">Enemies</button>
+            <button class="tab-btn" id="tab-events" onclick="switchTab('events')">Events</button>
             <button class="tab-btn" id="tab-card-stats" onclick="switchTab('card-stats')">Card Analytics</button>
             <button class="tab-btn" id="tab-relic-stats" onclick="switchTab('relic-stats')">Relic Analytics</button>
         </div>
@@ -2054,6 +2148,7 @@ $htmlTemplate = @'
         </div>
 
     <!-- COMPENDIUM TAB VIEW -->
+    <!-- COMPENDIUM TAB VIEW -->
     <div id="view-compendium" style="display: none;">
         <!-- Filters panel -->
         <div class="filter-panel">
@@ -2065,7 +2160,11 @@ $htmlTemplate = @'
                 <option value="all">All Categories</option>
                 <option value="card">Cards Only</option>
                 <option value="relic">Relics Only</option>
-                <option value="monster">Mobs & Bosses Only</option>
+            </select>
+
+            <select id="comp-sort-by" class="select-filter">
+                <option value="name">Sort by Name</option>
+                <option value="rarity">Sort by Rarity</option>
             </select>
             
             <div class="char-pills" id="comp-char-pills">
@@ -2077,9 +2176,30 @@ $htmlTemplate = @'
                 <div class="char-pill" data-char="necrobinder">Necrobinder</div>
                 <div class="char-pill" data-char="shared">Neutral / Shared</div>
             </div>
+        </div>
+        
+        <!-- Compendium cards container -->
+        <div class="compendium-grid" id="comp-grid">
+            <!-- Populated dynamically -->
+        </div>
+    </div>
 
-            <!-- Act filter pills (shown only when category is Mobs & Bosses) -->
-            <div class="char-pills" id="comp-act-pills" style="display: none;">
+    <!-- ENEMIES TAB VIEW -->
+    <div id="view-enemies" style="display: none;">
+        <!-- Filters panel -->
+        <div class="filter-panel" style="flex-wrap: wrap; gap: 12px;">
+            <div class="search-wrapper" style="flex-grow: 1; min-width: 250px;">
+                <input type="text" id="enemies-search" class="search-input" placeholder="Search enemies by name, behavior, or moves...">
+            </div>
+            
+            <div class="char-pills" id="enemies-type-pills">
+                <div class="char-pill active" data-type="all">All Types</div>
+                <div class="char-pill" data-type="normal">Normal</div>
+                <div class="char-pill" data-type="elite">Elite</div>
+                <div class="char-pill" data-type="boss">Boss</div>
+            </div>
+
+            <div class="char-pills" id="enemies-act-pills">
                 <div class="char-pill active" data-act="all">All Acts</div>
                 <div class="char-pill" data-act="Act 1 - Overgrowth">Act 1: Overgrowth</div>
                 <div class="char-pill" data-act="Act 2 - Hive">Act 2: Hive</div>
@@ -2088,33 +2208,58 @@ $htmlTemplate = @'
                 <div class="char-pill" data-act="other">Other / Special</div>
             </div>
         </div>
-        
-        <!-- Compendium cards container -->
-        <div class="compendium-grid" id="comp-grid">
-            <!-- Populated dynamically -->
-        </div>
 
-        <!-- Compendium detailed enemy list (hidden by default) -->
-        <div class="card runs-container" id="comp-monster-table-container" style="display: none; margin-top: 16px;">
+        <!-- Compendium detailed enemy list -->
+        <div class="card runs-container" id="enemies-table-container" style="margin-top: 16px;">
             <div class="runs-header-row">
                 <h3 style="margin: 0; font-size: 16px; font-weight: 600; color: var(--text-main);">Monsters & Bosses Compendium</h3>
-                <span class="runs-count-badge" id="comp-monster-count">Showing 0 enemies</span>
+                <span class="runs-count-badge" id="enemies-count">Showing 0 enemies</span>
             </div>
             <div class="table-wrapper" style="max-height: 600px; margin-top: 12px;">
                 <table>
                     <thead>
-                        <tr id="monster-header-row-tr">
-                            <th data-sort="name" onclick="sortMonsters('name')">Enemy Name</th>
-                            <th data-sort="type" onclick="sortMonsters('type')" style="width: 120px;">Type</th>
-                            <th data-sort="hp" onclick="sortMonsters('hp')" style="text-align:center; width: 120px;">HP Range</th>
-                            <th data-sort="acts" onclick="sortMonsters('acts')">Acts / Levels</th>
+                        <tr id="enemies-header-row-tr">
+                            <th data-sort="name" onclick="sortEnemies('name')">Enemy Name</th>
+                            <th data-sort="type" onclick="sortEnemies('type')" style="width: 120px;">Type</th>
+                            <th data-sort="hp" onclick="sortEnemies('hp')" style="text-align:center; width: 120px;">HP Range</th>
+                            <th data-sort="acts" onclick="sortEnemies('acts')">Acts / Levels</th>
                             <th style="width: 45%;">Moves & Intents</th>
                         </tr>
                     </thead>
-                    <tbody id="comp-monster-table-body">
+                    <tbody id="enemies-table-body">
                         <!-- Populated dynamically -->
                     </tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- EVENTS TAB VIEW -->
+    <div id="view-events" style="display: none;">
+        <!-- Filters panel -->
+        <div class="filter-panel" style="flex-wrap: wrap; gap: 12px;">
+            <div class="search-wrapper" style="flex-grow: 1; min-width: 250px;">
+                <input type="text" id="events-search" class="search-input" placeholder="Search events by name, text, or choice outcomes...">
+            </div>
+
+            <div class="char-pills" id="events-act-pills">
+                <div class="char-pill active" data-act="all">All Acts</div>
+                <div class="char-pill" data-act="Act 1 - Overgrowth">Act 1: Overgrowth</div>
+                <div class="char-pill" data-act="Act 2 - Hive">Act 2: Hive</div>
+                <div class="char-pill" data-act="Act 3 - Glory">Act 3: Glory</div>
+                <div class="char-pill" data-act="Underdocks">Underdocks</div>
+                <div class="char-pill" data-act="other">Other / Special</div>
+            </div>
+        </div>
+
+        <div class="card runs-container" style="margin-top: 16px; padding: 20px;">
+            <div class="runs-header-row" style="margin-bottom: 16px;">
+                <h3 style="margin: 0; font-size: 16px; font-weight: 600; color: var(--text-main);">Choose Your Path: Events</h3>
+                <span class="runs-count-badge" id="events-count">Showing 0 events</span>
+            </div>
+            
+            <div class="events-grid-layout" id="events-grid">
+                <!-- Populated dynamically -->
             </div>
         </div>
     </div>
@@ -2391,6 +2536,18 @@ $htmlTemplate = @'
                 .replace(/\[\/green\]/g, '</span>')
                 .replace(/\[red\]/g, '<span class="text-red">')
                 .replace(/\[\/red\]/g, '</span>')
+                .replace(/\[orange\]/g, '<span style="color: #fb923c; font-weight: 600;">')
+                .replace(/\[\/orange\]/g, '</span>')
+                .replace(/\[aqua\]/g, '<span style="color: #22d3ee; font-weight: 600;">')
+                .replace(/\[\/aqua\]/g, '</span>')
+                .replace(/\[sine\]/g, '<span style="display: inline-block; font-style: italic; color: #a5b4fc;">')
+                .replace(/\[\/sine\]/g, '</span>')
+                .replace(/\[jitter\]/g, '<span style="display: inline-block; font-style: italic; color: #f87171;">')
+                .replace(/\[\/jitter\]/g, '</span>')
+                .replace(/\[rainbow\]/g, '<span style="font-weight: bold; background: linear-gradient(to right, #f87171, #fb923c, #fbbf24, #34d399, #3b82f6, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">')
+                .replace(/\[\/rainbow\]/g, '</span>')
+                .replace(/\[b\]/g, '<strong>')
+                .replace(/\[\/b\]/g, '</strong>')
                 .replace(/\[energy:(\d+)\]/g, (match, p1) => {
                     return `<span class="energy-icon energy-${p1}">${p1}</span>`;
                 })
@@ -2438,11 +2595,18 @@ $htmlTemplate = @'
         let shareChart = null;
         let selectedRunId = null;
         
-        // Compendium Tab state
+        // Cards & Relics (Compendium) Tab state
         let activeCompChar = 'all';
-        let activeCompAct = 'all';
-        let monsterSortCol = 'name';
-        let monsterSortDir = 'asc';
+        let compSortBy = 'name';
+
+        // Enemies Tab state
+        let activeEnemiesAct = 'all';
+        let activeEnemiesType = 'all';
+        let enemiesSortCol = 'name';
+        let enemiesSortDir = 'asc';
+
+        // Events Tab state
+        let activeEventsAct = 'all';
 
         // Card Stats Tab state
         let activeCardStatsChar = 'all';
@@ -2511,10 +2675,21 @@ $htmlTemplate = @'
         const runInput = document.getElementById('run-input');
         const resetBtn = document.getElementById('reset-btn');
         
-        // Compendium DOM
+        // Compendium (Cards & Relics) DOM
         const compSearch = document.getElementById('comp-search');
         const compFilterType = document.getElementById('comp-filter-type');
+        const compSortBySelect = document.getElementById('comp-sort-by');
         const compGrid = document.getElementById('comp-grid');
+
+        // Enemies DOM
+        const enemiesSearch = document.getElementById('enemies-search');
+        const enemiesTableBody = document.getElementById('enemies-table-body');
+        const enemiesCount = document.getElementById('enemies-count');
+
+        // Events DOM
+        const eventsSearch = document.getElementById('events-search');
+        const eventsGrid = document.getElementById('events-grid');
+        const eventsCount = document.getElementById('events-count');
 
         // Colors
         const charColors = {
@@ -2655,9 +2830,15 @@ $htmlTemplate = @'
                 });
             });
 
-            // Compendium event listeners
-            compSearch.addEventListener('input', renderCompendium);
-            compFilterType.addEventListener('change', renderCompendium);
+            // Cards & Relics (Compendium) event listeners
+            if (compSearch) compSearch.addEventListener('input', renderCompendium);
+            if (compFilterType) compFilterType.addEventListener('change', renderCompendium);
+            if (compSortBySelect) {
+                compSortBySelect.addEventListener('change', () => {
+                    compSortBy = compSortBySelect.value;
+                    renderCompendium();
+                });
+            }
             document.querySelectorAll('#comp-char-pills .char-pill').forEach(pill => {
                 pill.addEventListener('click', () => {
                     document.querySelectorAll('#comp-char-pills .char-pill').forEach(p => p.classList.remove('active'));
@@ -2667,12 +2848,33 @@ $htmlTemplate = @'
                 });
             });
 
-            document.querySelectorAll('#comp-act-pills .char-pill').forEach(pill => {
+            // Enemies tab event listeners
+            if (enemiesSearch) enemiesSearch.addEventListener('input', renderEnemies);
+            document.querySelectorAll('#enemies-act-pills .char-pill').forEach(pill => {
                 pill.addEventListener('click', () => {
-                    document.querySelectorAll('#comp-act-pills .char-pill').forEach(p => p.classList.remove('active'));
+                    document.querySelectorAll('#enemies-act-pills .char-pill').forEach(p => p.classList.remove('active'));
                     pill.classList.add('active');
-                    activeCompAct = pill.dataset.act;
-                    renderCompendium();
+                    activeEnemiesAct = pill.dataset.act;
+                    renderEnemies();
+                });
+            });
+            document.querySelectorAll('#enemies-type-pills .char-pill').forEach(pill => {
+                pill.addEventListener('click', () => {
+                    document.querySelectorAll('#enemies-type-pills .char-pill').forEach(p => p.classList.remove('active'));
+                    pill.classList.add('active');
+                    activeEnemiesType = pill.dataset.type;
+                    renderEnemies();
+                });
+            });
+
+            // Events tab event listeners
+            if (eventsSearch) eventsSearch.addEventListener('input', renderEvents);
+            document.querySelectorAll('#events-act-pills .char-pill').forEach(pill => {
+                pill.addEventListener('click', () => {
+                    document.querySelectorAll('#events-act-pills .char-pill').forEach(p => p.classList.remove('active'));
+                    pill.classList.add('active');
+                    activeEventsAct = pill.dataset.act;
+                    renderEvents();
                 });
             });
             
@@ -3856,18 +4058,18 @@ $htmlTemplate = @'
             updateTableHeaders('relic-header-row-tr', relicSortCol, relicSortDir);
         }
 
-        function sortMonsters(col) {
-            if (monsterSortCol === col) {
-                monsterSortDir = monsterSortDir === 'asc' ? 'desc' : 'asc';
+        function sortEnemies(col) {
+            if (enemiesSortCol === col) {
+                enemiesSortDir = enemiesSortDir === 'asc' ? 'desc' : 'asc';
             } else {
-                monsterSortCol = col;
+                enemiesSortCol = col;
                 if (col === 'name' || col === 'acts') {
-                    monsterSortDir = 'asc';
+                    enemiesSortDir = 'asc';
                 } else {
-                    monsterSortDir = 'desc';
+                    enemiesSortDir = 'desc';
                 }
             }
-            renderCompendium();
+            renderEnemies();
         }
 
         // Tab Switching Logic
@@ -3878,7 +4080,7 @@ $htmlTemplate = @'
             
             const mainGrid = document.getElementById('main-grid');
             
-            const tabViews = ['view-runs', 'view-multiplayer', 'view-compendium', 'view-card-stats', 'view-relic-stats'];
+            const tabViews = ['view-runs', 'view-multiplayer', 'view-compendium', 'view-enemies', 'view-events', 'view-card-stats', 'view-relic-stats'];
             tabViews.forEach(viewId => {
                 const el = document.getElementById(viewId);
                 if (el) el.style.display = 'none';
@@ -3912,6 +4114,14 @@ $htmlTemplate = @'
                 if (mainGrid) mainGrid.style.display = 'none';
                 document.getElementById('view-compendium').style.display = 'block';
                 renderCompendium();
+            } else if (tab === 'enemies') {
+                if (mainGrid) mainGrid.style.display = 'none';
+                document.getElementById('view-enemies').style.display = 'block';
+                renderEnemies();
+            } else if (tab === 'events') {
+                if (mainGrid) mainGrid.style.display = 'none';
+                document.getElementById('view-events').style.display = 'block';
+                renderEvents();
             } else if (tab === 'card-stats') {
                 if (mainGrid) mainGrid.style.display = 'none';
                 document.getElementById('view-card-stats').style.display = 'block';
@@ -4244,33 +4454,18 @@ $htmlTemplate = @'
         }
 
         // Render Compendium View
+        // Render Compendium View (Cards & Relics Only)
         function renderCompendium() {
             const searchVal = compSearch.value.toLowerCase();
             const typeVal = compFilterType.value;
+            const sortByVal = compSortBySelect ? compSortBySelect.value : 'name';
             
-            // Toggle pills and layouts based on category select
             const charPillsContainer = document.getElementById('comp-char-pills');
-            const actPillsContainer = document.getElementById('comp-act-pills');
-            const monsterTableContainer = document.getElementById('comp-monster-table-container');
-            const monsterTableBody = document.getElementById('comp-monster-table-body');
-            const monsterCountEl = document.getElementById('comp-monster-count');
-            
-            if (typeVal === 'monster') {
-                if (charPillsContainer) charPillsContainer.style.display = 'none';
-                if (actPillsContainer) actPillsContainer.style.display = 'flex';
-                compGrid.style.display = 'none';
-                if (monsterTableContainer) monsterTableContainer.style.display = 'block';
-                compSearch.placeholder = 'Search enemies by name, behavior, or moves...';
-            } else {
-                if (charPillsContainer) charPillsContainer.style.display = 'flex';
-                if (actPillsContainer) actPillsContainer.style.display = 'none';
-                compGrid.style.display = 'grid';
-                if (monsterTableContainer) monsterTableContainer.style.display = 'none';
-                compSearch.placeholder = 'Search cards or relics by name or description...';
-            }
+            if (charPillsContainer) charPillsContainer.style.display = 'flex';
+            compGrid.style.display = 'grid';
+            compSearch.placeholder = 'Search cards or relics by name or description...';
 
             compGrid.innerHTML = '';
-            if (monsterTableBody) monsterTableBody.innerHTML = '';
             
             let items = [];
             
@@ -4286,44 +4481,20 @@ $htmlTemplate = @'
                         items.push({ id, ...relic, category: 'relic' });
                     });
                 }
-                if (typeVal === 'all' || typeVal === 'monster') {
-                    Object.entries(sts2Database.monsters).forEach(([id, monster]) => {
-                        items.push({ id, ...monster, category: 'monster' });
-                    });
-                }
             }
             
             // Filter items
             let filteredItems = items.filter(item => {
-                if (item.category === 'monster') {
-                    // Mobs & Bosses level filter
-                    if (typeVal === 'monster' && activeCompAct !== 'all') {
-                        const actsList = item.acts || [];
-                        if (activeCompAct === 'other') {
-                            // Mobs that don't belong to Act 1, 2, 3 or Underdocks
-                            const isStandardAct = actsList.some(a => a.includes('Act 1') || a.includes('Act 2') || a.includes('Act 3') || a.includes('Underdocks'));
-                            if (isStandardAct && actsList.length > 0) return false;
+                // Class character filter for Cards & Relics
+                if (activeCompChar !== 'all') {
+                    if (item.category === 'card') {
+                        if (!item.color) return activeCompChar === 'shared';
+                        if (item.color.toLowerCase() !== activeCompChar) return false;
+                    } else if (item.category === 'relic') {
+                        if (activeCompChar === 'shared') {
+                            return true;
                         } else {
-                            // Normal acts search
-                            const hasAct = actsList.some(a => a.toLowerCase().includes(activeCompAct.toLowerCase()));
-                            if (!hasAct) return false;
-                        }
-                    } else if (activeCompChar !== 'all') {
-                        // Monsters are not class specific, hide when a class filter is active
-                        return false;
-                    }
-                } else {
-                    // Class character filter for Cards & Relics
-                    if (activeCompChar !== 'all') {
-                        if (item.category === 'card') {
-                            if (!item.color) return activeCompChar === 'shared';
-                            if (item.color.toLowerCase() !== activeCompChar) return false;
-                        } else if (item.category === 'relic') {
-                            if (activeCompChar === 'shared') {
-                                return true;
-                            } else {
-                                return false;
-                            }
+                            return false;
                         }
                     }
                 }
@@ -4332,210 +4503,361 @@ $htmlTemplate = @'
                 if (searchVal) {
                     const matchName = item.name.toLowerCase().includes(searchVal);
                     const matchDesc = item.desc && item.desc.toLowerCase().includes(searchVal);
-                    const matchPattern = item.pattern && item.pattern.toLowerCase().includes(searchVal);
-                    const matchMoves = item.moves && item.moves.some(m => m.name.toLowerCase().includes(searchVal) || (m.desc && m.desc.toLowerCase().includes(searchVal)));
-                    if (!matchName && !matchDesc && !matchPattern && !matchMoves) return false;
+                    if (!matchName && !matchDesc) return false;
                 }
                 
                 return true;
             });
 
-            if (typeVal === 'monster') {
-                // Update table header indicators
-                updateTableHeaders('monster-header-row-tr', monsterSortCol, monsterSortDir);
+            // Sorting logic
+            const RARITY_ORDER = {
+                'basic': 1,
+                'starter': 1,
+                'common': 2,
+                'uncommon': 3,
+                'rare': 4,
+                'shop': 5,
+                'ancient': 6,
+                'event': 7,
+                'special': 8,
+                'curse': 9,
+                'status': 10,
+                'token': 11,
+                'quest': 12,
+                'none': 99,
+                'unknown': 99
+            };
 
-                // Sort monsters
-                filteredItems.sort((a, b) => {
-                    let valA = a[monsterSortCol];
-                    let valB = b[monsterSortCol];
-
-                    if (monsterSortCol === 'name') {
-                        valA = (valA || '').toString().toLowerCase();
-                        valB = (valB || '').toString().toLowerCase();
-                        return monsterSortDir === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
-                    } else if (monsterSortCol === 'type') {
-                        const TYPE_ORDER = { 'normal': 0, 'elite': 1, 'boss': 2 };
-                        valA = TYPE_ORDER[(valA || '').toLowerCase()] ?? 99;
-                        valB = TYPE_ORDER[(valB || '').toLowerCase()] ?? 99;
-                    } else if (monsterSortCol === 'hp') {
-                        valA = Number(a.minHp) || 0;
-                        valB = Number(b.minHp) || 0;
-                    } else if (monsterSortCol === 'acts') {
-                        valA = ((a.acts && a.acts[0]) || '').toString().toLowerCase();
-                        valB = ((b.acts && b.acts[0]) || '').toString().toLowerCase();
-                        return monsterSortDir === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+            filteredItems.sort((a, b) => {
+                if (sortByVal === 'rarity') {
+                    const rarityA = RARITY_ORDER[(a.rarity || '').replace(' Relic', '').toLowerCase()] || 99;
+                    const rarityB = RARITY_ORDER[(b.rarity || '').replace(' Relic', '').toLowerCase()] || 99;
+                    if (rarityA !== rarityB) {
+                        return rarityA - rarityB;
                     }
-
-                    if (valA < valB) return monsterSortDir === 'asc' ? -1 : 1;
-                    if (valA > valB) return monsterSortDir === 'asc' ? 1 : -1;
-                    return 0;
-                });
-
-                if (monsterCountEl) {
-                    monsterCountEl.textContent = `Showing ${filteredItems.length} enemies`;
                 }
+                // Tie breaker or sort by name
+                return a.name.localeCompare(b.name);
+            });
 
-                if (filteredItems.length === 0) {
-                    if (monsterTableBody) {
-                        monsterTableBody.innerHTML = '<tr><td colspan="5" class="no-data" style="text-align:center;">No enemies match active filters.</td></tr>';
-                    }
-                    return;
+            if (filteredItems.length === 0) {
+                compGrid.innerHTML = '<div class="no-data" style="grid-column: 1 / -1;">No items match active filters.</div>';
+                return;
+            }
+
+            filteredItems.forEach(item => {
+                const el = document.createElement('div');
+                el.dataset.id = item.id;
+                
+                // Assign rarity/type CSS class
+                let rarityClass = '';
+                if (item.category === 'card') {
+                    rarityClass = 'rarity-' + (item.rarity || 'common').toLowerCase();
+                } else if (item.category === 'relic') {
+                    const relRarity = (item.rarity || '').replace(/ Relic/i, '').toLowerCase();
+                    rarityClass = 'rarity-' + (relRarity || 'common');
                 }
-
-                filteredItems.forEach(item => {
-                    const tr = document.createElement('tr');
-                    tr.className = 'comp-monster-row';
-                    tr.style.cursor = 'help';
-                    
-                    const imgUrl = `https://spire-codex.com/static/images/monsters/${item.img.toLowerCase()}`;
-                    const hpText = item.minHp === item.maxHp ? `${item.minHp}` : (item.maxHp ? `${item.minHp}-${item.maxHp}` : `${item.minHp}`);
-                    
-                    // Format acts list
-                    let actsHtml = '';
-                    if (item.acts && item.acts.length > 0) {
-                        actsHtml = item.acts.map(act => `<span class="comp-act-badge">${act.split(' - ')[0]}</span>`).join('');
-                    } else {
-                        actsHtml = '<span class="comp-act-badge" style="background: rgba(148, 163, 184, 0.1); color: #94a3b8; border-color: rgba(148, 163, 184, 0.2);">Special</span>';
-                    }
-
-                    // Format moves list
-                    let movesHtml = '<div class="comp-moves-container">';
-                    if (item.pattern) {
-                        movesHtml += `<div style="font-style: italic; color: #cbd5e1; font-size: 11.5px; margin-bottom: 4px;">Behavior: ${item.pattern}</div>`;
-                    }
-                    if (item.moves && item.moves.length > 0) {
-                        item.moves.forEach(m => {
-                            let intentIcon = '❓';
-                            let intentClass = 'comp-intent-unknown';
-                            
-                            const intentLower = (m.intent || '').toLowerCase();
-                            if (intentLower === 'attack') {
-                                intentIcon = '⚔️';
-                                intentClass = 'comp-intent-attack';
-                            } else if (intentLower === 'defend') {
-                                intentIcon = '🛡️';
-                                intentClass = 'comp-intent-defend';
-                            } else if (intentLower === 'buff') {
-                                intentIcon = '🧪';
-                                intentClass = 'comp-intent-buff';
-                            } else if (intentLower === 'debuff') {
-                                intentIcon = '☠️';
-                                intentClass = 'comp-intent-debuff';
-                            }
-
-                            const dmgText = m.damage ? ` (deals ${m.damage})` : '';
-                            const descText = m.desc ? `: ${m.desc}` : '';
-                            movesHtml += `
-                                <div class="comp-move-item" style="margin-bottom: 2px;">
-                                    <span class="comp-intent-badge ${intentClass}">${intentIcon} ${m.intent || 'Unknown'}</span>
-                                    <span class="comp-move-name" style="margin-left: 8px;">${m.name}</span>
-                                    <span class="comp-move-details" style="margin-left: auto;">${dmgText}${descText}</span>
-                                </div>
-                            `;
-                        });
-                    } else {
-                        movesHtml += '<div style="font-size: 11.5px; color: var(--text-muted);">No recorded moves.</div>';
-                    }
-                    movesHtml += '</div>';
-
-                    tr.innerHTML = `
-                        <td style="font-weight: 600;">
-                            <div style="display: flex; align-items: center; gap: 12px;">
-                                <img src="${imgUrl}" alt="${item.name}" style="width: 32px; height: 32px; object-fit: cover; border-radius: 4px; border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(0, 0, 0, 0.2);" onerror="this.style.display='none';">
-                                <span>${item.name}</span>
-                            </div>
-                        </td>
-                        <td><span class="monster-type-badge type-${item.type.toLowerCase()}" style="margin: 0;">${item.type}</span></td>
-                        <td style="text-align: center; font-weight: 700; color: #ef4444;">${hpText}</td>
-                        <td>${actsHtml}</td>
-                        <td>${movesHtml}</td>
+                el.className = 'compendium-card ' + rarityClass;
+                
+                if (item.category === 'card') {
+                    const cleanColor = item.color ? item.color.charAt(0).toUpperCase() + item.color.slice(1).toLowerCase() : 'Neutral';
+                    el.innerHTML = `
+                        <div class="comp-card-header">
+                            <span class="comp-card-name">${item.name}</span>
+                            <span class="comp-card-cost">${item.cost !== "" ? item.cost : "No Cost"}</span>
+                        </div>
+                        <div class="comp-card-meta">
+                            <span>${item.type}</span>
+                            <span class="rarity-${item.rarity.toLowerCase()}">${item.rarity}</span>
+                        </div>
+                        <div class="comp-card-desc">${formatDescription(item.desc)}</div>
+                        <div style="font-size: 9px; color: var(--text-muted); text-align: right; margin-top: auto;">${cleanColor}</div>
                     `;
-
-                    // Attach hover tooltips to the row
-                    tr.addEventListener('mouseenter', (e) => showTooltip(e, item.id));
-                    tr.addEventListener('mousemove', moveTooltip);
-                    tr.addEventListener('mouseleave', hideTooltip);
-
-                    monsterTableBody.appendChild(tr);
-                });
-
-            } else {
-                if (filteredItems.length === 0) {
-                    compGrid.innerHTML = '<div class="no-data" style="grid-column: 1 / -1;">No items match active filters.</div>';
-                    return;
+                } else if (item.category === 'relic') {
+                    const imgUrl = `https://spire-codex.com/static/images/relics/${item.img.toLowerCase()}`;
+                    el.innerHTML = `
+                        <div class="comp-relic-title-row">
+                            <img class="comp-relic-img-preview" src="${imgUrl}" alt="${item.name}" onerror="this.style.display='none';">
+                            <span class="comp-card-name">${item.name}</span>
+                        </div>
+                        <div class="comp-card-meta">
+                            <span>Relic</span>
+                            <span class="rarity-${item.rarity.replace(' Relic', '').toLowerCase()}">${item.rarity}</span>
+                        </div>
+                        <div class="comp-card-desc">${formatDescription(item.desc)}</div>
+                    `;
                 }
+                
+                // Attach hover tooltips
+                el.addEventListener('mouseenter', (e) => showTooltip(e, item.id));
+                el.addEventListener('mousemove', moveTooltip);
+                el.addEventListener('mouseleave', hideTooltip);
+                
+                compGrid.appendChild(el);
+            });
+        }
 
-                filteredItems.forEach(item => {
-                    const el = document.createElement('div');
-                    el.dataset.id = item.id;
-                    
-                    // Assign rarity/type CSS class
-                    let rarityClass = '';
-                    if (item.category === 'card') {
-                        rarityClass = 'rarity-' + (item.rarity || 'common').toLowerCase();
-                    } else if (item.category === 'relic') {
-                        const relRarity = (item.rarity || '').replace(/ Relic/i, '').toLowerCase();
-                        rarityClass = 'rarity-' + (relRarity || 'common');
-                    } else if (item.category === 'monster') {
-                        rarityClass = 'monster-' + (item.type || 'normal').toLowerCase();
-                    }
-                    el.className = 'compendium-card ' + rarityClass;
-                    
-                    // Relic badge preview or Card header
-                    if (item.category === 'card') {
-                        const cleanColor = item.color ? item.color.charAt(0).toUpperCase() + item.color.slice(1).toLowerCase() : 'Neutral';
-                        el.innerHTML = `
-                            <div class="comp-card-header">
-                                <span class="comp-card-name">${item.name}</span>
-                                <span class="comp-card-cost">${item.cost !== "" ? item.cost : "No Cost"}</span>
-                            </div>
-                            <div class="comp-card-meta">
-                                <span>${item.type}</span>
-                                <span class="rarity-${item.rarity.toLowerCase()}">${item.rarity}</span>
-                            </div>
-                            <div class="comp-card-desc">${formatDescription(item.desc)}</div>
-                            <div style="font-size: 9px; color: var(--text-muted); text-align: right; margin-top: auto;">${cleanColor}</div>
-                        `;
-                    } else if (item.category === 'relic') {
-                        const imgUrl = `https://spire-codex.com/static/images/relics/${item.img.toLowerCase()}`;
-                        el.innerHTML = `
-                            <div class="comp-relic-title-row">
-                                <img class="comp-relic-img-preview" src="${imgUrl}" alt="${item.name}" onerror="this.style.display='none';">
-                                <span class="comp-card-name">${item.name}</span>
-                            </div>
-                            <div class="comp-card-meta">
-                                <span>Relic</span>
-                                <span class="rarity-${item.rarity.replace(' Relic', '').toLowerCase()}">${item.rarity}</span>
-                            </div>
-                            <div class="comp-card-desc">${formatDescription(item.desc)}</div>
-                        `;
-                    } else if (item.category === 'monster') {
-                        const imgUrl = `https://spire-codex.com/static/images/monsters/${item.img.toLowerCase()}`;
-                        const hpText = item.minHp === item.maxHp ? `HP: ${item.minHp}` : `HP: ${item.minHp}-${item.maxHp}`;
-                        el.innerHTML = `
-                            <div class="comp-relic-title-row">
-                                <img class="comp-relic-img-preview" src="${imgUrl}" alt="${item.name}" onerror="this.style.display='none';">
-                                <span class="comp-card-name">${item.name}</span>
-                            </div>
-                            <div class="comp-card-meta">
-                                <span class="monster-type-badge type-${item.type.toLowerCase()}" style="margin-top:0;">${item.type}</span>
-                                <span style="font-weight:600; font-size:11.5px; color:var(--text-muted);">${hpText}</span>
-                            </div>
-                            <div class="comp-card-desc">
-                                ${item.pattern ? `<div style="font-style: italic; color: #cbd5e1; margin-bottom: 4px;">Pattern: ${item.pattern}</div>` : ''}
-                                <div style="font-size: 11px; color: var(--text-muted); line-height: 1.35;">Moves: ${item.moves.map(m => m.name).join(', ')}</div>
-                            </div>
-                        `;
-                    }
-                    
-                    // Attach hover tooltips
-                    el.addEventListener('mouseenter', (e) => showTooltip(e, item.id));
-                    el.addEventListener('mousemove', moveTooltip);
-                    el.addEventListener('mouseleave', hideTooltip);
-                    
-                    compGrid.appendChild(el);
+        // Render Enemies View
+        function renderEnemies() {
+            const searchVal = enemiesSearch ? enemiesSearch.value.toLowerCase() : '';
+            
+            if (!enemiesTableBody) return;
+            enemiesTableBody.innerHTML = '';
+            
+            let monsters = [];
+            if (sts2Database && sts2Database.monsters) {
+                Object.entries(sts2Database.monsters).forEach(([id, monster]) => {
+                    monsters.push({ id, ...monster });
                 });
             }
+            
+            // Filter enemies
+            let filteredMonsters = monsters.filter(item => {
+                // Act filter
+                if (activeEnemiesAct !== 'all') {
+                    const actsList = item.acts || [];
+                    if (activeEnemiesAct === 'other') {
+                        const isStandardAct = actsList.some(a => a.includes('Act 1') || a.includes('Act 2') || a.includes('Act 3') || a.includes('Underdocks'));
+                        if (isStandardAct && actsList.length > 0) return false;
+                    } else {
+                        const hasAct = actsList.some(a => a.toLowerCase().includes(activeEnemiesAct.toLowerCase()));
+                        if (!hasAct) return false;
+                    }
+                }
+                
+                // Type filter
+                if (activeEnemiesType !== 'all') {
+                    if ((item.type || '').toLowerCase() !== activeEnemiesType.toLowerCase()) return false;
+                }
+                
+                // Search term
+                if (searchVal) {
+                    const matchName = item.name.toLowerCase().includes(searchVal);
+                    const matchPattern = item.pattern && item.pattern.toLowerCase().includes(searchVal);
+                    const matchMoves = item.moves && item.moves.some(m => m.name.toLowerCase().includes(searchVal) || (m.desc && m.desc.toLowerCase().includes(searchVal)));
+                    if (!matchName && !matchPattern && !matchMoves) return false;
+                }
+                
+                return true;
+            });
+
+            // Update table headers
+            updateTableHeaders('enemies-header-row-tr', enemiesSortCol, enemiesSortDir);
+
+            // Sort enemies
+            filteredMonsters.sort((a, b) => {
+                let valA = a[enemiesSortCol];
+                let valB = b[enemiesSortCol];
+
+                if (enemiesSortCol === 'name') {
+                    valA = (valA || '').toString().toLowerCase();
+                    valB = (valB || '').toString().toLowerCase();
+                    return enemiesSortDir === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+                } else if (enemiesSortCol === 'type') {
+                    const TYPE_ORDER = { 'normal': 0, 'elite': 1, 'boss': 2 };
+                    valA = TYPE_ORDER[(a.type || '').toLowerCase()] ?? 99;
+                    valB = TYPE_ORDER[(b.type || '').toLowerCase()] ?? 99;
+                } else if (enemiesSortCol === 'hp') {
+                    valA = Number(a.minHp) || 0;
+                    valB = Number(b.minHp) || 0;
+                } else if (enemiesSortCol === 'acts') {
+                    valA = ((a.acts && a.acts[0]) || '').toString().toLowerCase();
+                    valB = ((b.acts && b.acts[0]) || '').toString().toLowerCase();
+                    return enemiesSortDir === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+                }
+
+                if (valA < valB) return enemiesSortDir === 'asc' ? -1 : 1;
+                if (valA > valB) return enemiesSortDir === 'asc' ? 1 : -1;
+                return 0;
+            });
+
+            if (enemiesCount) {
+                enemiesCount.textContent = `Showing ${filteredMonsters.length} enemies`;
+            }
+
+            if (filteredMonsters.length === 0) {
+                enemiesTableBody.innerHTML = '<tr><td colspan="5" class="no-data" style="text-align:center;">No enemies match active filters.</td></tr>';
+                return;
+            }
+
+            filteredMonsters.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.className = 'comp-monster-row';
+                tr.style.cursor = 'help';
+                
+                const imgUrl = `https://spire-codex.com/static/images/monsters/${item.img.toLowerCase()}`;
+                const hpText = item.minHp === item.maxHp ? `${item.minHp}` : (item.maxHp ? `${item.minHp}-${item.maxHp}` : `${item.minHp}`);
+                
+                // Format acts list
+                let actsHtml = '';
+                if (item.acts && item.acts.length > 0) {
+                    actsHtml = item.acts.map(act => `<span class="comp-act-badge">${act.split(' - ')[0]}</span>`).join('');
+                } else {
+                    actsHtml = '<span class="comp-act-badge" style="background: rgba(148, 163, 184, 0.1); color: #94a3b8; border-color: rgba(148, 163, 184, 0.2);">Special</span>';
+                }
+
+                // Format moves list
+                let movesHtml = '<div class="comp-moves-container">';
+                if (item.pattern) {
+                    movesHtml += `<div style="font-style: italic; color: #cbd5e1; font-size: 11.5px; margin-bottom: 4px;">Behavior: ${item.pattern}</div>`;
+                }
+                if (item.moves && item.moves.length > 0) {
+                    item.moves.forEach(m => {
+                        let intentIcon = '❓';
+                        let intentClass = 'comp-intent-unknown';
+                        
+                        const intentLower = (m.intent || '').toLowerCase();
+                        if (intentLower === 'attack') {
+                            intentIcon = '⚔️';
+                            intentClass = 'comp-intent-attack';
+                        } else if (intentLower === 'defend') {
+                            intentIcon = '🛡️';
+                            intentClass = 'comp-intent-defend';
+                        } else if (intentLower === 'buff') {
+                            intentIcon = '🧪';
+                            intentClass = 'comp-intent-buff';
+                        } else if (intentLower === 'debuff') {
+                            intentIcon = '☠️';
+                            intentClass = 'comp-intent-debuff';
+                        }
+
+                        const dmgText = m.damage ? ` (deals ${m.damage})` : '';
+                        const descText = m.desc ? `: ${m.desc}` : '';
+                        movesHtml += `
+                            <div class="comp-move-item" style="margin-bottom: 2px;">
+                                <span class="comp-intent-badge ${intentClass}">${intentIcon} ${m.intent || 'Unknown'}</span>
+                                <span class="comp-move-name" style="margin-left: 8px;">${m.name}</span>
+                                <span class="comp-move-details" style="margin-left: auto;">${dmgText}${descText}</span>
+                            </div>
+                        `;
+                    });
+                } else {
+                    movesHtml += '<div style="font-size: 11.5px; color: var(--text-muted);">No recorded moves.</div>';
+                }
+                movesHtml += '</div>';
+
+                tr.innerHTML = `
+                    <td style="font-weight: 600;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <img src="${imgUrl}" alt="${item.name}" style="width: 32px; height: 32px; object-fit: cover; border-radius: 4px; border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(0, 0, 0, 0.2);" onerror="this.style.display='none';">
+                            <span>${item.name}</span>
+                        </div>
+                    </td>
+                    <td><span class="monster-type-badge type-${item.type.toLowerCase()}" style="margin: 0;">${item.type}</span></td>
+                    <td style="text-align: center; font-weight: 700; color: #ef4444;">${hpText}</td>
+                    <td>${actsHtml}</td>
+                    <td>${movesHtml}</td>
+                `;
+
+                // Attach hover tooltips to the row
+                tr.addEventListener('mouseenter', (e) => showTooltip(e, item.id));
+                tr.addEventListener('mousemove', moveTooltip);
+                tr.addEventListener('mouseleave', hideTooltip);
+
+                enemiesTableBody.appendChild(tr);
+            });
+        }
+
+        // Render Events View
+        function renderEvents() {
+            const searchVal = eventsSearch ? eventsSearch.value.toLowerCase() : '';
+            
+            if (!eventsGrid) return;
+            eventsGrid.innerHTML = '';
+            
+            let events = [];
+            if (sts2Database && sts2Database.events) {
+                Object.entries(sts2Database.events).forEach(([name, event]) => {
+                    events.push({ name, ...event });
+                });
+            }
+            
+            // Filter events
+            let filteredEvents = events.filter(item => {
+                // Act filter
+                if (activeEventsAct !== 'all') {
+                    if (activeEventsAct === 'other') {
+                        const isStandardAct = item.act && (item.act.includes('Act 1') || item.act.includes('Act 2') || item.act.includes('Act 3') || item.act.includes('Underdocks'));
+                        if (isStandardAct) return false;
+                    } else {
+                        if (!item.act || !item.act.toLowerCase().includes(activeEventsAct.toLowerCase())) return false;
+                    }
+                }
+                
+                // Search term
+                if (searchVal) {
+                    const matchName = item.name.toLowerCase().includes(searchVal);
+                    const matchDesc = item.description && item.description.toLowerCase().includes(searchVal);
+                    const matchOptions = item.options && item.options.some(o => 
+                        o.title.toLowerCase().includes(searchVal) || 
+                        (o.description && o.description.toLowerCase().includes(searchVal)) ||
+                        (o.id && o.id.toLowerCase().includes(searchVal))
+                    );
+                    if (!matchName && !matchDesc && !matchOptions) return false;
+                }
+                
+                return true;
+            });
+
+            // Sort alphabetically by name
+            filteredEvents.sort((a, b) => a.name.localeCompare(b.name));
+
+            if (eventsCount) {
+                eventsCount.textContent = `Showing ${filteredEvents.length} events`;
+            }
+
+            if (filteredEvents.length === 0) {
+                eventsGrid.innerHTML = '<div class="no-data" style="grid-column: 1 / -1;">No events match active filters.</div>';
+                return;
+            }
+
+            filteredEvents.forEach(item => {
+                const el = document.createElement('div');
+                el.className = 'event-card';
+                
+                // Format options list
+                let optionsHtml = '';
+                if (item.options && item.options.length > 0) {
+                    optionsHtml = `
+                        <div class="event-options-title">Choices & Outcomes</div>
+                        <div class="event-options-list">
+                    `;
+                    item.options.forEach(opt => {
+                        const title = opt.title || opt.id || 'Choice';
+                        const desc = opt.description || '';
+                        optionsHtml += `
+                            <div class="event-option-row">
+                                <div class="event-option-header">
+                                    <span class="event-option-pill">${opt.id || 'CHOOSE'}</span>
+                                    <span class="event-option-text">${title}</span>
+                                </div>
+                                <div class="event-option-outcome">${formatDescription(desc)}</div>
+                            </div>
+                        `;
+                    });
+                    optionsHtml += `</div>`;
+                } else {
+                    optionsHtml = '<div style="font-size: 11.5px; color: var(--text-muted); font-style: italic;">No interactive choices.</div>';
+                }
+
+                // Format acts list
+                let actHtml = '';
+                if (item.act) {
+                    actHtml = `<span class="comp-act-badge" style="margin: 0; font-size: 10px; padding: 2px 8px;">${item.act.split(' - ')[0]}</span>`;
+                } else {
+                    actHtml = '<span class="comp-act-badge" style="margin: 0; font-size: 10px; padding: 2px 8px; background: rgba(148, 163, 184, 0.1); color: #94a3b8; border-color: rgba(148, 163, 184, 0.2);">Special</span>';
+                }
+
+                el.innerHTML = `
+                    <div class="event-header">
+                        <span class="event-name">${item.name}</span>
+                        ${actHtml}
+                    </div>
+                    <div class="event-desc">${formatDescription(item.description)}</div>
+                    ${optionsHtml}
+                `;
+                eventsGrid.appendChild(el);
+            });
         }
 
         // Render Card Statistics View

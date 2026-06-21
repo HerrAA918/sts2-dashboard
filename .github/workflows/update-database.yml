@@ -25,6 +25,7 @@ jobs:
             "relics_api.json"     = "https://raw.githubusercontent.com/ptrlrd/spire-codex/main/data/relics.json"
             "monsters_api.json"   = "https://raw.githubusercontent.com/ptrlrd/spire-codex/main/data/monsters.json"
             "encounters_api.json" = "https://raw.githubusercontent.com/ptrlrd/spire-codex/main/data/encounters.json"
+            "events_api.json"     = "https://raw.githubusercontent.com/ptrlrd/spire-codex/main/data/events.json"
           }
 
           $changed = $false

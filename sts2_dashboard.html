@@ -1189,6 +1189,98 @@
             font-size: 11.5px;
         }
 
+        /* Events Tab Styles */
+        .events-grid-layout {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 20px;
+            margin-top: 12px;
+        }
+        .event-card {
+            background: rgba(30, 41, 59, 0.25);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .event-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(99, 102, 241, 0.35);
+            box-shadow: 0 8px 30px rgba(99, 102, 241, 0.08);
+        }
+        .event-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 8px;
+        }
+        .event-name {
+            font-family: 'Outfit', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+        .event-desc {
+            font-size: 12.5px;
+            color: #94a3b8;
+            line-height: 1.5;
+            white-space: pre-line;
+            max-height: 120px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+        .event-options-title {
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+            margin-top: 4px;
+        }
+        .event-options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .event-option-row {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            padding: 8px 10px;
+            border-radius: 6px;
+        }
+        .event-option-header {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .event-option-pill {
+            background: rgba(99, 102, 241, 0.15);
+            color: #a5b4fc;
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            padding: 1px 6px;
+            font-size: 10px;
+            border-radius: 4px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .event-option-text {
+            font-size: 12.5px;
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+        .event-option-outcome {
+            font-size: 11.5px;
+            color: #94a3b8;
+            line-height: 1.35;
+        }
+
         .comp-card-header {
             display: flex;
             justify-content: space-between;
@@ -1486,7 +1578,9 @@
         <div class="tab-container">
             <button class="tab-btn active" id="tab-runs" onclick="switchTab('runs')">Run History</button>
             <button class="tab-btn" id="tab-multiplayer" onclick="switchTab('multiplayer')">Co-op History</button>
-            <button class="tab-btn" id="tab-compendium" onclick="switchTab('compendium')">Compendium</button>
+            <button class="tab-btn" id="tab-compendium" onclick="switchTab('compendium')">Cards & Relics</button>
+            <button class="tab-btn" id="tab-enemies" onclick="switchTab('enemies')">Enemies</button>
+            <button class="tab-btn" id="tab-events" onclick="switchTab('events')">Events</button>
             <button class="tab-btn" id="tab-card-stats" onclick="switchTab('card-stats')">Card Analytics</button>
             <button class="tab-btn" id="tab-relic-stats" onclick="switchTab('relic-stats')">Relic Analytics</button>
         </div>
@@ -1838,6 +1932,7 @@
         </div>
 
     <!-- COMPENDIUM TAB VIEW -->
+    <!-- COMPENDIUM TAB VIEW -->
     <div id="view-compendium" style="display: none;">
         <!-- Filters panel -->
         <div class="filter-panel">
@@ -1849,7 +1944,11 @@
                 <option value="all">All Categories</option>
                 <option value="card">Cards Only</option>
                 <option value="relic">Relics Only</option>
-                <option value="monster">Mobs & Bosses Only</option>
+            </select>
+
+            <select id="comp-sort-by" class="select-filter">
+                <option value="name">Sort by Name</option>
+                <option value="rarity">Sort by Rarity</option>
             </select>
             
             <div class="char-pills" id="comp-char-pills">
@@ -1861,9 +1960,30 @@
                 <div class="char-pill" data-char="necrobinder">Necrobinder</div>
                 <div class="char-pill" data-char="shared">Neutral / Shared</div>
             </div>
+        </div>
+        
+        <!-- Compendium cards container -->
+        <div class="compendium-grid" id="comp-grid">
+            <!-- Populated dynamically -->
+        </div>
+    </div>
 
-            <!-- Act filter pills (shown only when category is Mobs & Bosses) -->
-            <div class="char-pills" id="comp-act-pills" style="display: none;">
+    <!-- ENEMIES TAB VIEW -->
+    <div id="view-enemies" style="display: none;">
+        <!-- Filters panel -->
+        <div class="filter-panel" style="flex-wrap: wrap; gap: 12px;">
+            <div class="search-wrapper" style="flex-grow: 1; min-width: 250px;">
+                <input type="text" id="enemies-search" class="search-input" placeholder="Search enemies by name, behavior, or moves...">
+            </div>
+            
+            <div class="char-pills" id="enemies-type-pills">
+                <div class="char-pill active" data-type="all">All Types</div>
+                <div class="char-pill" data-type="normal">Normal</div>
+                <div class="char-pill" data-type="elite">Elite</div>
+                <div class="char-pill" data-type="boss">Boss</div>
+            </div>
+
+            <div class="char-pills" id="enemies-act-pills">
                 <div class="char-pill active" data-act="all">All Acts</div>
                 <div class="char-pill" data-act="Act 1 - Overgrowth">Act 1: Overgrowth</div>
                 <div class="char-pill" data-act="Act 2 - Hive">Act 2: Hive</div>
@@ -1872,33 +1992,58 @@
                 <div class="char-pill" data-act="other">Other / Special</div>
             </div>
         </div>
-        
-        <!-- Compendium cards container -->
-        <div class="compendium-grid" id="comp-grid">
-            <!-- Populated dynamically -->
-        </div>
 
-        <!-- Compendium detailed enemy list (hidden by default) -->
-        <div class="card runs-container" id="comp-monster-table-container" style="display: none; margin-top: 16px;">
+        <!-- Compendium detailed enemy list -->
+        <div class="card runs-container" id="enemies-table-container" style="margin-top: 16px;">
             <div class="runs-header-row">
                 <h3 style="margin: 0; font-size: 16px; font-weight: 600; color: var(--text-main);">Monsters & Bosses Compendium</h3>
-                <span class="runs-count-badge" id="comp-monster-count">Showing 0 enemies</span>
+                <span class="runs-count-badge" id="enemies-count">Showing 0 enemies</span>
             </div>
             <div class="table-wrapper" style="max-height: 600px; margin-top: 12px;">
                 <table>
                     <thead>
-                        <tr id="monster-header-row-tr">
-                            <th data-sort="name" onclick="sortMonsters('name')">Enemy Name</th>
-                            <th data-sort="type" onclick="sortMonsters('type')" style="width: 120px;">Type</th>
-                            <th data-sort="hp" onclick="sortMonsters('hp')" style="text-align:center; width: 120px;">HP Range</th>
-                            <th data-sort="acts" onclick="sortMonsters('acts')">Acts / Levels</th>
+                        <tr id="enemies-header-row-tr">
+                            <th data-sort="name" onclick="sortEnemies('name')">Enemy Name</th>
+                            <th data-sort="type" onclick="sortEnemies('type')" style="width: 120px;">Type</th>
+                            <th data-sort="hp" onclick="sortEnemies('hp')" style="text-align:center; width: 120px;">HP Range</th>
+                            <th data-sort="acts" onclick="sortEnemies('acts')">Acts / Levels</th>
                             <th style="width: 45%;">Moves & Intents</th>
                         </tr>
                     </thead>
-                    <tbody id="comp-monster-table-body">
+                    <tbody id="enemies-table-body">
                         <!-- Populated dynamically -->
                     </tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- EVENTS TAB VIEW -->
+    <div id="view-events" style="display: none;">
+        <!-- Filters panel -->
+        <div class="filter-panel" style="flex-wrap: wrap; gap: 12px;">
+            <div class="search-wrapper" style="flex-grow: 1; min-width: 250px;">
+                <input type="text" id="events-search" class="search-input" placeholder="Search events by name, text, or choice outcomes...">
+            </div>
+
+            <div class="char-pills" id="events-act-pills">
+                <div class="char-pill active" data-act="all">All Acts</div>
+                <div class="char-pill" data-act="Act 1 - Overgrowth">Act 1: Overgrowth</div>
+                <div class="char-pill" data-act="Act 2 - Hive">Act 2: Hive</div>
+                <div class="char-pill" data-act="Act 3 - Glory">Act 3: Glory</div>
+                <div class="char-pill" data-act="Underdocks">Underdocks</div>
+                <div class="char-pill" data-act="other">Other / Special</div>
+            </div>
+        </div>
+
+        <div class="card runs-container" style="margin-top: 16px; padding: 20px;">
+            <div class="runs-header-row" style="margin-bottom: 16px;">
+                <h3 style="margin: 0; font-size: 16px; font-weight: 600; color: var(--text-main);">Choose Your Path: Events</h3>
+                <span class="runs-count-badge" id="events-count">Showing 0 events</span>
+            </div>
+            
+            <div class="events-grid-layout" id="events-grid">
+                <!-- Populated dynamically -->
             </div>
         </div>
     </div>
@@ -2015,6 +2160,1210 @@
     <script>
         const rawRunData = [];
         const sts2Database = {
+    "events":  {
+                   "EVENT.DENSE_VEGETATION":  {
+                                                  "description":  "Having taken the wrong path for a good while, you find yourself in a thick jungle of [green]ferns[/green], [green]shrubs[/green], and [green]vines[/green]. Especially [green]vines[/green]. Exhaustion sets in, and a dark thought comes to mind:\n\n[sine][purple]“You are lost, unprepared, and the inevitability of death is approaching.”[/purple][/sine]\n\nWhat do you do?",
+                                                  "name":  "Dense Vegetation",
+                                                  "act":  "Act 1 - Overgrowth",
+                                                  "options":  [
+                                                                  {
+                                                                      "title":  "Rest",
+                                                                      "description":  "Heal [green]30% Max[/green] HP. Fight some [red]enemies[/red].",
+                                                                      "id":  "REST"
+                                                                  },
+                                                                  {
+                                                                      "title":  "Trudge On",
+                                                                      "description":  "Remove a card from your [gold]Deck[/gold]. Lose [red]11[/red] HP.",
+                                                                      "id":  "TRUDGE_ON"
+                                                                  }
+                                                              ]
+                                              },
+                   "EVENT.ROUND_TEA_PARTY":  {
+                                                 "description":  "You find an [orange]invitation[/orange] for a [blue]“Sir Galalot”[/blue] to a tea party and decide to show up in his stead.\n\nUpon entering an unassuming rotunda, you find yourself in the midst of [gold]commanders[/gold], [aqua]generals[/aqua], [red]warlords[/red], and [blue]mercenaries[/blue] having... tea?\nThe gigantic knight donning a [gold]golden crown[/gold] speaks.\n\n[jitter]“Thou art late for [b]Tea[/b]?!”[/jitter]",
+                                                 "name":  "The Round Tea Party",
+                                                 "act":  "Act 3 - Glory",
+                                                 "options":  [
+                                                                 {
+                                                                     "title":  "Enjoy Your Tea",
+                                                                     "description":  "Obtain [red]Royal Poison[/red]. [green]Heal to full HP.[/green]",
+                                                                     "id":  "ENJOY_TEA"
+                                                                 },
+                                                                 {
+                                                                     "title":  "Pick a Fight",
+                                                                     "description":  "Lose [red]11[/red] HP. Obtain a random [gold]Relic[/gold].",
+                                                                     "id":  "PICK_FIGHT"
+                                                                 }
+                                                             ]
+                                             },
+                   "EVENT.AMALGAMATOR":  {
+                                             "description":  "[b][jitter]CLANG! CLANG!!![/jitter][/b]\n\nYou hear the echoes of metal upon metal on the otherside of a wall...\n\nAs you press your head against the wall to listen in—the wall opens up, revealing a [orange]hulking six-armed figure[/orange] toiling away.\nIts “face” is a [gold][sine]swirling vortex of glowing sigils[/sine][/gold] that shift about.\n\n“One with an [aqua]Ascending Spirit[/aqua] has found my workshop? Let\u0027s get [jitter]COMBINING[/jitter]!”",
+                                             "name":  "Amalgamator",
+                                             "act":  "Act 2 - Hive",
+                                             "options":  [
+                                                             {
+                                                                 "title":  "Combine Defends",
+                                                                 "description":  "Remove [blue]2[/blue] [gold]Defends[/gold]. Add [gold]Ultimate Defend[/gold] to your [gold]Deck[/gold].",
+                                                                 "id":  "COMBINE_DEFENDS"
+                                                             },
+                                                             {
+                                                                 "title":  "Combine Strikes",
+                                                                 "description":  "Remove [blue]2[/blue] [gold]Strikes[/gold]. Add [gold]Ultimate Strike[/gold] to your [gold]Deck[/gold].",
+                                                                 "id":  "COMBINE_STRIKES"
+                                                             }
+                                                         ]
+                                         },
+                   "EVENT.TABLET_OF_TRUTH":  {
+                                                 "description":  "You defeat a pair of [blue]Guardian Kin[/blue] and make your way into a protected vault.\n\nInside is a [purple][sine]tablet with familiar inscriptions[/sine][/purple]. Your intuition tells you that this language can be deciphered rather easily... However, once you begin deciphering you\u0027ll be locked in.\n\nThe tablet gives off a soothing energy and you can smash it to receive its [green]healing energies[/green] instead.",
+                                                 "name":  "Tablet of Truth",
+                                                 "act":  "Act 1 - Overgrowth",
+                                                 "options":  [
+                                                                 {
+                                                                     "title":  "Decipher",
+                                                                     "description":  "Lose [red]3[/red] Max HP. [gold]Upgrade[/gold] a random card.",
+                                                                     "id":  "DECIPHER_1"
+                                                                 },
+                                                                 {
+                                                                     "title":  "Smash",
+                                                                     "description":  "Heal [green]20[/green] HP.",
+                                                                     "id":  "SMASH"
+                                                                 }
+                                                             ]
+                                             },
+                   "EVENT.ENDLESS_CONVEYOR":  {
+                                                  "description":  "You lumber into a shack with a bright but crooked sign that reads:\n[aqua]“ENDLESS FEAST - PAY WHAT YOU HUNGER!”[/aqua]\n\nInside, a [orange]willowy multi-armed chef[/orange] is deftly preparing [green]bites of food[/green] and placing them onto a [sine]winding chitinous belt[/sine].\n\nOne of the chef\u0027s arms point to a sign:\n[blue]35[/blue] [gold]Gold[/gold] each",
+                                                  "name":  "Endless Conveyor",
+                                                  "act":  "Underdocks",
+                                                  "options":  [
+                                                                  {
+                                                                      "title":  "Observe the Chef",
+                                                                      "description":  "[gold]Upgrade[/gold] a random card in your [gold]Deck[/gold].",
+                                                                      "id":  "OBSERVE_CHEF"
+                                                                  }
+                                                              ]
+                                              },
+                   "EVENT.LOST_WISP":  {
+                                           "description":  "In the distance is an odd sight. Mounds and mounds of [sine][red]deceased insects[/red][/sine], surrounding what looks to be a [orange]small glowing mote[/orange].\nIt seems to be an effective attractant for all manner of bugs but you see it lash out some flames!\n\nYou move closer to investigate.",
+                                           "name":  "The Lost Wisp",
+                                           "act":  "Act 2 - Hive",
+                                           "options":  [
+                                                           {
+                                                               "title":  "Capture the Wisp",
+                                                               "description":  "Add [red]Decay[/red] to your [gold]Deck[/gold]. Obtain the [gold]Lost Wisp[/gold].",
+                                                               "id":  "CLAIM"
+                                                           },
+                                                           {
+                                                               "title":  "Locked",
+                                                               "description":  "Your Max HP is too low.",
+                                                               "id":  "CLAIM_LOCKED"
+                                                           },
+                                                           {
+                                                               "title":  "Search the Nearby Area",
+                                                               "description":  "Gain [blue]60[/blue] [gold]Gold[/gold].",
+                                                               "id":  "SEARCH"
+                                                           }
+                                                       ]
+                                       },
+                   "EVENT.SPIRIT_GRAFTER":  {
+                                                "description":  "Above, a cocoon is [jitter]shaking and wriggling[/jitter], about to burst forth!\n\n...it stops wriggling. [orange][sine]The cocoon ignites[/sine][/orange]! [jitter]What is going on?[/jitter]\nIn a flash of [gold]light[/gold] and [red]flame[/red], a [orange]Spirit Grafter[/orange] rushes into you, threatening to merge with your being to become complete.",
+                                                "name":  "Spirit Grafter",
+                                                "act":  "Act 2 - Hive",
+                                                "options":  [
+                                                                {
+                                                                    "title":  "Let It In",
+                                                                    "description":  "Heal [green]25[/green] HP. Add [gold]Metamorphosis[/gold] to your [gold]Deck[/gold].",
+                                                                    "id":  "LET_IT_IN"
+                                                                },
+                                                                {
+                                                                    "title":  "Rejection",
+                                                                    "description":  "Lose [red]9[/red] HP. Remove a card from your [gold]Deck[/gold].",
+                                                                    "id":  "REJECTION"
+                                                                }
+                                                            ]
+                                            },
+                   "EVENT.TINKER_TIME":  {
+                                             "description":  "Navigating through an [red][sine]endless sea of corpses[/sine][/red], you find a [orange]mad scientist[/orange] scavenging for various scraps.\n\n“Yes. Hi, hello! You look like a capable fighter... I need a tester for my next [green]atrocity device[/green]! How about it?”",
+                                             "name":  "Tinker Time",
+                                             "act":  "Act 3 - Glory",
+                                             "options":  [
+                                                             {
+                                                                 "title":  "Accept",
+                                                                 "description":  "Create a custom card to add to your [gold]Deck[/gold].",
+                                                                 "id":  "CHOOSE_CARD_TYPE"
+                                                             }
+                                                         ]
+                                         },
+                   "EVENT.DROWNING_BEACON":  {
+                                                 "description":  "Crossing a dreamscape of rocks and still waters, you emerge to face a [sine]sinking lighthouse[/sine] emitting [purple]anti-light[/purple].\n\nYou can bottle up the [aqua][sine]eerily-glowing water[/sine][/aqua] that has pooled here or climb up the dilapidated structure to retrieve the [gold]lens[/gold].",
+                                                 "name":  "Drowning Beacon",
+                                                 "act":  "Underdocks",
+                                                 "options":  [
+                                                                 {
+                                                                     "title":  "Bottle",
+                                                                     "description":  "Procure [aqua]Glowwater Potion[/aqua].",
+                                                                     "id":  "BOTTLE"
+                                                                 },
+                                                                 {
+                                                                     "title":  "Climb",
+                                                                     "description":  "Obtain [gold]Fresnel Lens[/gold]. Lose [red]13[/red] Max HP.",
+                                                                     "id":  "CLIMB"
+                                                                 }
+                                                             ]
+                                             },
+                   "EVENT.TANX":  {
+                                      "description":  "SO WEAK! BUT YOU HAVE POTENTIAL!\nUSE THIS WEAPON!!",
+                                      "name":  "Tanx",
+                                      "act":  "Act 3 - Glory",
+                                      "options":  [
+
+                                                  ]
+                                  },
+                   "EVENT.COLORFUL_PHILOSOPHERS":  {
+                                                       "description":  "Before you is a rather epic sight.\nYou see 3 different colored statues towering over a dais, having a [jitter][red]heated debate[/red][/jitter] over the philosophical implications of color.\n\nAs you listen in, you get a sense that the most important question at hand is which color truly is [gold]THE BEST[/gold].\n\nYou chime in with your thoughts.",
+                                                       "name":  "Colorful Philosophers",
+                                                       "act":  "Act 2 - Hive",
+                                                       "options":  [
+                                                                       {
+                                                                           "title":  "Blue",
+                                                                           "description":  "Obtain [blue]3[/blue] Defect cards.",
+                                                                           "id":  "DEFECT"
+                                                                       },
+                                                                       {
+                                                                           "title":  "Equality",
+                                                                           "description":  "Obtain [gold]Prismatic Shard[/gold].",
+                                                                           "id":  "EQUALITY"
+                                                                       },
+                                                                       {
+                                                                           "title":  "Red",
+                                                                           "description":  "Obtain [blue]3[/blue] Ironclad cards.",
+                                                                           "id":  "IRONCLAD"
+                                                                       },
+                                                                       {
+                                                                           "title":  "Pink",
+                                                                           "description":  "Obtain [blue]3[/blue] Necrobinder cards.",
+                                                                           "id":  "NECROBINDER"
+                                                                       },
+                                                                       {
+                                                                           "title":  "Orange",
+                                                                           "description":  "Obtain [blue]3[/blue] Regent cards.",
+                                                                           "id":  "REGENT"
+                                                                       },
+                                                                       {
+                                                                           "title":  "Green",
+                                                                           "description":  "Obtain [blue]3[/blue] Silent cards.",
+                                                                           "id":  "SILENT"
+                                                                       }
+                                                                   ]
+                                                   },
+                   "EVENT.AROMA_OF_CHAOS":  {
+                                                "description":  "Upon trudging through a thick underbrush and making it into a clearing, you\u0027re hit with an unplaceable nostalgia.\n\nA mix of [purple]floral scents[/purple], [green]putrid decay[/green], and [orange]something else entirely[/orange]. The scent grows stronger with each step, and you feel as though the world around you is [sine]warping and twisting[/sine].\n\nOvercome with a sense of [sine]shifting chaos[/rainbow][/sine], you begin to lose your sense of self.",
+                                                "name":  "Aroma of Chaos",
+                                                "act":  "Act 1 - Overgrowth",
+                                                "options":  [
+                                                                {
+                                                                    "title":  "Let Go",
+                                                                    "description":  "[gold]Transform[/gold] a card in your [gold]Deck[/gold].",
+                                                                    "id":  "LET_GO"
+                                                                },
+                                                                {
+                                                                    "title":  "Maintain Control",
+                                                                    "description":  "[gold]Upgrade[/gold] a card in your [gold]Deck[/gold].",
+                                                                    "id":  "MAINTAIN_CONTROL"
+                                                                }
+                                                            ]
+                                            },
+                   "EVENT.THIS_OR_THAT":  {
+                                              "description":  "Arms suddenly jut out from a nearby hole, clutching a [gold]suspicious bag of riches[/gold] and a clearly [purple]cursed relic[/purple].\n\n[jitter][blue]“This... or That?”[/blue][/jitter]\na scratched-up voice whispers from below.",
+                                              "name":  "This or That?",
+                                              "act":  "Other / Special",
+                                              "options":  [
+                                                              {
+                                                                  "title":  "That",
+                                                                  "description":  "Add [red]Clumsy[/red] to your [gold]Deck[/gold]. Obtain a random [gold]Relic[/gold].",
+                                                                  "id":  "ORNATE"
+                                                              },
+                                                              {
+                                                                  "title":  "This",
+                                                                  "description":  "Lose [red]6[/red] HP. Gain [blue]41-69[/blue] [gold]Gold[/gold].",
+                                                                  "id":  "PLAIN"
+                                                              }
+                                                          ]
+                                          },
+                   "EVENT.PAEL":  {
+                                      "description":  "A puppet has arrived?\nCan you check on Father? I’m too tired...",
+                                      "name":  "Pael",
+                                      "act":  "Act 2 - Hive",
+                                      "options":  [
+
+                                                  ]
+                                  },
+                   "EVENT.GRAVE_OF_THE_FORGOTTEN":  {
+                                                        "description":  "There is a single grave with a [jitter][aqua]roiling blue flame[/aqua][/jitter]...\n\nA prideful warrior died in battle but its soul is restless. It wants to keep fighting, you feel it [sine]begging[/sine] to journey with you.\n\nBut perhaps it\u0027s better for it to face the [red]truth[/red]?",
+                                                        "name":  "Grave of the Forgotten",
+                                                        "act":  "Act 3 - Glory",
+                                                        "options":  [
+                                                                        {
+                                                                            "title":  "Accept the Forgotten Soul",
+                                                                            "description":  "Obtain [gold]Forgotten Soul[/gold].",
+                                                                            "id":  "ACCEPT"
+                                                                        },
+                                                                        {
+                                                                            "title":  "Confront with Truth",
+                                                                            "description":  "Add [red]Decay[/red] to your [gold]Deck[/gold]. [gold]Enchant[/gold] a card that [gold]Exhausts[/gold] with [purple]Soul\u0027s Power[/purple].",
+                                                                            "id":  "CONFRONT"
+                                                                        },
+                                                                        {
+                                                                            "title":  "Locked",
+                                                                            "description":  "You have no cards with [gold]Exhaust[/gold] that can be [purple]Enchanted[/purple].",
+                                                                            "id":  "CONFRONT_LOCKED"
+                                                                        }
+                                                                    ]
+                                                    },
+                   "EVENT.HUNGRY_FOR_MUSHROOMS":  {
+                                                      "description":  "[sine]How long has it been since you ate?\n...wait, what\u0027s that fantastic smell?[/sine]\n\nFollowing the scent, you reach a cozy campground with all manner of [green]tasty mushrooms[/green] being cooked! You don\u0027t consider the safety of eating these mushrooms because you are so hungry.\n(So hungry that you don\u0027t notice the dead adventurer)",
+                                                      "name":  "Hungry for Mushrooms",
+                                                      "act":  "Act 3 - Glory",
+                                                      "options":  [
+                                                                      {
+                                                                          "title":  "Big Mushroom",
+                                                                          "description":  "Obtain [gold]Big Mushroom[/gold]. Upon pickup, raise your Max HP by [blue]20[/blue]. At the start of each combat, draw [blue]2[/blue] fewer cards.",
+                                                                          "id":  "BIG_MUSHROOM"
+                                                                      },
+                                                                      {
+                                                                          "title":  "Fragrant Mushroom",
+                                                                          "description":  "Obtain [gold]Fragrant Mushroom[/gold]. Upon pickup, lose [red]15[/red] HP and [gold]Upgrade[/gold] [blue]3[/blue] random cards.",
+                                                                          "id":  "FRAGRANT_MUSHROOM"
+                                                                      }
+                                                                  ]
+                                                  },
+                   "EVENT.JUNGLE_MAZE_ADVENTURE":  {
+                                                       "description":  "In a clearing, you run into a [green]Ragtag Group of Adventurers[/green] looking down and gesturing at a [purple]gigantic maze[/purple].\n\nThey offer to join forces with you in an [b]Epic Quest[/b] to loot the riches of this maze. As an experienced adventurer yourself, it\u0027s clear this maze is filled with [red][jitter]deadly traps[/jitter][/red] and [orange][sine]guardians[/sine][/orange].\n\nIt would be easier if you work together, but then you would have to split the loot.",
+                                                       "name":  "Jungle Maze Adventure",
+                                                       "act":  "Act 1 - Overgrowth",
+                                                       "options":  [
+                                                                       {
+                                                                           "title":  "Join Forces",
+                                                                           "description":  "Gain [blue]50[/blue] [gold]Gold[/gold].",
+                                                                           "id":  "JOIN_FORCES"
+                                                                       },
+                                                                       {
+                                                                           "title":  "Solo Quest",
+                                                                           "description":  "Gain [blue]150[/blue] [gold]Gold[/gold]. Lose [red]18[/red] HP.",
+                                                                           "id":  "SOLO_QUEST"
+                                                                       }
+                                                                   ]
+                                                   },
+                   "EVENT.NEOW":  {
+                                      "description":  "[sine]I’ve... remade you....\n...go... ..up.....[/sine]",
+                                      "name":  "Neow",
+                                      "act":  "Underdocks",
+                                      "options":  [
+
+                                                  ]
+                                  },
+                   "EVENT.WATERLOGGED_SCRIPTORIUM":  {
+                                                         "description":  "Navigating the murky passages, you stumble upon a [aqua]withered figure[/aqua] working a small shop. The multitude of shelves are [sine]stuffed[/sine] full of damp scrolls and parchment.\n\nNoticing a patron has entered, the [aqua]scribe-shopkeeper[/aqua] snaps to attention and gestures at some [gold]implements[/gold] arranged on a desk.",
+                                                         "name":  "Waterlogged Scriptorium",
+                                                         "act":  "Underdocks",
+                                                         "options":  [
+                                                                         {
+                                                                             "title":  "Bloody Ink",
+                                                                             "description":  "Gain [green]6[/green] Max HP.",
+                                                                             "id":  "BLOODY_INK"
+                                                                         },
+                                                                         {
+                                                                             "title":  "Prickly Sponge",
+                                                                             "description":  "Pay [red]155[/red] [gold]Gold[/gold]. [gold]Enchant[/gold] [blue]2[/blue] cards with [purple]Steady[/purple].",
+                                                                             "id":  "PRICKLY_SPONGE"
+                                                                         },
+                                                                         {
+                                                                             "title":  "Locked",
+                                                                             "description":  "Requires [blue]155[/blue] [gold]Gold[/gold].",
+                                                                             "id":  "PRICKLY_SPONGE_LOCKED"
+                                                                         },
+                                                                         {
+                                                                             "title":  "Tentacle Quill",
+                                                                             "description":  "Pay [red]65[/red] [gold]Gold[/gold]. [gold]Enchant[/gold] a card with [purple]Steady[/purple].",
+                                                                             "id":  "TENTACLE_QUILL"
+                                                                         },
+                                                                         {
+                                                                             "title":  "Locked",
+                                                                             "description":  "Requires [blue]65[/blue] [gold]Gold[/gold].",
+                                                                             "id":  "TENTACLE_QUILL_LOCKED"
+                                                                         }
+                                                                     ]
+                                                     },
+                   "EVENT.UNREST_SITE":  {
+                                             "description":  "You find a secluded [gold]Rest Site[/gold] and start a [orange]fire[/orange] to get some rest.\nOr so you thought.\n\nOnce the fire is started, it begins to swell, reaching not upwards but [sine]sideways[/sine] towards a grove of [purple]oil-seeping trees[/purple].\n\nShould you try resting anyways?",
+                                             "name":  "Unrest Site",
+                                             "act":  "Act 1 - Overgrowth",
+                                             "options":  [
+                                                             {
+                                                                 "title":  "Kill the Trees",
+                                                                 "description":  "Lose [red]8[/red] Max HP. Obtain a random [gold]Relic[/gold].",
+                                                                 "id":  "KILL"
+                                                             },
+                                                             {
+                                                                 "title":  "Rest Anyways",
+                                                                 "description":  "[green]Heal to full HP.[/green] Receive [red]Poor Sleep[/red].",
+                                                                 "id":  "REST"
+                                                             }
+                                                         ]
+                                         },
+                   "EVENT.WELLSPRING":  {
+                                            "description":  "You trace a [jitter]low rumble[/jitter] to its source and find yourself captivated by a tranquil wellspring. The water is an [sine][aqua]emerald green[/aqua][/sine] with clusters of [sine][gold]glowing motes[/gold][/sine].\n\nIt looks inviting. What can possibly go wrong?",
+                                            "name":  "Wellspring",
+                                            "act":  "Act 1 - Overgrowth",
+                                            "options":  [
+                                                            {
+                                                                "title":  "Bathe",
+                                                                "description":  "Remove [blue]1[/blue] card from your [gold]Deck[/gold]. Add [blue]1[/blue] [red]Guilty[/red] to your [gold]Deck[/gold].",
+                                                                "id":  "BATHE"
+                                                            },
+                                                            {
+                                                                "title":  "Bottle",
+                                                                "description":  "Procure [blue]1[/blue] random [gold]Potion[/gold].",
+                                                                "id":  "BOTTLE"
+                                                            }
+                                                        ]
+                                        },
+                   "EVENT.TEZCATARA":  {
+                                           "description":  "Oh, a visitor! Do come in, dear!\nWhat can Tezcatara do for you?",
+                                           "name":  "Tezcatara",
+                                           "act":  "Act 2 - Hive",
+                                           "options":  [
+
+                                                       ]
+                                       },
+                   "EVENT.SAPPHIRE_SEED":  {
+                                               "description":  "You narrowly avoid stepping on a bright, sharp... seed? Its unmistakable color gives away that it\u0027s a [aqua]Sapphire Seed[/aqua]! Weren\u0027t these incredible seeds supposed to be extinct!?\n\nLegends say that consuming one can greatly [gold]amplify your endurance[/gold], but what if you plant and nourish it instead?",
+                                               "name":  "Sapphire Seed",
+                                               "act":  "Act 1 - Overgrowth",
+                                               "options":  [
+                                                               {
+                                                                   "title":  "Consume",
+                                                                   "description":  "Heal [green]9[/green] HP. [gold]Upgrade[/gold] a card in your [gold]Deck[/gold].",
+                                                                   "id":  "EAT"
+                                                               },
+                                                               {
+                                                                   "title":  "Plant and Nourish",
+                                                                   "description":  "[gold]Enchant[/gold] a card with [purple]Sown[/purple].",
+                                                                   "id":  "PLANT"
+                                                               }
+                                                           ]
+                                           },
+                   "EVENT.DOORS_OF_LIGHT_AND_DARK":  {
+                                                         "description":  "A doorway existed where none existed moments before...\n\nYou enter to find two shimmering doorways and a [gold]well-dressed doorman[/gold].\n“Finally, a visitor! Please please! Choose a door, any door!”\n\n[blue]Are we still in the Spire? How is this place so clean?[/blue]",
+                                                         "name":  "Doors of Light and Dark",
+                                                         "act":  "Underdocks",
+                                                         "options":  [
+                                                                         {
+                                                                             "title":  "Dark Door",
+                                                                             "description":  "Remove [blue]1[/blue] card from your [gold]Deck[/gold].",
+                                                                             "id":  "DARK"
+                                                                         },
+                                                                         {
+                                                                             "title":  "Light Door",
+                                                                             "description":  "[gold]Upgrade[/gold] [blue]2[/blue] random cards.",
+                                                                             "id":  "LIGHT"
+                                                                         }
+                                                                     ]
+                                                     },
+                   "EVENT.THE_ARCHITECT":  {
+                                               "description":  "",
+                                               "name":  "The Architect",
+                                               "act":  "Other / Special",
+                                               "options":  [
+
+                                                           ]
+                                           },
+                   "EVENT.ZEN_WEAVER":  {
+                                            "description":  "You walk through a spider web and [jitter][red]PANIC[/red][/jitter]!\nBut then, a [sine][blue]wave of calm[/blue][/sine] washes over you...\n\n[sine]“Calm down. I need you to quit fussing up my web.”[/sine]\n\nHow did you calm down so quickly?\nAn [orange]itsy bitsy[/orange] spider abseils down to meet you. It seems willing to impart some techniques for [gold]gold[/gold].",
+                                            "name":  "Zen Weaver",
+                                            "act":  "Act 2 - Hive",
+                                            "options":  [
+                                                            {
+                                                                "title":  "Arachnid Acupuncture",
+                                                                "description":  "Pay [red]250[/red] [gold]Gold[/gold]. Remove [blue]2[/blue] cards from your [gold]Deck[/gold].",
+                                                                "id":  "ARACHNID_ACUPUNCTURE"
+                                                            },
+                                                            {
+                                                                "title":  "Breathing Techniques",
+                                                                "description":  "Pay [red]50[/red] [gold]Gold[/gold]. Add [blue]2[/blue] [gold]Enlightenment[/gold] to your [gold]Deck[/gold].",
+                                                                "id":  "BREATHING_TECHNIQUES"
+                                                            },
+                                                            {
+                                                                "title":  "Emotional Awareness",
+                                                                "description":  "Pay [red]125[/red] [gold]Gold[/gold]. Remove [blue]1[/blue] card from your [gold]Deck[/gold].",
+                                                                "id":  "EMOTIONAL_AWARENESS"
+                                                            },
+                                                            {
+                                                                "title":  "Locked",
+                                                                "description":  "Not enough [gold]Gold[/gold].",
+                                                                "id":  "LOCKED"
+                                                            }
+                                                        ]
+                                        },
+                   "EVENT.REFLECTIONS":  {
+                                             "description":  "What is this? Something feels wrong here...\n[sine]...ereh gnorw sleef gnihtemoS ?siht si tahW[/sine]",
+                                             "name":  "Reflections snoitcelfeR",
+                                             "act":  "Act 3 - Glory",
+                                             "options":  [
+                                                             {
+                                                                 "title":  "Shatter",
+                                                                 "description":  "Duplicate your [gold]Deck[/gold]. Receive [purple]Bad Luck[/purple].",
+                                                                 "id":  "SHATTER"
+                                                             },
+                                                             {
+                                                                 "title":  "Touch a Mirror",
+                                                                 "description":  "[red]Downgrade[/red] [blue]2[/blue] random cards. [green]Upgrade[/green] [blue]4[/blue] random cards.",
+                                                                 "id":  "TOUCH_A_MIRROR"
+                                                             }
+                                                         ]
+                                         },
+                   "EVENT.CRYSTAL_SPHERE":  {
+                                                "description":  "[sine][blue]“I predicted you\u0027d enter...!”[/blue][/sine]\n\nA [jitter]raspy[/jitter] voice calls out as you enter a [purple]mystic hut[/purple].\n\n[sine][blue]“Your destiny has brought you here. We must uncover your future and fortunes so you can SAVE US ALL!!”[/blue][/sine]\n“Okay, here are the options for the [gold]Crystal Sphere reading[/gold]. Be sure to sign this waiver as well,” she says while bringing out pen and parchment.",
+                                                "name":  "Crystal Sphere",
+                                                "act":  "Other / Special",
+                                                "options":  [
+                                                                {
+                                                                    "title":  "Payment Plan",
+                                                                    "description":  "Gain a [red]Debt[/red]. [purple]Divine[/purple] [blue]6[/blue] times.",
+                                                                    "id":  "PAYMENT_PLAN"
+                                                                },
+                                                                {
+                                                                    "title":  "Uncover Future",
+                                                                    "description":  "Pay [red]50[/red] [gold]Gold[/gold]. [purple]Divine[/purple] [blue]3[/blue] times.",
+                                                                    "id":  "UNCOVER_FUTURE"
+                                                                }
+                                                            ]
+                                            },
+                   "EVENT.RANWID_THE_ELDER":  {
+                                                  "description":  "You are approached by the [purple]oldest person you have ever seen[/purple].\n[sine]“We meet once more... it\u0027s me, Ranwid!”[/sine]\n\nYou do not know this man.",
+                                                  "name":  "Ranwid the Elder",
+                                                  "act":  "Other / Special",
+                                                  "options":  [
+                                                                  {
+                                                                      "title":  "Give 100 Gold",
+                                                                      "description":  "Obtain a random [gold]Relic[/gold].",
+                                                                      "id":  "GOLD"
+                                                                  },
+                                                                  {
+                                                                      "title":  "Give Potion",
+                                                                      "description":  "Obtain a random [gold]Relic[/gold].",
+                                                                      "id":  "POTION"
+                                                                  },
+                                                                  {
+                                                                      "title":  "Locked",
+                                                                      "description":  "You don\u0027t have any Potions that can be given.",
+                                                                      "id":  "POTION_LOCKED"
+                                                                  },
+                                                                  {
+                                                                      "title":  "Give Relic",
+                                                                      "description":  "Obtain [blue]2[/blue] random [gold]Relics[/gold].",
+                                                                      "id":  "RELIC"
+                                                                  },
+                                                                  {
+                                                                      "title":  "Locked",
+                                                                      "description":  "You don\u0027t have any Relics that can be given.",
+                                                                      "id":  "RELIC_LOCKED"
+                                                                  }
+                                                              ]
+                                              },
+                   "EVENT.BYRDONIS_NEST":  {
+                                               "description":  "You spot an enormous [jitter][red]Shambling Beast[/red][/jitter] chase off an injured [green][sine]Green Byrd[/sine][/green].\n\nIn the alcove the byrd fled from, a [gold]single unguarded egg[/gold] lies abandoned.\n\n[sine]Your stomach gurgles...[/sine]",
+                                               "name":  "Byrdonis Nest",
+                                               "act":  "Act 1 - Overgrowth",
+                                               "options":  [
+                                                               {
+                                                                   "title":  "Eat the Egg",
+                                                                   "description":  "Gain [blue]7[/blue] Max HP.",
+                                                                   "id":  "EAT"
+                                                               },
+                                                               {
+                                                                   "title":  "Take the Egg",
+                                                                   "description":  "Add [gold]Byrdonis Egg[/gold] to your [gold]Deck[/gold].",
+                                                                   "id":  "TAKE"
+                                                               }
+                                                           ]
+                                           },
+                   "EVENT.SUNKEN_TREASURY":  {
+                                                 "description":  "A path leads you into a partially submerged vault.\nThere are [blue]2[/blue] [gold]chests[/gold] but only [blue]1[/blue] [jitter][purple]brittle key[/purple][/jitter].\n\n[gold]The First Chest:[/gold] Shaking it, you get jingly-jangly noises. Bit of gold.\n[gold]The Second Chest:[/gold] Enormous, ornate, and clearly [red]cursed[/red]. Lots of gold!",
+                                                 "name":  "Sunken Treasury",
+                                                 "act":  "Underdocks",
+                                                 "options":  [
+                                                                 {
+                                                                     "title":  "First Chest",
+                                                                     "description":  "Gain [blue]60[/blue] [gold]Gold[/gold].",
+                                                                     "id":  "FIRST_CHEST"
+                                                                 },
+                                                                 {
+                                                                     "title":  "Second Chest",
+                                                                     "description":  "Gain [blue]333[/blue] [gold]Gold[/gold]. Receive [red]Greed[/red].",
+                                                                     "id":  "SECOND_CHEST"
+                                                                 }
+                                                             ]
+                                             },
+                   "EVENT.WOOD_CARVINGS":  {
+                                               "description":  "You open a dusty box to find a set of 3 elaborate wood carvings:\n\nA bird, snake, and... a torus?\n\nA nearby pedestal has indentations which match the bottom of the carvings. Which carving will you place on the pedestal?",
+                                               "name":  "Wood Carvings",
+                                               "act":  "Act 1 - Overgrowth",
+                                               "options":  [
+                                                               {
+                                                                   "title":  "Bird",
+                                                                   "description":  "Choose [blue]1[/blue] starter card to [gold]Transform[/gold] into [gold]Peck[/gold].",
+                                                                   "id":  "BIRD"
+                                                               },
+                                                               {
+                                                                   "title":  "Snake",
+                                                                   "description":  "[gold]Enchant[/gold] [blue]1[/blue] card with [purple]Slither[/purple].",
+                                                                   "id":  "SNAKE"
+                                                               },
+                                                               {
+                                                                   "title":  "Locked",
+                                                                   "description":  "None of your cards can be Enchanted with [purple]Slither[/purple].",
+                                                                   "id":  "SNAKE_LOCKED"
+                                                               },
+                                                               {
+                                                                   "title":  "Torus",
+                                                                   "description":  "Choose [blue]1[/blue] starter card to [gold]Transform[/gold] into [gold]Toric Toughness[/gold].",
+                                                                   "id":  "TORUS"
+                                                               }
+                                                           ]
+                                           },
+                   "EVENT.THE_LEGENDS_WERE_TRUE":  {
+                                                       "description":  "Entering into a pitch dark chamber, a sudden light pierces the darkness from above, just as the door slams behind you.\n\nIlluminated before you appears to be a podium with a map on it. You feel compelled to take it.\n\nSuspicious.",
+                                                       "name":  "The Legends Were True",
+                                                       "act":  "Other / Special",
+                                                       "options":  [
+                                                                       {
+                                                                           "title":  "Nab the Map",
+                                                                           "description":  "Receive the [gold]Spoils Map[/gold].",
+                                                                           "id":  "NAB_THE_MAP"
+                                                                       },
+                                                                       {
+                                                                           "title":  "Slowly Find an Exit",
+                                                                           "description":  "Lose [red]8[/red] HP. Procure [blue]1[/blue] random [gold]Potion[/gold].",
+                                                                           "id":  "SLOWLY_FIND_AN_EXIT"
+                                                                       }
+                                                                   ]
+                                                   },
+                   "EVENT.BUGSLAYER":  {
+                                           "description":  "As you\u0027re fending off a [jitter][red]swarm of aggressive insects[/red][/jitter] you suddenly notice a [gold]Mighty Rugged Warrior-Man[/gold] fighting beside you this whole time!\n\nThe insects, sensing defeat, scatter. You turn to your fellow fighter.\n“Would you like any tips on exterminating these pests?”\n\nHow polite. You nod and accept his offer.",
+                                           "name":  "Bugslayer",
+                                           "act":  "Act 2 - Hive",
+                                           "options":  [
+                                                           {
+                                                               "title":  "Learn Extermination Technique",
+                                                               "description":  "Add [gold]Exterminate[/gold] to your [gold]Deck[/gold].",
+                                                               "id":  "EXTERMINATION"
+                                                           },
+                                                           {
+                                                               "title":  "Learn Squash Technique",
+                                                               "description":  "Add [gold]Squash[/gold] to your [gold]Deck[/gold].",
+                                                               "id":  "SQUASH"
+                                                           }
+                                                       ]
+                                       },
+                   "EVENT.LUMINOUS_CHOIR":  {
+                                                "description":  "You stumble upon a clearing bathed in an unnatural blue glow. Towering mushrooms pulse with bioluminescence, their caps swollen and glistening. As you approach, the fungi begin to emit [sine][purple]haunting, melodic tones[/purple][/sine] that reverberate throughout your chest.\n\nYou notice something gleaming, embedded within the largest mushroom\u0027s flesh, [sine]pulsing[/sine] in rhythm with the fungal song.",
+                                                "name":  "Luminous Choir",
+                                                "act":  "Act 1 - Overgrowth",
+                                                "options":  [
+                                                                {
+                                                                    "title":  "Offer Tribute",
+                                                                    "description":  "Pay [red]149[/red] [gold]Gold[/gold]. Obtain a random [gold]Relic[/gold].",
+                                                                    "id":  "OFFER_TRIBUTE"
+                                                                },
+                                                                {
+                                                                    "title":  "Locked",
+                                                                    "description":  "Requires [blue]149[/blue] [gold]Gold[/gold].",
+                                                                    "id":  "OFFER_TRIBUTE_LOCKED"
+                                                                },
+                                                                {
+                                                                    "title":  "Reach into the Flesh",
+                                                                    "description":  "Remove [blue]2[/blue] cards from your [gold]Deck[/gold]. Add [red]Spore Mind[/red] to your [gold]Deck[/gold].",
+                                                                    "id":  "REACH_INTO_THE_FLESH"
+                                                                }
+                                                            ]
+                                            },
+                   "EVENT.SELF_HELP_BOOK":  {
+                                                "description":  "On the floor lies a tome,\n“Top 3 Ways to Conquer the Spire”\n\nThe book is [red]encrusted with blood[/red] so you find this manuscript highly suspicious.\n\nWill you read it?",
+                                                "name":  "Self-Help Book",
+                                                "act":  "Other / Special",
+                                                "options":  [
+                                                                {
+                                                                    "title":  "Move On",
+                                                                    "description":  "You don\u0027t have any cards that can be Enchanted.",
+                                                                    "id":  "NO_OPTIONS"
+                                                                },
+                                                                {
+                                                                    "title":  "Read the Entire Book",
+                                                                    "description":  "Choose a Power to [gold]Enchant[/gold] with [purple]Swift[/purple] [blue]2[/blue].",
+                                                                    "id":  "READ_ENTIRE_BOOK"
+                                                                },
+                                                                {
+                                                                    "title":  "Locked",
+                                                                    "description":  "You don\u0027t have any Powers that can be [gold]Enchanted[/gold].",
+                                                                    "id":  "READ_ENTIRE_BOOK_LOCKED"
+                                                                },
+                                                                {
+                                                                    "title":  "Read a Random Passage",
+                                                                    "description":  "Choose a Skill to [gold]Enchant[/gold] with [purple]Nimble[/purple] [blue]2[/blue].",
+                                                                    "id":  "READ_PASSAGE"
+                                                                },
+                                                                {
+                                                                    "title":  "Locked",
+                                                                    "description":  "You don\u0027t have any Skills that can be [gold]Enchanted[/gold].",
+                                                                    "id":  "READ_PASSAGE_LOCKED"
+                                                                },
+                                                                {
+                                                                    "title":  "Read the Back",
+                                                                    "description":  "Choose an Attack to [gold]Enchant[/gold] with [purple]Sharp[/purple] [blue]2[/blue].",
+                                                                    "id":  "READ_THE_BACK"
+                                                                },
+                                                                {
+                                                                    "title":  "Locked",
+                                                                    "description":  "You don\u0027t have any Attacks that can be [gold]Enchanted[/gold].",
+                                                                    "id":  "READ_THE_BACK_LOCKED"
+                                                                }
+                                                            ]
+                                            },
+                   "EVENT.RELIC_TRADER":  {
+                                              "description":  "You turn a corner and suddenly, a shadowy figure is just standing there. He pivots to face you.\n\n“Welcome! What\u0027re ya trading?”\nThe figure inquires as he flares open his cloak to reveal a slew of [sine][purple]suspicious wares[/purple][/sine].",
+                                              "name":  "Relic Trader",
+                                              "act":  "Other / Special",
+                                              "options":  [
+                                                              {
+                                                                  "title":  "Take the Bottom One",
+                                                                  "description":  "Trade [gold]one of your Relics[/gold] for [gold]a random Relic[/gold].",
+                                                                  "id":  "BOTTOM"
+                                                              },
+                                                              {
+                                                                  "title":  "Take the Middle One",
+                                                                  "description":  "Trade [gold]one of your Relics[/gold] for [gold]a random Relic[/gold].",
+                                                                  "id":  "MIDDLE"
+                                                              },
+                                                              {
+                                                                  "title":  "Take the Top One",
+                                                                  "description":  "Trade [gold]one of your Relics[/gold] for [gold]a random Relic[/gold].",
+                                                                  "id":  "TOP"
+                                                              }
+                                                          ]
+                                          },
+                   "EVENT.SLIPPERY_BRIDGE":  {
+                                                 "description":  "While crossing a rickety wooden bridge, there is a sudden [blue][jitter]torrent of rain[/jitter][/blue]. [purple][sine]Massive gusts of wind[/sine][/purple] buffet you, threatening to end your journey.",
+                                                 "name":  "Slippery Bridge",
+                                                 "act":  "Other / Special",
+                                                 "options":  [
+                                                                 {
+                                                                     "title":  "Hold On",
+                                                                     "description":  "Lose [red]3+[/red] HP. The card in the above option is randomized.",
+                                                                     "id":  "HOLD_ON_0"
+                                                                 },
+                                                                 {
+                                                                     "title":  "Overcome",
+                                                                     "description":  "[red]a random Card[/red] is removed from your [gold]Deck[/gold].",
+                                                                     "id":  "OVERCOME"
+                                                                 }
+                                                             ]
+                                             },
+                   "EVENT.TRIAL":  {
+                                       "description":  "You join a line of people entering a massive building.\n\nAs you pass under a [gold]golden archway[/gold], horns blare, [jitter]confetti explodes[/jitter], and [sine]streamers glide[/sine] down from the ceiling!\n\n“Entrant [blue][EntrantNumber][/blue], you are the [green]DECIDER[/green] for today\u0027s [gold]Trial[/gold].”",
+                                       "name":  "The Trial",
+                                       "act":  "Act 3 - Glory",
+                                       "options":  [
+                                                       {
+                                                           "title":  "Accept",
+                                                           "description":  "Serve as today\u0027s Decider.",
+                                                           "id":  "ACCEPT"
+                                                       },
+                                                       {
+                                                           "title":  "Reject",
+                                                           "description":  "[red]You are not allowed to Reject.[/red]",
+                                                           "id":  "REJECT"
+                                                       }
+                                                   ]
+                                   },
+                   "EVENT.MORPHIC_GROVE":  {
+                                               "description":  "You enter a grove of [green]crystalline trees[/green], and they begin to [jitter]quiver excitedly[/jitter]!\nA chorus of [sine]hellos and welcomes[/sine] bombard you as a group of [aqua]Morphics[/aqua] [jitter]burst[/jitter] forth from trees.\n\nOne of the [aqua]Morphics[/aqua] is fidgeting in the corner, clearly not as sociable as the others.\n\nApproach the group or the loner?",
+                                               "name":  "Morphic Grove",
+                                               "act":  "Act 1 - Overgrowth",
+                                               "options":  [
+                                                               {
+                                                                   "title":  "Group",
+                                                                   "description":  "Lose [red]100[/red] [gold]Gold[/gold]. [gold]Transform[/gold] [blue]2[/blue] cards.",
+                                                                   "id":  "GROUP"
+                                                               },
+                                                               {
+                                                                   "title":  "Loner",
+                                                                   "description":  "Gain [green]5[/green] Max HP.",
+                                                                   "id":  "LONER"
+                                                               }
+                                                           ]
+                                           },
+                   "EVENT.BATTLEWORN_DUMMY":  {
+                                                  "description":  "As you approach, it begins to rumble and fizzle and lights up brilliantly!\n\n“[jitter]BZZZT![/jitter] TIME TO TRAIN!!! YOU HAVE [blue]3 TURNS[/blue] TO DEFEAT ME!\nCHOOSE A SETTING OR FACE [red]LETHAL HUMILIATION[/red].\nHere are the options:”\n\nAfter the terrifying message, the dummy carefully reads out detailed instructions.\n\nWhat do you choose?",
+                                                  "name":  "Battleworn Dummy",
+                                                  "act":  "Act 3 - Glory",
+                                                  "options":  [
+                                                                  {
+                                                                      "title":  "Setting 1",
+                                                                      "description":  "Fight a [blue][Setting1Hp][/blue] HP dummy. Procure [blue]1[/blue] random [gold]Potion[/gold].",
+                                                                      "id":  "SETTING_1"
+                                                                  },
+                                                                  {
+                                                                      "title":  "Setting 2",
+                                                                      "description":  "Fight a [blue][Setting2Hp][/blue] HP dummy. [gold]Upgrade[/gold] [blue]2[/blue] random cards.",
+                                                                      "id":  "SETTING_2"
+                                                                  },
+                                                                  {
+                                                                      "title":  "Setting 3",
+                                                                      "description":  "Fight a [blue][Setting3Hp][/blue] HP dummy. Obtain a random [gold]Relic[/gold].",
+                                                                      "id":  "SETTING_3"
+                                                                  }
+                                                              ]
+                                              },
+                   "EVENT.DOLL_ROOM":  {
+                                           "description":  "You enter a hidden room...\n\nIt\u0027s packed with an array of dolls. Each are unique, their expressions ranging from [green]joy[/green] to [purple]sorrow[/purple], their attire spanning centuries and realms beyond your own.\n\nA [sine][blue]chorus of whispers[/blue][/sine] grows louder and louder until [jitter][red]the dolls are shouting[/red][/jitter] over each other and calling for you...\n\nYou must choose one and leave immediately.",
+                                           "name":  "Doll Room",
+                                           "act":  "Other / Special",
+                                           "options":  [
+                                                           {
+                                                               "title":  "Examine Each and Make the Best Choice",
+                                                               "description":  "Lose [red]15[/red] HP. Choose [blue]1[/blue] of [blue]3[/blue] [gold]Doll Relics[/gold].",
+                                                               "id":  "EXAMINE"
+                                                           },
+                                                           {
+                                                               "title":  "Pick at Random",
+                                                               "description":  "Obtain a random [gold]Doll Relic[/gold].",
+                                                               "id":  "RANDOM"
+                                                           },
+                                                           {
+                                                               "title":  "Take Some Time",
+                                                               "description":  "Lose [red]5[/red] HP. Choose [blue]1[/blue] of [blue]2[/blue] [gold]Doll Relics[/gold].",
+                                                               "id":  "TAKE_SOME_TIME"
+                                                           }
+                                                       ]
+                                       },
+                   "EVENT.COLOSSAL_FLOWER":  {
+                                                 "description":  "There is a [green]colossal flower[/green] growing atop a [red][jitter]mountain of bones[/jitter][/red].\n\nAs its [sine]color-shifting petals[/rainbow][/sine] pulsate, you sense there is a [aqua]Powerful Cluster of Pollen[/aqua] in the center but the undulating petals are [red]razor sharp[/red] and unpredictable.\n\nYou could grab some of the [gold]golden nectar[/gold], but reaching the prize in the center is so tempting...",
+                                                 "name":  "Colossal Flower",
+                                                 "act":  "Act 2 - Hive",
+                                                 "options":  [
+                                                                 {
+                                                                     "title":  "Extract Nectar",
+                                                                     "description":  "Gain [blue]35[/blue] [gold]Gold[/gold].",
+                                                                     "id":  "EXTRACT_CURRENT_PRIZE_1"
+                                                                 },
+                                                                 {
+                                                                     "title":  "Reach Deeper",
+                                                                     "description":  "Enter deeper. Lose [red]5[/red] HP.",
+                                                                     "id":  "REACH_DEEPER_1"
+                                                                 }
+                                                             ]
+                                             },
+                   "EVENT.WAR_HISTORIAN_REPY":  {
+                                                    "description":  "An academic is trapped in a [purple]hanging cage[/purple] next to a [gold]treasure chest[/gold].\n\nThe academic is muttering about [sine][orange]“One-Time-Use Keys”[/orange][/sine] while furiously writing something.\n\nLooks like you can unlock the [purple]cage[/purple] or the [gold]chest[/gold].",
+                                                    "name":  "War Historian, Repy",
+                                                    "act":  "Other / Special",
+                                                    "options":  [
+                                                                    {
+                                                                        "title":  "Unlock the Cage",
+                                                                        "description":  "Lose [gold]Lantern Key[/gold]. Obtain [gold]History Course[/gold].",
+                                                                        "id":  "UNLOCK_CAGE"
+                                                                    },
+                                                                    {
+                                                                        "title":  "Unlock the Chest",
+                                                                        "description":  "Lose [gold]Lantern Key[/gold]. Procure [blue]2[/blue] random [gold]Potions[/gold]. Obtain [blue]2[/blue] random [gold]Relics[/gold].",
+                                                                        "id":  "UNLOCK_CHEST"
+                                                                    }
+                                                                ]
+                                                },
+                   "EVENT.POTION_COURIER":  {
+                                                "description":  "There is a [sine]sour[/sine] smell in the air and shortly after, you find a [gold]Potion Courier[/gold] collapsed on the ground.\nUnmoving. Lifeless. [jitter]Dead!?[/jitter]\nWhile their belongings have been ransacked, there is a batch of [green][sine]Foul Smelling Potions[/sine][/green] with a note: \"Recipient: Merchant\".",
+                                                "name":  "Potion Courier",
+                                                "act":  "Other / Special",
+                                                "options":  [
+                                                                {
+                                                                    "title":  "Grab Potions",
+                                                                    "description":  "Procure [blue]3[/blue] [gold]Foul Potions[/gold].",
+                                                                    "id":  "GRAB_POTIONS"
+                                                                },
+                                                                {
+                                                                    "title":  "Ransack",
+                                                                    "description":  "Procure [blue]1[/blue] random [gold]Uncommon Potion[/gold].",
+                                                                    "id":  "RANSACK"
+                                                                }
+                                                            ]
+                                            },
+                   "EVENT.BRAIN_LEECH":  {
+                                             "description":  "[jitter]*thunk*[/jitter]\n\nA sharp pain is felt atop your head and a thought stabs into your mind.\n\n[purple][sine]“SHARE KNOWLEDGE???”[/sine][/purple]\n\nYou are unsure how to proceed...",
+                                             "name":  "Brain Leech",
+                                             "act":  "Other / Special",
+                                             "options":  [
+                                                             {
+                                                                 "title":  "Rip the Leech Off",
+                                                                 "description":  "Lose [red]5[/red] HP. Gain a Colorless card reward.",
+                                                                 "id":  "RIP"
+                                                             },
+                                                             {
+                                                                 "title":  "Share Knowledge",
+                                                                 "description":  "Choose [blue]1[/blue] of [blue]5[/blue] random cards to add to your [gold]Deck[/gold].",
+                                                                 "id":  "SHARE_KNOWLEDGE"
+                                                             }
+                                                         ]
+                                         },
+                   "EVENT.STONE_OF_ALL_TIME":  {
+                                                   "description":  "A massive boulder sits in the middle of an abandoned courtyard.\n\nA plaque reads:\n[gold][b]Stone of All Time[/b][/gold].\n\nIts presence, shape, and adornments indicate that this courtyard was built around this [blue]Stone[/blue] and that it has never moved from this spot.",
+                                                   "name":  "Stone of All Time",
+                                                   "act":  "Other / Special",
+                                                   "options":  [
+                                                                   {
+                                                                       "title":  "Drink and Lift",
+                                                                       "description":  "Lose [red]a random Potion[/red]. Gain [blue]10[/blue] Max HP.",
+                                                                       "id":  "LIFT"
+                                                                   },
+                                                                   {
+                                                                       "title":  "Locked",
+                                                                       "description":  "Requires a Potion.",
+                                                                       "id":  "LIFT_LOCKED"
+                                                                   },
+                                                                   {
+                                                                       "title":  "Push",
+                                                                       "description":  "Lose [red]6[/red] HP. [gold]Enchant[/gold] an Attack with [purple]Vigorous[/purple] [blue]8[/blue].",
+                                                                       "id":  "PUSH"
+                                                                   },
+                                                                   {
+                                                                       "title":  "Locked",
+                                                                       "description":  "Requires an Attack.",
+                                                                       "id":  "PUSH_LOCKED"
+                                                                   }
+                                                               ]
+                                               },
+                   "EVENT.FAKE_MERCHANT":  {
+                                               "description":  "Placeholder",
+                                               "name":  "The Merchant???",
+                                               "act":  "Other / Special",
+                                               "options":  [
+
+                                                           ]
+                                           },
+                   "EVENT.INFESTED_AUTOMATON":  {
+                                                    "description":  "There\u0027s a chamber filled with [red]dead robots[/red].\n\nA lone automaton still has a [sine][aqua]faintly glowing core[/aqua][/sine] but it\u0027s engulfed by a grotesque, organic growth and doesn\u0027t respond.",
+                                                    "name":  "Infested Automaton",
+                                                    "act":  "Act 2 - Hive",
+                                                    "options":  [
+                                                                    {
+                                                                        "title":  "Study",
+                                                                        "description":  "Obtain a random [gold]Power[/gold].",
+                                                                        "id":  "STUDY"
+                                                                    },
+                                                                    {
+                                                                        "title":  "Touch the Core",
+                                                                        "description":  "Obtain a random [gold]0 cost card[/gold].",
+                                                                        "id":  "TOUCH_CORE"
+                                                                    }
+                                                                ]
+                                                },
+                   "EVENT.OROBAS":  {
+                                        "description":  "Puppet puppet!! All the way up here?! Take these, take take!",
+                                        "name":  "Orobas",
+                                        "act":  "Act 2 - Hive",
+                                        "options":  [
+
+                                                    ]
+                                    },
+                   "EVENT.WHISPERING_HOLLOW":  {
+                                                   "description":  "Making your way through a [red]hollow of dead trees[/red] you happen upon a single bone-white tree. Clay baubles hang off its branches, which curve inward like protective ribs.\n\nSuch a [purple]creepy tree[/purple]. It whispers.\n\n[sine][blue]...make exchange.....[/blue][/sine]",
+                                                   "name":  "Whispering Hollow",
+                                                   "act":  "Act 1 - Overgrowth",
+                                                   "options":  [
+                                                                   {
+                                                                       "title":  "Exchange Gold",
+                                                                       "description":  "Lose [red]50[/red] [gold]Gold[/gold]. Procure [blue]2[/blue] random [gold]Potions[/gold].",
+                                                                       "id":  "GOLD"
+                                                                   },
+                                                                   {
+                                                                       "title":  "Hug the Tree",
+                                                                       "description":  "Lose [red]9[/red] HP. Choose a card to [gold]Transform[/gold].",
+                                                                       "id":  "HUG"
+                                                                   }
+                                                               ]
+                                               },
+                   "EVENT.ROOM_FULL_OF_CHEESE":  {
+                                                     "description":  "This room is full of [b][jitter]cheese!!![/jitter][/b]\n\nYou look around to see if there are any traps and above you is... more [b]cheese[/b]. The candles in this room appear to be made of [b]cheese[/b]. The furniture is also [b]cheese[/b].\nSuddenly, the door behind you slams shut.\n\nIt is made of [b]cheese[/b].",
+                                                     "name":  "Room Full of Cheese",
+                                                     "act":  "Other / Special",
+                                                     "options":  [
+                                                                     {
+                                                                         "title":  "Gorge",
+                                                                         "description":  "Choose [blue]2[/blue] of [blue]8[/blue] random [gold]Common[/gold] cards to add to your [gold]Deck[/gold].",
+                                                                         "id":  "GORGE"
+                                                                     },
+                                                                     {
+                                                                         "title":  "Search",
+                                                                         "description":  "Lose [red]14[/red] HP. Obtain the [gold]Chosen Cheese[/gold].",
+                                                                         "id":  "SEARCH"
+                                                                     }
+                                                                 ]
+                                                 },
+                   "EVENT.TEA_MASTER":  {
+                                            "description":  "You stumble into a dimly lit shack and find yourself immersed in a very peaceful space containing an obsessive variety of tea.\n\nThe man inside gestures to a selection of [green]teas[/green], each neatly labeled with a [gold]premium price[/gold].",
+                                            "name":  "Tea Master",
+                                            "act":  "Other / Special",
+                                            "options":  [
+                                                            {
+                                                                "title":  "Bone Tea",
+                                                                "description":  "Pay [red]50[/red] [gold]Gold[/gold]. At the start of the next [blue]2[/blue] combats, [gold]Upgrade[/gold] your starting hand.",
+                                                                "id":  "BONE_TEA"
+                                                            },
+                                                            {
+                                                                "title":  "Locked",
+                                                                "description":  "Requires [blue]50[/blue] [gold]Gold[/gold].",
+                                                                "id":  "BONE_TEA_LOCKED"
+                                                            },
+                                                            {
+                                                                "title":  "Ember Tea",
+                                                                "description":  "Pay [red]150[/red] [gold]Gold[/gold]. At the start of the next [blue]2[/blue] combats, gain [blue]2[/blue] [gold]Strength[/gold].",
+                                                                "id":  "EMBER_TEA"
+                                                            },
+                                                            {
+                                                                "title":  "Locked",
+                                                                "description":  "Requires [blue]150[/blue] [gold]Gold[/gold].",
+                                                                "id":  "EMBER_TEA_LOCKED"
+                                                            },
+                                                            {
+                                                                "title":  "Tea of Discourtesy",
+                                                                "description":  "At the start of the next combat, shuffle [blue]2[/blue] [gold]Dazed[/gold] into your [gold]Draw Pile[/gold].",
+                                                                "id":  "TEA_OF_DISCOURTESY"
+                                                            }
+                                                        ]
+                                        },
+                   "EVENT.PUNCH_OFF":  {
+                                           "description":  "Two [gold]Punch Constructs[/gold] are duking it out and you see some treasure in between them...\n\nShould you try to nab it?",
+                                           "name":  "Punch Off",
+                                           "act":  "Underdocks",
+                                           "options":  [
+                                                           {
+                                                               "title":  "I Can Take Them",
+                                                               "description":  "Fight them for [gold]Greater Rewards[/gold].",
+                                                               "id":  "I_CAN_TAKE_THEM"
+                                                           },
+                                                           {
+                                                               "title":  "Nab",
+                                                               "description":  "Add [red]Injury[/red] to your [gold]Deck[/gold]. Obtain a random [gold]Relic[/gold].",
+                                                               "id":  "NAB"
+                                                           }
+                                                       ]
+                                       },
+                   "EVENT.SPIRALING_WHIRLPOOL":  {
+                                                     "description":  "You happen upon a [aqua][sine]Massive Spiraling Whirlpool[/sine][/aqua]. The water swirls with beautiful precision and its surrounding walls are adorned with spiral patterns.\n\n[purple][sine]Around and around... around...\n....and around.... what a sight......[/sine][/purple]\n\nWhat do you do?",
+                                                     "name":  "Spiraling Whirlpool",
+                                                     "act":  "Underdocks",
+                                                     "options":  [
+                                                                     {
+                                                                         "title":  "Drink",
+                                                                         "description":  "Heal [green]33% Max[/green] HP.",
+                                                                         "id":  "DRINK"
+                                                                     },
+                                                                     {
+                                                                         "title":  "Observe",
+                                                                         "description":  "[gold]Enchant[/gold] a [gold]Strike[/gold] or [gold]Defend[/gold] with [purple]Spiral[/purple].",
+                                                                         "id":  "OBSERVE"
+                                                                     },
+                                                                     {
+                                                                         "title":  "Reach In",
+                                                                         "description":  "Obtain a random [gold]Relic[/gold]. Add [red]Writhe[/red] to your [gold]Deck[/gold].",
+                                                                         "id":  "REACH_IN"
+                                                                     }
+                                                                 ]
+                                                 },
+                   "EVENT.THE_LANTERN_KEY":  {
+                                                 "description":  "You come upon a faintly glowing key and go to pick it up.\n\n“Been looking all over for that key! Now if you don\u0027t mind...”\n\n This person looks like bad news but maybe it\u0027s not good to be judgy.",
+                                                 "name":  "The Lantern Key",
+                                                 "act":  "Act 2 - Hive",
+                                                 "options":  [
+                                                                 {
+                                                                     "title":  "Keep the Key",
+                                                                     "description":  "Fight to obtain the Key.",
+                                                                     "id":  "KEEP_THE_KEY"
+                                                                 },
+                                                                 {
+                                                                     "title":  "Return the Key",
+                                                                     "description":  "Gain [blue]100[/blue] [gold]Gold[/gold].",
+                                                                     "id":  "RETURN_THE_KEY"
+                                                                 }
+                                                             ]
+                                             },
+                   "EVENT.SUNKEN_STATUE":  {
+                                               "description":  "You spot an aged statue half submerged in a pond; its hands gently rest atop a [blue]stone sword[/blue].\n\nSomething is also [gold][sine]glittering[/sine][/gold] at the bottom of the pond.\nVotive offerings perhaps?\n\nYou could really use some money...",
+                                               "name":  "The Sunken Statue",
+                                               "act":  "Underdocks",
+                                               "options":  [
+                                                               {
+                                                                   "title":  "Dive into the Water",
+                                                                   "description":  "Gain [blue]111[/blue] [gold]Gold[/gold]. Lose [red]7[/red] HP.",
+                                                                   "id":  "DIVE_INTO_WATER"
+                                                               },
+                                                               {
+                                                                   "title":  "Grab the Sword",
+                                                                   "description":  "Obtain the [gold]Sword of Stone.[/gold]",
+                                                                   "id":  "GRAB_SWORD"
+                                                               }
+                                                           ]
+                                           },
+                   "EVENT.VAKUU":  {
+                                       "description":  "Give yourself to me and you will be feared as much as I.",
+                                       "name":  "Vakuu",
+                                       "act":  "Act 3 - Glory",
+                                       "options":  [
+
+                                                   ]
+                                   },
+                   "EVENT.THE_FUTURE_OF_POTIONS":  {
+                                                       "description":  "You feel a faint rumbling as you round the corner to discover a gigantic spinning apparatus!\nIt has several slots which appear to convert liquids into a highly compressed digestible tablet.\n\nThe idea of turning these health tonics into a tiny morsel is uncomfortable but perhaps it\u0027s good to try new things?",
+                                                       "name":  "The Future of Potions?",
+                                                       "act":  "Other / Special",
+                                                       "options":  [
+                                                                       {
+                                                                           "title":  "Insert Common Potion",
+                                                                           "description":  "Lose [gold]a Potion[/gold]. Obtain an [gold]Upgraded[/gold] [gold]Common Skill[/gold].",
+                                                                           "id":  "POTION"
+                                                                       }
+                                                                   ]
+                                                   },
+                   "EVENT.TRASH_HEAP":  {
+                                            "description":  "You discover a towering pile of [red][jitter]scrapped weapons[/jitter][/red], [orange]discarded trinkets[/orange], and [purple][sine]other oddities[/sine][/purple]. The massive pile shifts and rumbles, as if growing from within...\n\nIf you scavenge from the surface, you may find some decent things. But if you really get in there, you may find some [gold]exotic treasures[/gold].",
+                                            "name":  "Trash Heap",
+                                            "act":  "Underdocks",
+                                            "options":  [
+                                                            {
+                                                                "title":  "Dive In",
+                                                                "description":  "Lose [red]8[/red] HP. Obtain a random forgotten [gold]Relic[/gold] from the past.",
+                                                                "id":  "DIVE_IN"
+                                                            },
+                                                            {
+                                                                "title":  "Grab Random Junk",
+                                                                "description":  "Gain [blue]100[/blue] [gold]Gold[/gold]. Obtain a random forgotten card from the past.",
+                                                                "id":  "GRAB"
+                                                            }
+                                                        ]
+                                        },
+                   "EVENT.ABYSSAL_BATHS":  {
+                                               "description":  "You discover a secluded chamber.\n\nSteam rises from bubbling pools of hot liquid that shifts colors with hypnotic rhythm. Barnacled growths hang from the ceiling, dripping viscous fluid that hisses and writhes when it touches the surface. The air feels heavy, laden with [blue]salt[/blue] and something [green]unmistakably organic[/green].\n\nAs you approach the edge of the largest pool, the liquid ripples. The waters bubble more intensely as if anticipating your entry.",
+                                               "name":  "Abyssal Baths",
+                                               "act":  "Underdocks",
+                                               "options":  [
+                                                               {
+                                                                   "title":  "Abstain",
+                                                                   "description":  "Heal [green]10[/green] HP.",
+                                                                   "id":  "ABSTAIN"
+                                                               },
+                                                               {
+                                                                   "title":  "Immerse",
+                                                                   "description":  "Gain [green]2[/green] Max HP. Take [red]3[/red] damage.",
+                                                                   "id":  "IMMERSE"
+                                                               }
+                                                           ]
+                                           },
+                   "EVENT.WELCOME_TO_WONGOS":  {
+                                                   "description":  "“Welcome to Wongo\u0027s. We have what you want at Wongtastic prices.” says the least enthusiastic clerk you have ever met.\n\n“Peruse our wares and enjoy your time at Wongo\u0027s,” they continue, without even looking up.",
+                                                   "name":  "Welcome to Wongo\u0027s",
+                                                   "act":  "Other / Special",
+                                                   "options":  [
+                                                                   {
+                                                                       "title":  "Wongo\u0027s Bargain Bin",
+                                                                       "description":  "Pay [red]100[/red] [gold]Gold[/gold]. Obtain [blue]1[/blue] random [gold]Common Relic[/gold].",
+                                                                       "id":  "BARGAIN_BIN"
+                                                                   },
+                                                                   {
+                                                                       "title":  "Locked",
+                                                                       "description":  "Requires [blue]100[/blue] [gold]Gold[/gold].",
+                                                                       "id":  "BARGAIN_BIN_LOCKED"
+                                                                   },
+                                                                   {
+                                                                       "title":  "Wongo\u0027s Featured Item",
+                                                                       "description":  "Pay [red]200[/red] [gold]Gold[/gold]. Obtain [gold]a random Relic[/gold].",
+                                                                       "id":  "FEATURED_ITEM"
+                                                                   },
+                                                                   {
+                                                                       "title":  "Locked",
+                                                                       "description":  "Requires [blue]200[/blue] [gold]Gold[/gold].",
+                                                                       "id":  "FEATURED_ITEM_LOCKED"
+                                                                   },
+                                                                   {
+                                                                       "title":  "Leave",
+                                                                       "description":  "[red]Downgrade[/red] a random card.",
+                                                                       "id":  "LEAVE"
+                                                                   },
+                                                                   {
+                                                                       "title":  "Wongo\u0027s Mystery Box",
+                                                                       "description":  "Pay [red]300[/red] [gold]Gold[/gold]. Obtain [blue]3[/blue] random [gold]Relics[/gold] after [blue]5[/blue] combats.",
+                                                                       "id":  "MYSTERY_BOX"
+                                                                   },
+                                                                   {
+                                                                       "title":  "Locked",
+                                                                       "description":  "Requires [blue]300[/blue] [gold]Gold[/gold].",
+                                                                       "id":  "MYSTERY_BOX_LOCKED"
+                                                                   }
+                                                               ]
+                                               },
+                   "EVENT.NONUPEIPE":  {
+                                           "description":  "I haven’t had a visitor in a millennia!\nYou’re looking quite drab, here, let’s find something delightful for you to wear.",
+                                           "name":  "Nonupeipe",
+                                           "act":  "Act 3 - Glory",
+                                           "options":  [
+
+                                                       ]
+                                       },
+                   "EVENT.SYMBIOTE":  {
+                                          "description":  "Along your travels, you stumble upon a dark, amorphous polyp. You can sense that it is very old, and very evil.\n\n[sine]Approach...[/sine]",
+                                          "name":  "Symbiote",
+                                          "act":  "Other / Special",
+                                          "options":  [
+                                                          {
+                                                              "title":  "Approach",
+                                                              "description":  "[gold]Enchant[/gold] an Attack with [purple]Corrupted[/purple].",
+                                                              "id":  "APPROACH"
+                                                          },
+                                                          {
+                                                              "title":  "Locked",
+                                                              "description":  "None of your Attacks can be Enchanted.",
+                                                              "id":  "APPROACH_LOCKED"
+                                                          },
+                                                          {
+                                                              "title":  "Kill with Fire",
+                                                              "description":  "Choose a card to [gold]Transform[/gold].",
+                                                              "id":  "KILL_WITH_FIRE"
+                                                          }
+                                                      ]
+                                      },
+                   "EVENT.FIELD_OF_MAN_SIZED_HOLES":  {
+                                                          "description":  "The sudden sight of a massive field, [jitter]gouged with large outlines of bodies[/jitter], stops you in your tracks.\n\nOne of these outlines matches your own.\n\n[sine][orange]It\u0027s perfect...[/orange][/sine]",
+                                                          "name":  "Field of Man-Sized Holes",
+                                                          "act":  "Act 2 - Hive",
+                                                          "options":  [
+                                                                          {
+                                                                              "title":  "Enter Your Hole",
+                                                                              "description":  "[gold]Enchant[/gold] a card with [purple]Perfect Fit[/purple].",
+                                                                              "id":  "ENTER_YOUR_HOLE"
+                                                                          },
+                                                                          {
+                                                                              "title":  "Resist",
+                                                                              "description":  "Remove [blue]2[/blue] cards from your [gold]Deck[/gold]. Add [red]Normality[/red] to your [gold]Deck[/gold].",
+                                                                              "id":  "RESIST"
+                                                                          }
+                                                                      ]
+                                                      },
+                   "EVENT.DARV":  {
+                                      "description":  "...where did I put... Oh!\nCome to see my collection!? Take anything from that pile over there, put it to good use!",
+                                      "name":  "Darv",
+                                      "act":  "Other / Special",
+                                      "options":  [
+
+                                                  ]
+                                  }
+               },
     "monsters":  {
                      "GLOBE_HEAD":  {
                                         "acts":  [
@@ -13076,6 +14425,18 @@
                 .replace(/\[\/green\]/g, '</span>')
                 .replace(/\[red\]/g, '<span class="text-red">')
                 .replace(/\[\/red\]/g, '</span>')
+                .replace(/\[orange\]/g, '<span style="color: #fb923c; font-weight: 600;">')
+                .replace(/\[\/orange\]/g, '</span>')
+                .replace(/\[aqua\]/g, '<span style="color: #22d3ee; font-weight: 600;">')
+                .replace(/\[\/aqua\]/g, '</span>')
+                .replace(/\[sine\]/g, '<span style="display: inline-block; font-style: italic; color: #a5b4fc;">')
+                .replace(/\[\/sine\]/g, '</span>')
+                .replace(/\[jitter\]/g, '<span style="display: inline-block; font-style: italic; color: #f87171;">')
+                .replace(/\[\/jitter\]/g, '</span>')
+                .replace(/\[rainbow\]/g, '<span style="font-weight: bold; background: linear-gradient(to right, #f87171, #fb923c, #fbbf24, #34d399, #3b82f6, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">')
+                .replace(/\[\/rainbow\]/g, '</span>')
+                .replace(/\[b\]/g, '<strong>')
+                .replace(/\[\/b\]/g, '</strong>')
                 .replace(/\[energy:(\d+)\]/g, (match, p1) => {
                     return `<span class="energy-icon energy-${p1}">${p1}</span>`;
                 })
@@ -13123,11 +14484,18 @@
         let shareChart = null;
         let selectedRunId = null;
         
-        // Compendium Tab state
+        // Cards & Relics (Compendium) Tab state
         let activeCompChar = 'all';
-        let activeCompAct = 'all';
-        let monsterSortCol = 'name';
-        let monsterSortDir = 'asc';
+        let compSortBy = 'name';
+
+        // Enemies Tab state
+        let activeEnemiesAct = 'all';
+        let activeEnemiesType = 'all';
+        let enemiesSortCol = 'name';
+        let enemiesSortDir = 'asc';
+
+        // Events Tab state
+        let activeEventsAct = 'all';
 
         // Card Stats Tab state
         let activeCardStatsChar = 'all';
@@ -13196,10 +14564,21 @@
         const runInput = document.getElementById('run-input');
         const resetBtn = document.getElementById('reset-btn');
         
-        // Compendium DOM
+        // Compendium (Cards & Relics) DOM
         const compSearch = document.getElementById('comp-search');
         const compFilterType = document.getElementById('comp-filter-type');
+        const compSortBySelect = document.getElementById('comp-sort-by');
         const compGrid = document.getElementById('comp-grid');
+
+        // Enemies DOM
+        const enemiesSearch = document.getElementById('enemies-search');
+        const enemiesTableBody = document.getElementById('enemies-table-body');
+        const enemiesCount = document.getElementById('enemies-count');
+
+        // Events DOM
+        const eventsSearch = document.getElementById('events-search');
+        const eventsGrid = document.getElementById('events-grid');
+        const eventsCount = document.getElementById('events-count');
 
         // Colors
         const charColors = {
@@ -13340,9 +14719,15 @@
                 });
             });
 
-            // Compendium event listeners
-            compSearch.addEventListener('input', renderCompendium);
-            compFilterType.addEventListener('change', renderCompendium);
+            // Cards & Relics (Compendium) event listeners
+            if (compSearch) compSearch.addEventListener('input', renderCompendium);
+            if (compFilterType) compFilterType.addEventListener('change', renderCompendium);
+            if (compSortBySelect) {
+                compSortBySelect.addEventListener('change', () => {
+                    compSortBy = compSortBySelect.value;
+                    renderCompendium();
+                });
+            }
             document.querySelectorAll('#comp-char-pills .char-pill').forEach(pill => {
                 pill.addEventListener('click', () => {
                     document.querySelectorAll('#comp-char-pills .char-pill').forEach(p => p.classList.remove('active'));
@@ -13352,12 +14737,33 @@
                 });
             });
 
-            document.querySelectorAll('#comp-act-pills .char-pill').forEach(pill => {
+            // Enemies tab event listeners
+            if (enemiesSearch) enemiesSearch.addEventListener('input', renderEnemies);
+            document.querySelectorAll('#enemies-act-pills .char-pill').forEach(pill => {
                 pill.addEventListener('click', () => {
-                    document.querySelectorAll('#comp-act-pills .char-pill').forEach(p => p.classList.remove('active'));
+                    document.querySelectorAll('#enemies-act-pills .char-pill').forEach(p => p.classList.remove('active'));
                     pill.classList.add('active');
-                    activeCompAct = pill.dataset.act;
-                    renderCompendium();
+                    activeEnemiesAct = pill.dataset.act;
+                    renderEnemies();
+                });
+            });
+            document.querySelectorAll('#enemies-type-pills .char-pill').forEach(pill => {
+                pill.addEventListener('click', () => {
+                    document.querySelectorAll('#enemies-type-pills .char-pill').forEach(p => p.classList.remove('active'));
+                    pill.classList.add('active');
+                    activeEnemiesType = pill.dataset.type;
+                    renderEnemies();
+                });
+            });
+
+            // Events tab event listeners
+            if (eventsSearch) eventsSearch.addEventListener('input', renderEvents);
+            document.querySelectorAll('#events-act-pills .char-pill').forEach(pill => {
+                pill.addEventListener('click', () => {
+                    document.querySelectorAll('#events-act-pills .char-pill').forEach(p => p.classList.remove('active'));
+                    pill.classList.add('active');
+                    activeEventsAct = pill.dataset.act;
+                    renderEvents();
                 });
             });
             
@@ -14541,18 +15947,18 @@
             updateTableHeaders('relic-header-row-tr', relicSortCol, relicSortDir);
         }
 
-        function sortMonsters(col) {
-            if (monsterSortCol === col) {
-                monsterSortDir = monsterSortDir === 'asc' ? 'desc' : 'asc';
+        function sortEnemies(col) {
+            if (enemiesSortCol === col) {
+                enemiesSortDir = enemiesSortDir === 'asc' ? 'desc' : 'asc';
             } else {
-                monsterSortCol = col;
+                enemiesSortCol = col;
                 if (col === 'name' || col === 'acts') {
-                    monsterSortDir = 'asc';
+                    enemiesSortDir = 'asc';
                 } else {
-                    monsterSortDir = 'desc';
+                    enemiesSortDir = 'desc';
                 }
             }
-            renderCompendium();
+            renderEnemies();
         }
 
         // Tab Switching Logic
@@ -14563,7 +15969,7 @@
             
             const mainGrid = document.getElementById('main-grid');
             
-            const tabViews = ['view-runs', 'view-multiplayer', 'view-compendium', 'view-card-stats', 'view-relic-stats'];
+            const tabViews = ['view-runs', 'view-multiplayer', 'view-compendium', 'view-enemies', 'view-events', 'view-card-stats', 'view-relic-stats'];
             tabViews.forEach(viewId => {
                 const el = document.getElementById(viewId);
                 if (el) el.style.display = 'none';
@@ -14597,6 +16003,14 @@
                 if (mainGrid) mainGrid.style.display = 'none';
                 document.getElementById('view-compendium').style.display = 'block';
                 renderCompendium();
+            } else if (tab === 'enemies') {
+                if (mainGrid) mainGrid.style.display = 'none';
+                document.getElementById('view-enemies').style.display = 'block';
+                renderEnemies();
+            } else if (tab === 'events') {
+                if (mainGrid) mainGrid.style.display = 'none';
+                document.getElementById('view-events').style.display = 'block';
+                renderEvents();
             } else if (tab === 'card-stats') {
                 if (mainGrid) mainGrid.style.display = 'none';
                 document.getElementById('view-card-stats').style.display = 'block';
@@ -14929,33 +16343,18 @@
         }
 
         // Render Compendium View
+        // Render Compendium View (Cards & Relics Only)
         function renderCompendium() {
             const searchVal = compSearch.value.toLowerCase();
             const typeVal = compFilterType.value;
+            const sortByVal = compSortBySelect ? compSortBySelect.value : 'name';
             
-            // Toggle pills and layouts based on category select
             const charPillsContainer = document.getElementById('comp-char-pills');
-            const actPillsContainer = document.getElementById('comp-act-pills');
-            const monsterTableContainer = document.getElementById('comp-monster-table-container');
-            const monsterTableBody = document.getElementById('comp-monster-table-body');
-            const monsterCountEl = document.getElementById('comp-monster-count');
-            
-            if (typeVal === 'monster') {
-                if (charPillsContainer) charPillsContainer.style.display = 'none';
-                if (actPillsContainer) actPillsContainer.style.display = 'flex';
-                compGrid.style.display = 'none';
-                if (monsterTableContainer) monsterTableContainer.style.display = 'block';
-                compSearch.placeholder = 'Search enemies by name, behavior, or moves...';
-            } else {
-                if (charPillsContainer) charPillsContainer.style.display = 'flex';
-                if (actPillsContainer) actPillsContainer.style.display = 'none';
-                compGrid.style.display = 'grid';
-                if (monsterTableContainer) monsterTableContainer.style.display = 'none';
-                compSearch.placeholder = 'Search cards or relics by name or description...';
-            }
+            if (charPillsContainer) charPillsContainer.style.display = 'flex';
+            compGrid.style.display = 'grid';
+            compSearch.placeholder = 'Search cards or relics by name or description...';
 
             compGrid.innerHTML = '';
-            if (monsterTableBody) monsterTableBody.innerHTML = '';
             
             let items = [];
             
@@ -14971,44 +16370,20 @@
                         items.push({ id, ...relic, category: 'relic' });
                     });
                 }
-                if (typeVal === 'all' || typeVal === 'monster') {
-                    Object.entries(sts2Database.monsters).forEach(([id, monster]) => {
-                        items.push({ id, ...monster, category: 'monster' });
-                    });
-                }
             }
             
             // Filter items
             let filteredItems = items.filter(item => {
-                if (item.category === 'monster') {
-                    // Mobs & Bosses level filter
-                    if (typeVal === 'monster' && activeCompAct !== 'all') {
-                        const actsList = item.acts || [];
-                        if (activeCompAct === 'other') {
-                            // Mobs that don't belong to Act 1, 2, 3 or Underdocks
-                            const isStandardAct = actsList.some(a => a.includes('Act 1') || a.includes('Act 2') || a.includes('Act 3') || a.includes('Underdocks'));
-                            if (isStandardAct && actsList.length > 0) return false;
+                // Class character filter for Cards & Relics
+                if (activeCompChar !== 'all') {
+                    if (item.category === 'card') {
+                        if (!item.color) return activeCompChar === 'shared';
+                        if (item.color.toLowerCase() !== activeCompChar) return false;
+                    } else if (item.category === 'relic') {
+                        if (activeCompChar === 'shared') {
+                            return true;
                         } else {
-                            // Normal acts search
-                            const hasAct = actsList.some(a => a.toLowerCase().includes(activeCompAct.toLowerCase()));
-                            if (!hasAct) return false;
-                        }
-                    } else if (activeCompChar !== 'all') {
-                        // Monsters are not class specific, hide when a class filter is active
-                        return false;
-                    }
-                } else {
-                    // Class character filter for Cards & Relics
-                    if (activeCompChar !== 'all') {
-                        if (item.category === 'card') {
-                            if (!item.color) return activeCompChar === 'shared';
-                            if (item.color.toLowerCase() !== activeCompChar) return false;
-                        } else if (item.category === 'relic') {
-                            if (activeCompChar === 'shared') {
-                                return true;
-                            } else {
-                                return false;
-                            }
+                            return false;
                         }
                     }
                 }
@@ -15017,210 +16392,361 @@
                 if (searchVal) {
                     const matchName = item.name.toLowerCase().includes(searchVal);
                     const matchDesc = item.desc && item.desc.toLowerCase().includes(searchVal);
-                    const matchPattern = item.pattern && item.pattern.toLowerCase().includes(searchVal);
-                    const matchMoves = item.moves && item.moves.some(m => m.name.toLowerCase().includes(searchVal) || (m.desc && m.desc.toLowerCase().includes(searchVal)));
-                    if (!matchName && !matchDesc && !matchPattern && !matchMoves) return false;
+                    if (!matchName && !matchDesc) return false;
                 }
                 
                 return true;
             });
 
-            if (typeVal === 'monster') {
-                // Update table header indicators
-                updateTableHeaders('monster-header-row-tr', monsterSortCol, monsterSortDir);
+            // Sorting logic
+            const RARITY_ORDER = {
+                'basic': 1,
+                'starter': 1,
+                'common': 2,
+                'uncommon': 3,
+                'rare': 4,
+                'shop': 5,
+                'ancient': 6,
+                'event': 7,
+                'special': 8,
+                'curse': 9,
+                'status': 10,
+                'token': 11,
+                'quest': 12,
+                'none': 99,
+                'unknown': 99
+            };
 
-                // Sort monsters
-                filteredItems.sort((a, b) => {
-                    let valA = a[monsterSortCol];
-                    let valB = b[monsterSortCol];
-
-                    if (monsterSortCol === 'name') {
-                        valA = (valA || '').toString().toLowerCase();
-                        valB = (valB || '').toString().toLowerCase();
-                        return monsterSortDir === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
-                    } else if (monsterSortCol === 'type') {
-                        const TYPE_ORDER = { 'normal': 0, 'elite': 1, 'boss': 2 };
-                        valA = TYPE_ORDER[(valA || '').toLowerCase()] ?? 99;
-                        valB = TYPE_ORDER[(valB || '').toLowerCase()] ?? 99;
-                    } else if (monsterSortCol === 'hp') {
-                        valA = Number(a.minHp) || 0;
-                        valB = Number(b.minHp) || 0;
-                    } else if (monsterSortCol === 'acts') {
-                        valA = ((a.acts && a.acts[0]) || '').toString().toLowerCase();
-                        valB = ((b.acts && b.acts[0]) || '').toString().toLowerCase();
-                        return monsterSortDir === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+            filteredItems.sort((a, b) => {
+                if (sortByVal === 'rarity') {
+                    const rarityA = RARITY_ORDER[(a.rarity || '').replace(' Relic', '').toLowerCase()] || 99;
+                    const rarityB = RARITY_ORDER[(b.rarity || '').replace(' Relic', '').toLowerCase()] || 99;
+                    if (rarityA !== rarityB) {
+                        return rarityA - rarityB;
                     }
-
-                    if (valA < valB) return monsterSortDir === 'asc' ? -1 : 1;
-                    if (valA > valB) return monsterSortDir === 'asc' ? 1 : -1;
-                    return 0;
-                });
-
-                if (monsterCountEl) {
-                    monsterCountEl.textContent = `Showing ${filteredItems.length} enemies`;
                 }
+                // Tie breaker or sort by name
+                return a.name.localeCompare(b.name);
+            });
 
-                if (filteredItems.length === 0) {
-                    if (monsterTableBody) {
-                        monsterTableBody.innerHTML = '<tr><td colspan="5" class="no-data" style="text-align:center;">No enemies match active filters.</td></tr>';
-                    }
-                    return;
+            if (filteredItems.length === 0) {
+                compGrid.innerHTML = '<div class="no-data" style="grid-column: 1 / -1;">No items match active filters.</div>';
+                return;
+            }
+
+            filteredItems.forEach(item => {
+                const el = document.createElement('div');
+                el.dataset.id = item.id;
+                
+                // Assign rarity/type CSS class
+                let rarityClass = '';
+                if (item.category === 'card') {
+                    rarityClass = 'rarity-' + (item.rarity || 'common').toLowerCase();
+                } else if (item.category === 'relic') {
+                    const relRarity = (item.rarity || '').replace(/ Relic/i, '').toLowerCase();
+                    rarityClass = 'rarity-' + (relRarity || 'common');
                 }
-
-                filteredItems.forEach(item => {
-                    const tr = document.createElement('tr');
-                    tr.className = 'comp-monster-row';
-                    tr.style.cursor = 'help';
-                    
-                    const imgUrl = `https://spire-codex.com/static/images/monsters/${item.img.toLowerCase()}`;
-                    const hpText = item.minHp === item.maxHp ? `${item.minHp}` : (item.maxHp ? `${item.minHp}-${item.maxHp}` : `${item.minHp}`);
-                    
-                    // Format acts list
-                    let actsHtml = '';
-                    if (item.acts && item.acts.length > 0) {
-                        actsHtml = item.acts.map(act => `<span class="comp-act-badge">${act.split(' - ')[0]}</span>`).join('');
-                    } else {
-                        actsHtml = '<span class="comp-act-badge" style="background: rgba(148, 163, 184, 0.1); color: #94a3b8; border-color: rgba(148, 163, 184, 0.2);">Special</span>';
-                    }
-
-                    // Format moves list
-                    let movesHtml = '<div class="comp-moves-container">';
-                    if (item.pattern) {
-                        movesHtml += `<div style="font-style: italic; color: #cbd5e1; font-size: 11.5px; margin-bottom: 4px;">Behavior: ${item.pattern}</div>`;
-                    }
-                    if (item.moves && item.moves.length > 0) {
-                        item.moves.forEach(m => {
-                            let intentIcon = 'â“';
-                            let intentClass = 'comp-intent-unknown';
-                            
-                            const intentLower = (m.intent || '').toLowerCase();
-                            if (intentLower === 'attack') {
-                                intentIcon = 'âš”ï¸';
-                                intentClass = 'comp-intent-attack';
-                            } else if (intentLower === 'defend') {
-                                intentIcon = 'ðŸ›¡ï¸';
-                                intentClass = 'comp-intent-defend';
-                            } else if (intentLower === 'buff') {
-                                intentIcon = 'ðŸ§ª';
-                                intentClass = 'comp-intent-buff';
-                            } else if (intentLower === 'debuff') {
-                                intentIcon = 'â˜ ï¸';
-                                intentClass = 'comp-intent-debuff';
-                            }
-
-                            const dmgText = m.damage ? ` (deals ${m.damage})` : '';
-                            const descText = m.desc ? `: ${m.desc}` : '';
-                            movesHtml += `
-                                <div class="comp-move-item" style="margin-bottom: 2px;">
-                                    <span class="comp-intent-badge ${intentClass}">${intentIcon} ${m.intent || 'Unknown'}</span>
-                                    <span class="comp-move-name" style="margin-left: 8px;">${m.name}</span>
-                                    <span class="comp-move-details" style="margin-left: auto;">${dmgText}${descText}</span>
-                                </div>
-                            `;
-                        });
-                    } else {
-                        movesHtml += '<div style="font-size: 11.5px; color: var(--text-muted);">No recorded moves.</div>';
-                    }
-                    movesHtml += '</div>';
-
-                    tr.innerHTML = `
-                        <td style="font-weight: 600;">
-                            <div style="display: flex; align-items: center; gap: 12px;">
-                                <img src="${imgUrl}" alt="${item.name}" style="width: 32px; height: 32px; object-fit: cover; border-radius: 4px; border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(0, 0, 0, 0.2);" onerror="this.style.display='none';">
-                                <span>${item.name}</span>
-                            </div>
-                        </td>
-                        <td><span class="monster-type-badge type-${item.type.toLowerCase()}" style="margin: 0;">${item.type}</span></td>
-                        <td style="text-align: center; font-weight: 700; color: #ef4444;">${hpText}</td>
-                        <td>${actsHtml}</td>
-                        <td>${movesHtml}</td>
+                el.className = 'compendium-card ' + rarityClass;
+                
+                if (item.category === 'card') {
+                    const cleanColor = item.color ? item.color.charAt(0).toUpperCase() + item.color.slice(1).toLowerCase() : 'Neutral';
+                    el.innerHTML = `
+                        <div class="comp-card-header">
+                            <span class="comp-card-name">${item.name}</span>
+                            <span class="comp-card-cost">${item.cost !== "" ? item.cost : "No Cost"}</span>
+                        </div>
+                        <div class="comp-card-meta">
+                            <span>${item.type}</span>
+                            <span class="rarity-${item.rarity.toLowerCase()}">${item.rarity}</span>
+                        </div>
+                        <div class="comp-card-desc">${formatDescription(item.desc)}</div>
+                        <div style="font-size: 9px; color: var(--text-muted); text-align: right; margin-top: auto;">${cleanColor}</div>
                     `;
-
-                    // Attach hover tooltips to the row
-                    tr.addEventListener('mouseenter', (e) => showTooltip(e, item.id));
-                    tr.addEventListener('mousemove', moveTooltip);
-                    tr.addEventListener('mouseleave', hideTooltip);
-
-                    monsterTableBody.appendChild(tr);
-                });
-
-            } else {
-                if (filteredItems.length === 0) {
-                    compGrid.innerHTML = '<div class="no-data" style="grid-column: 1 / -1;">No items match active filters.</div>';
-                    return;
+                } else if (item.category === 'relic') {
+                    const imgUrl = `https://spire-codex.com/static/images/relics/${item.img.toLowerCase()}`;
+                    el.innerHTML = `
+                        <div class="comp-relic-title-row">
+                            <img class="comp-relic-img-preview" src="${imgUrl}" alt="${item.name}" onerror="this.style.display='none';">
+                            <span class="comp-card-name">${item.name}</span>
+                        </div>
+                        <div class="comp-card-meta">
+                            <span>Relic</span>
+                            <span class="rarity-${item.rarity.replace(' Relic', '').toLowerCase()}">${item.rarity}</span>
+                        </div>
+                        <div class="comp-card-desc">${formatDescription(item.desc)}</div>
+                    `;
                 }
+                
+                // Attach hover tooltips
+                el.addEventListener('mouseenter', (e) => showTooltip(e, item.id));
+                el.addEventListener('mousemove', moveTooltip);
+                el.addEventListener('mouseleave', hideTooltip);
+                
+                compGrid.appendChild(el);
+            });
+        }
 
-                filteredItems.forEach(item => {
-                    const el = document.createElement('div');
-                    el.dataset.id = item.id;
-                    
-                    // Assign rarity/type CSS class
-                    let rarityClass = '';
-                    if (item.category === 'card') {
-                        rarityClass = 'rarity-' + (item.rarity || 'common').toLowerCase();
-                    } else if (item.category === 'relic') {
-                        const relRarity = (item.rarity || '').replace(/ Relic/i, '').toLowerCase();
-                        rarityClass = 'rarity-' + (relRarity || 'common');
-                    } else if (item.category === 'monster') {
-                        rarityClass = 'monster-' + (item.type || 'normal').toLowerCase();
-                    }
-                    el.className = 'compendium-card ' + rarityClass;
-                    
-                    // Relic badge preview or Card header
-                    if (item.category === 'card') {
-                        const cleanColor = item.color ? item.color.charAt(0).toUpperCase() + item.color.slice(1).toLowerCase() : 'Neutral';
-                        el.innerHTML = `
-                            <div class="comp-card-header">
-                                <span class="comp-card-name">${item.name}</span>
-                                <span class="comp-card-cost">${item.cost !== "" ? item.cost : "No Cost"}</span>
-                            </div>
-                            <div class="comp-card-meta">
-                                <span>${item.type}</span>
-                                <span class="rarity-${item.rarity.toLowerCase()}">${item.rarity}</span>
-                            </div>
-                            <div class="comp-card-desc">${formatDescription(item.desc)}</div>
-                            <div style="font-size: 9px; color: var(--text-muted); text-align: right; margin-top: auto;">${cleanColor}</div>
-                        `;
-                    } else if (item.category === 'relic') {
-                        const imgUrl = `https://spire-codex.com/static/images/relics/${item.img.toLowerCase()}`;
-                        el.innerHTML = `
-                            <div class="comp-relic-title-row">
-                                <img class="comp-relic-img-preview" src="${imgUrl}" alt="${item.name}" onerror="this.style.display='none';">
-                                <span class="comp-card-name">${item.name}</span>
-                            </div>
-                            <div class="comp-card-meta">
-                                <span>Relic</span>
-                                <span class="rarity-${item.rarity.replace(' Relic', '').toLowerCase()}">${item.rarity}</span>
-                            </div>
-                            <div class="comp-card-desc">${formatDescription(item.desc)}</div>
-                        `;
-                    } else if (item.category === 'monster') {
-                        const imgUrl = `https://spire-codex.com/static/images/monsters/${item.img.toLowerCase()}`;
-                        const hpText = item.minHp === item.maxHp ? `HP: ${item.minHp}` : `HP: ${item.minHp}-${item.maxHp}`;
-                        el.innerHTML = `
-                            <div class="comp-relic-title-row">
-                                <img class="comp-relic-img-preview" src="${imgUrl}" alt="${item.name}" onerror="this.style.display='none';">
-                                <span class="comp-card-name">${item.name}</span>
-                            </div>
-                            <div class="comp-card-meta">
-                                <span class="monster-type-badge type-${item.type.toLowerCase()}" style="margin-top:0;">${item.type}</span>
-                                <span style="font-weight:600; font-size:11.5px; color:var(--text-muted);">${hpText}</span>
-                            </div>
-                            <div class="comp-card-desc">
-                                ${item.pattern ? `<div style="font-style: italic; color: #cbd5e1; margin-bottom: 4px;">Pattern: ${item.pattern}</div>` : ''}
-                                <div style="font-size: 11px; color: var(--text-muted); line-height: 1.35;">Moves: ${item.moves.map(m => m.name).join(', ')}</div>
-                            </div>
-                        `;
-                    }
-                    
-                    // Attach hover tooltips
-                    el.addEventListener('mouseenter', (e) => showTooltip(e, item.id));
-                    el.addEventListener('mousemove', moveTooltip);
-                    el.addEventListener('mouseleave', hideTooltip);
-                    
-                    compGrid.appendChild(el);
+        // Render Enemies View
+        function renderEnemies() {
+            const searchVal = enemiesSearch ? enemiesSearch.value.toLowerCase() : '';
+            
+            if (!enemiesTableBody) return;
+            enemiesTableBody.innerHTML = '';
+            
+            let monsters = [];
+            if (sts2Database && sts2Database.monsters) {
+                Object.entries(sts2Database.monsters).forEach(([id, monster]) => {
+                    monsters.push({ id, ...monster });
                 });
             }
+            
+            // Filter enemies
+            let filteredMonsters = monsters.filter(item => {
+                // Act filter
+                if (activeEnemiesAct !== 'all') {
+                    const actsList = item.acts || [];
+                    if (activeEnemiesAct === 'other') {
+                        const isStandardAct = actsList.some(a => a.includes('Act 1') || a.includes('Act 2') || a.includes('Act 3') || a.includes('Underdocks'));
+                        if (isStandardAct && actsList.length > 0) return false;
+                    } else {
+                        const hasAct = actsList.some(a => a.toLowerCase().includes(activeEnemiesAct.toLowerCase()));
+                        if (!hasAct) return false;
+                    }
+                }
+                
+                // Type filter
+                if (activeEnemiesType !== 'all') {
+                    if ((item.type || '').toLowerCase() !== activeEnemiesType.toLowerCase()) return false;
+                }
+                
+                // Search term
+                if (searchVal) {
+                    const matchName = item.name.toLowerCase().includes(searchVal);
+                    const matchPattern = item.pattern && item.pattern.toLowerCase().includes(searchVal);
+                    const matchMoves = item.moves && item.moves.some(m => m.name.toLowerCase().includes(searchVal) || (m.desc && m.desc.toLowerCase().includes(searchVal)));
+                    if (!matchName && !matchPattern && !matchMoves) return false;
+                }
+                
+                return true;
+            });
+
+            // Update table headers
+            updateTableHeaders('enemies-header-row-tr', enemiesSortCol, enemiesSortDir);
+
+            // Sort enemies
+            filteredMonsters.sort((a, b) => {
+                let valA = a[enemiesSortCol];
+                let valB = b[enemiesSortCol];
+
+                if (enemiesSortCol === 'name') {
+                    valA = (valA || '').toString().toLowerCase();
+                    valB = (valB || '').toString().toLowerCase();
+                    return enemiesSortDir === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+                } else if (enemiesSortCol === 'type') {
+                    const TYPE_ORDER = { 'normal': 0, 'elite': 1, 'boss': 2 };
+                    valA = TYPE_ORDER[(a.type || '').toLowerCase()] ?? 99;
+                    valB = TYPE_ORDER[(b.type || '').toLowerCase()] ?? 99;
+                } else if (enemiesSortCol === 'hp') {
+                    valA = Number(a.minHp) || 0;
+                    valB = Number(b.minHp) || 0;
+                } else if (enemiesSortCol === 'acts') {
+                    valA = ((a.acts && a.acts[0]) || '').toString().toLowerCase();
+                    valB = ((b.acts && b.acts[0]) || '').toString().toLowerCase();
+                    return enemiesSortDir === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+                }
+
+                if (valA < valB) return enemiesSortDir === 'asc' ? -1 : 1;
+                if (valA > valB) return enemiesSortDir === 'asc' ? 1 : -1;
+                return 0;
+            });
+
+            if (enemiesCount) {
+                enemiesCount.textContent = `Showing ${filteredMonsters.length} enemies`;
+            }
+
+            if (filteredMonsters.length === 0) {
+                enemiesTableBody.innerHTML = '<tr><td colspan="5" class="no-data" style="text-align:center;">No enemies match active filters.</td></tr>';
+                return;
+            }
+
+            filteredMonsters.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.className = 'comp-monster-row';
+                tr.style.cursor = 'help';
+                
+                const imgUrl = `https://spire-codex.com/static/images/monsters/${item.img.toLowerCase()}`;
+                const hpText = item.minHp === item.maxHp ? `${item.minHp}` : (item.maxHp ? `${item.minHp}-${item.maxHp}` : `${item.minHp}`);
+                
+                // Format acts list
+                let actsHtml = '';
+                if (item.acts && item.acts.length > 0) {
+                    actsHtml = item.acts.map(act => `<span class="comp-act-badge">${act.split(' - ')[0]}</span>`).join('');
+                } else {
+                    actsHtml = '<span class="comp-act-badge" style="background: rgba(148, 163, 184, 0.1); color: #94a3b8; border-color: rgba(148, 163, 184, 0.2);">Special</span>';
+                }
+
+                // Format moves list
+                let movesHtml = '<div class="comp-moves-container">';
+                if (item.pattern) {
+                    movesHtml += `<div style="font-style: italic; color: #cbd5e1; font-size: 11.5px; margin-bottom: 4px;">Behavior: ${item.pattern}</div>`;
+                }
+                if (item.moves && item.moves.length > 0) {
+                    item.moves.forEach(m => {
+                        let intentIcon = 'â“';
+                        let intentClass = 'comp-intent-unknown';
+                        
+                        const intentLower = (m.intent || '').toLowerCase();
+                        if (intentLower === 'attack') {
+                            intentIcon = 'âš”ï¸';
+                            intentClass = 'comp-intent-attack';
+                        } else if (intentLower === 'defend') {
+                            intentIcon = 'ðŸ›¡ï¸';
+                            intentClass = 'comp-intent-defend';
+                        } else if (intentLower === 'buff') {
+                            intentIcon = 'ðŸ§ª';
+                            intentClass = 'comp-intent-buff';
+                        } else if (intentLower === 'debuff') {
+                            intentIcon = 'â˜ ï¸';
+                            intentClass = 'comp-intent-debuff';
+                        }
+
+                        const dmgText = m.damage ? ` (deals ${m.damage})` : '';
+                        const descText = m.desc ? `: ${m.desc}` : '';
+                        movesHtml += `
+                            <div class="comp-move-item" style="margin-bottom: 2px;">
+                                <span class="comp-intent-badge ${intentClass}">${intentIcon} ${m.intent || 'Unknown'}</span>
+                                <span class="comp-move-name" style="margin-left: 8px;">${m.name}</span>
+                                <span class="comp-move-details" style="margin-left: auto;">${dmgText}${descText}</span>
+                            </div>
+                        `;
+                    });
+                } else {
+                    movesHtml += '<div style="font-size: 11.5px; color: var(--text-muted);">No recorded moves.</div>';
+                }
+                movesHtml += '</div>';
+
+                tr.innerHTML = `
+                    <td style="font-weight: 600;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <img src="${imgUrl}" alt="${item.name}" style="width: 32px; height: 32px; object-fit: cover; border-radius: 4px; border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(0, 0, 0, 0.2);" onerror="this.style.display='none';">
+                            <span>${item.name}</span>
+                        </div>
+                    </td>
+                    <td><span class="monster-type-badge type-${item.type.toLowerCase()}" style="margin: 0;">${item.type}</span></td>
+                    <td style="text-align: center; font-weight: 700; color: #ef4444;">${hpText}</td>
+                    <td>${actsHtml}</td>
+                    <td>${movesHtml}</td>
+                `;
+
+                // Attach hover tooltips to the row
+                tr.addEventListener('mouseenter', (e) => showTooltip(e, item.id));
+                tr.addEventListener('mousemove', moveTooltip);
+                tr.addEventListener('mouseleave', hideTooltip);
+
+                enemiesTableBody.appendChild(tr);
+            });
+        }
+
+        // Render Events View
+        function renderEvents() {
+            const searchVal = eventsSearch ? eventsSearch.value.toLowerCase() : '';
+            
+            if (!eventsGrid) return;
+            eventsGrid.innerHTML = '';
+            
+            let events = [];
+            if (sts2Database && sts2Database.events) {
+                Object.entries(sts2Database.events).forEach(([name, event]) => {
+                    events.push({ name, ...event });
+                });
+            }
+            
+            // Filter events
+            let filteredEvents = events.filter(item => {
+                // Act filter
+                if (activeEventsAct !== 'all') {
+                    if (activeEventsAct === 'other') {
+                        const isStandardAct = item.act && (item.act.includes('Act 1') || item.act.includes('Act 2') || item.act.includes('Act 3') || item.act.includes('Underdocks'));
+                        if (isStandardAct) return false;
+                    } else {
+                        if (!item.act || !item.act.toLowerCase().includes(activeEventsAct.toLowerCase())) return false;
+                    }
+                }
+                
+                // Search term
+                if (searchVal) {
+                    const matchName = item.name.toLowerCase().includes(searchVal);
+                    const matchDesc = item.description && item.description.toLowerCase().includes(searchVal);
+                    const matchOptions = item.options && item.options.some(o => 
+                        o.title.toLowerCase().includes(searchVal) || 
+                        (o.description && o.description.toLowerCase().includes(searchVal)) ||
+                        (o.id && o.id.toLowerCase().includes(searchVal))
+                    );
+                    if (!matchName && !matchDesc && !matchOptions) return false;
+                }
+                
+                return true;
+            });
+
+            // Sort alphabetically by name
+            filteredEvents.sort((a, b) => a.name.localeCompare(b.name));
+
+            if (eventsCount) {
+                eventsCount.textContent = `Showing ${filteredEvents.length} events`;
+            }
+
+            if (filteredEvents.length === 0) {
+                eventsGrid.innerHTML = '<div class="no-data" style="grid-column: 1 / -1;">No events match active filters.</div>';
+                return;
+            }
+
+            filteredEvents.forEach(item => {
+                const el = document.createElement('div');
+                el.className = 'event-card';
+                
+                // Format options list
+                let optionsHtml = '';
+                if (item.options && item.options.length > 0) {
+                    optionsHtml = `
+                        <div class="event-options-title">Choices & Outcomes</div>
+                        <div class="event-options-list">
+                    `;
+                    item.options.forEach(opt => {
+                        const title = opt.title || opt.id || 'Choice';
+                        const desc = opt.description || '';
+                        optionsHtml += `
+                            <div class="event-option-row">
+                                <div class="event-option-header">
+                                    <span class="event-option-pill">${opt.id || 'CHOOSE'}</span>
+                                    <span class="event-option-text">${title}</span>
+                                </div>
+                                <div class="event-option-outcome">${formatDescription(desc)}</div>
+                            </div>
+                        `;
+                    });
+                    optionsHtml += `</div>`;
+                } else {
+                    optionsHtml = '<div style="font-size: 11.5px; color: var(--text-muted); font-style: italic;">No interactive choices.</div>';
+                }
+
+                // Format acts list
+                let actHtml = '';
+                if (item.act) {
+                    actHtml = `<span class="comp-act-badge" style="margin: 0; font-size: 10px; padding: 2px 8px;">${item.act.split(' - ')[0]}</span>`;
+                } else {
+                    actHtml = '<span class="comp-act-badge" style="margin: 0; font-size: 10px; padding: 2px 8px; background: rgba(148, 163, 184, 0.1); color: #94a3b8; border-color: rgba(148, 163, 184, 0.2);">Special</span>';
+                }
+
+                el.innerHTML = `
+                    <div class="event-header">
+                        <span class="event-name">${item.name}</span>
+                        ${actHtml}
+                    </div>
+                    <div class="event-desc">${formatDescription(item.description)}</div>
+                    ${optionsHtml}
+                `;
+                eventsGrid.appendChild(el);
+            });
         }
 
         // Render Card Statistics View

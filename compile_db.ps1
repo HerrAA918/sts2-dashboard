@@ -126,29 +126,94 @@ foreach ($monster in $monstersData) {
             # Remove spaces, dashes and numbers from move name to compare against key values
             $cleanMoveName = ($move.name -replace '\s+', '' -replace '\d+', '' -replace '-', '').ToLower()
             
+            $matchedDmg = $null
             if ($monster.damage_values) {
-                foreach ($dmgProp in $monster.damage_values.psobject.properties) {
-                    $dmgKey = $dmgProp.Name
-                    $cleanDmgKey = ($dmgKey -replace '\s+', '' -replace '\d+', '' -replace '-', '').ToLower()
-                    if ($dmgKey.ToLower() -eq $move.name.ToLower() -or $cleanDmgKey -eq $cleanMoveName -or $move.name.ToLower().Contains($dmgKey.ToLower())) {
-                        $dmgVal = $monster.damage_values.$dmgKey
-                        if ($dmgVal.normal -ne $null) {
-                            $damage = "$($dmgVal.normal)"
-                            if ($dmgVal.ascension -ne $null) {
-                                $damage = "$($dmgVal.normal) (A: $($dmgVal.ascension))"
-                            }
-                        }
-                        $intent = "Attack"
+                # 1. Custom explicit monster mappings
+                if ($monster.name -eq "Turret Operator" -and $move.name -match "Unload") {
+                    $matchedDmg = $monster.damage_values.Fire
+                } elseif ($monster.name -eq "Thieving Hopper" -and ($move.name -eq "Thievery" -or $move.name -eq "Nab")) {
+                    $matchedDmg = $monster.damage_values.Theft
+                } elseif ($monster.name -eq "Bowlbug (Silk)" -and $move.name -eq "Trash") {
+                    $matchedDmg = $monster.damage_values.Thrash
+                } elseif ($monster.name -eq "Slithering Strangler" -and $move.name -eq "Twack") {
+                    $matchedDmg = $monster.damage_values.Thwack
+                } elseif (($monster.name -eq "Leaf Slime (S)" -or $monster.name -eq "Twig Slime (S)") -and $move.name -eq "Butt") {
+                    $matchedDmg = $monster.damage_values.Tackle
+                } elseif ($monster.name -eq "Magi Knight" -and $move.name -eq "Ram") {
+                    $matchedDmg = $monster.damage_values.Spear
+                } elseif ($monster.name -eq "Torch Head Amalgam") {
+                    if ($move.name -eq "Tackle 1" -or $move.name -eq "Tackle 2") {
+                        $matchedDmg = $monster.damage_values.WeakTackle
+                    } elseif ($move.name -eq "Tackle 3" -or $move.name -eq "Tackle 4") {
+                        $matchedDmg = $monster.damage_values.Tackle
                     }
+                }
+                
+                # 2. General fuzzy mappings
+                if ($matchedDmg -eq $null) {
+                    foreach ($dmgProp in $monster.damage_values.psobject.properties) {
+                        $dmgKey = $dmgProp.Name
+                        $cleanDmgKey = ($dmgKey -replace '\s+', '' -replace '\d+', '' -replace '-', '' -replace '!', '').ToLower()
+                        $cleanDmgKey = $cleanDmgKey -replace '^the', '' -replace 'move$', ''
+                        
+                        $cleanMove = $cleanMoveName -replace '^the', ''
+                        
+                        $dmgSingular = $cleanDmgKey -replace 's$', ''
+                        $moveSingular = $cleanMove -replace 's$', ''
+                        
+                        if ($cleanDmgKey -eq "bees" -and $cleanMove -match "be+s") {
+                            $matchedDmg = $monster.damage_values.$dmgKey
+                            break
+                        }
+                        
+                        if ($dmgKey.ToLower() -eq $move.name.ToLower() -or 
+                            $cleanDmgKey -eq $cleanMove -or 
+                            $dmgSingular -eq $moveSingular -or
+                            $cleanDmgKey -eq $moveSingular -or
+                            $dmgSingular -eq $cleanMove -or
+                            $move.name.ToLower().Contains($dmgKey.ToLower()) -or
+                            $dmgKey.ToLower().Contains($move.name.ToLower()) -or
+                            $cleanDmgKey.Contains($cleanMove) -or
+                            $cleanMove.Contains($cleanDmgKey)) {
+                            $matchedDmg = $monster.damage_values.$dmgKey
+                            break
+                        }
+                    }
+                }
+                
+                if ($matchedDmg -ne $null) {
+                    if ($matchedDmg.normal -ne $null) {
+                        $damage = "$($matchedDmg.normal)"
+                        if ($matchedDmg.ascension -ne $null) {
+                            $damage = "$($matchedDmg.normal) (A: $($matchedDmg.ascension))"
+                        }
+                    }
+                    $intent = "Attack"
                 }
             }
             
-            if ($monster.block_values) {
+            if ($intent -eq "Unknown" -and $monster.block_values) {
                 foreach ($blkProp in $monster.block_values.psobject.properties) {
                     $blkKey = $blkProp.Name
-                    $cleanBlkKey = ($blkKey -replace '\s+', '' -replace '\d+', '' -replace '-', '').ToLower()
-                    if ($blkKey.ToLower() -eq $move.name.ToLower() -or $cleanBlkKey -eq $cleanMoveName -or $move.name.ToLower().Contains($blkKey.ToLower())) {
+                    $cleanBlkKey = ($blkKey -replace '\s+', '' -replace '\d+', '' -replace '-', '' -replace '!', '').ToLower()
+                    $cleanBlkKey = $cleanBlkKey -replace '^the', '' -replace 'move$', ''
+                    
+                    $cleanMove = $cleanMoveName -replace '^the', ''
+                    
+                    $blkSingular = $cleanBlkKey -replace 's$', ''
+                    $moveSingular = $cleanMove -replace 's$', ''
+                    
+                    if ($blkKey.ToLower() -eq $move.name.ToLower() -or 
+                        $cleanBlkKey -eq $cleanMove -or 
+                        $blkSingular -eq $moveSingular -or
+                        $cleanBlkKey -eq $moveSingular -or
+                        $blkSingular -eq $cleanMove -or
+                        $move.name.ToLower().Contains($blkKey.ToLower()) -or
+                        $blkKey.ToLower().Contains($move.name.ToLower()) -or
+                        $cleanBlkKey.Contains($cleanMove) -or
+                        $cleanMove.Contains($cleanBlkKey)) {
                         $intent = "Defend"
+                        break
                     }
                 }
             }

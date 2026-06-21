@@ -16738,13 +16738,17 @@
                         monster.moves.forEach(move => {
                             let dmgStr = '';
                             if (move.damage && move.damage !== "") {
-                                let hitStr = (move.damage.hit_count && move.damage.hit_count > 1) ? `x${move.damage.hit_count}` : '';
-                                let normalDmg = move.damage.normal;
-                                let ascDmg = move.damage.ascension;
-                                if (ascDmg && ascDmg !== normalDmg) {
-                                    dmgStr = `<span class="monster-move-dmg">&#9876; ${normalDmg}${hitStr} (${ascDmg}${hitStr} Asc)</span>`;
+                                const match = move.damage.match(/^([^(]+?)\s*(?:\(A:\s*([^)]+)\))?$/);
+                                if (match) {
+                                    const normalDmg = match[1];
+                                    const ascDmg = match[2];
+                                    if (ascDmg && ascDmg !== normalDmg) {
+                                        dmgStr = `<span class="monster-move-dmg">&#9876; ${normalDmg} (${ascDmg} Asc)</span>`;
+                                    } else {
+                                        dmgStr = `<span class="monster-move-dmg">&#9876; ${normalDmg}</span>`;
+                                    }
                                 } else {
-                                    dmgStr = `<span class="monster-move-dmg">&#9876; ${normalDmg}${hitStr}</span>`;
+                                    dmgStr = `<span class="monster-move-dmg">&#9876; ${move.damage}</span>`;
                                 }
                             }
                             

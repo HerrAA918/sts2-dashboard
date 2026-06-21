@@ -1325,6 +1325,86 @@ $htmlTemplate = @'
             color: #fb7185;
         }
 
+        /* Compendium Monster Table & Intent Styles */
+        .comp-monster-row {
+            transition: background 0.15s ease;
+        }
+        .comp-monster-row:hover {
+            background: rgba(255, 255, 255, 0.02) !important;
+        }
+        .comp-act-badge {
+            display: inline-block;
+            background: rgba(99, 102, 241, 0.1);
+            color: #818cf8;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            padding: 2px 6px;
+            font-size: 11px;
+            border-radius: 4px;
+            font-weight: 500;
+            margin: 2px;
+        }
+        .comp-moves-container {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .comp-move-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            background: rgba(255, 255, 255, 0.015);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 6px;
+            padding: 4px 8px;
+        }
+        .comp-intent-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 1px 6px;
+            font-size: 9.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            border-radius: 4px;
+            min-width: 75px;
+            justify-content: center;
+        }
+        .comp-intent-attack {
+            background: rgba(239, 68, 68, 0.12);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+        .comp-intent-defend {
+            background: rgba(59, 130, 246, 0.12);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+        .comp-intent-buff {
+            background: rgba(16, 185, 129, 0.12);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        .comp-intent-debuff {
+            background: rgba(245, 158, 11, 0.12);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+        .comp-intent-unknown {
+            background: rgba(148, 163, 184, 0.12);
+            color: #94a3b8;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+        .comp-move-name {
+            font-weight: 600;
+            color: #e2e8f0;
+            min-width: 100px;
+        }
+        .comp-move-details {
+            color: var(--text-muted);
+            font-size: 11.5px;
+        }
+
         .comp-card-header {
             display: flex;
             justify-content: space-between;
@@ -1997,11 +2077,45 @@ $htmlTemplate = @'
                 <div class="char-pill" data-char="necrobinder">Necrobinder</div>
                 <div class="char-pill" data-char="shared">Neutral / Shared</div>
             </div>
+
+            <!-- Act filter pills (shown only when category is Mobs & Bosses) -->
+            <div class="char-pills" id="comp-act-pills" style="display: none;">
+                <div class="char-pill active" data-act="all">All Acts</div>
+                <div class="char-pill" data-act="Act 1 - Overgrowth">Act 1: Overgrowth</div>
+                <div class="char-pill" data-act="Act 2 - Hive">Act 2: Hive</div>
+                <div class="char-pill" data-act="Act 3 - Glory">Act 3: Glory</div>
+                <div class="char-pill" data-act="Underdocks">Underdocks</div>
+                <div class="char-pill" data-act="other">Other / Special</div>
+            </div>
         </div>
         
         <!-- Compendium cards container -->
         <div class="compendium-grid" id="comp-grid">
             <!-- Populated dynamically -->
+        </div>
+
+        <!-- Compendium detailed enemy list (hidden by default) -->
+        <div class="card runs-container" id="comp-monster-table-container" style="display: none; margin-top: 16px;">
+            <div class="runs-header-row">
+                <h3 style="margin: 0; font-size: 16px; font-weight: 600; color: var(--text-main);">Monsters & Bosses Compendium</h3>
+                <span class="runs-count-badge" id="comp-monster-count">Showing 0 enemies</span>
+            </div>
+            <div class="table-wrapper" style="max-height: 600px; margin-top: 12px;">
+                <table>
+                    <thead>
+                        <tr id="monster-header-row-tr">
+                            <th data-sort="name" onclick="sortMonsters('name')">Enemy Name</th>
+                            <th data-sort="type" onclick="sortMonsters('type')" style="width: 120px;">Type</th>
+                            <th data-sort="hp" onclick="sortMonsters('hp')" style="text-align:center; width: 120px;">HP Range</th>
+                            <th data-sort="acts" onclick="sortMonsters('acts')">Acts / Levels</th>
+                            <th style="width: 45%;">Moves & Intents</th>
+                        </tr>
+                    </thead>
+                    <tbody id="comp-monster-table-body">
+                        <!-- Populated dynamically -->
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -2326,6 +2440,9 @@ $htmlTemplate = @'
         
         // Compendium Tab state
         let activeCompChar = 'all';
+        let activeCompAct = 'all';
+        let monsterSortCol = 'name';
+        let monsterSortDir = 'asc';
 
         // Card Stats Tab state
         let activeCardStatsChar = 'all';
@@ -2546,6 +2663,15 @@ $htmlTemplate = @'
                     document.querySelectorAll('#comp-char-pills .char-pill').forEach(p => p.classList.remove('active'));
                     pill.classList.add('active');
                     activeCompChar = pill.dataset.char;
+                    renderCompendium();
+                });
+            });
+
+            document.querySelectorAll('#comp-act-pills .char-pill').forEach(pill => {
+                pill.addEventListener('click', () => {
+                    document.querySelectorAll('#comp-act-pills .char-pill').forEach(p => p.classList.remove('active'));
+                    pill.classList.add('active');
+                    activeCompAct = pill.dataset.act;
                     renderCompendium();
                 });
             });
@@ -3730,6 +3856,20 @@ $htmlTemplate = @'
             updateTableHeaders('relic-header-row-tr', relicSortCol, relicSortDir);
         }
 
+        function sortMonsters(col) {
+            if (monsterSortCol === col) {
+                monsterSortDir = monsterSortDir === 'asc' ? 'desc' : 'asc';
+            } else {
+                monsterSortCol = col;
+                if (col === 'name' || col === 'acts') {
+                    monsterSortDir = 'asc';
+                } else {
+                    monsterSortDir = 'desc';
+                }
+            }
+            renderCompendium();
+        }
+
         // Tab Switching Logic
         function switchTab(tab) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -4105,10 +4245,32 @@ $htmlTemplate = @'
 
         // Render Compendium View
         function renderCompendium() {
-            compGrid.innerHTML = '';
-            
             const searchVal = compSearch.value.toLowerCase();
             const typeVal = compFilterType.value;
+            
+            // Toggle pills and layouts based on category select
+            const charPillsContainer = document.getElementById('comp-char-pills');
+            const actPillsContainer = document.getElementById('comp-act-pills');
+            const monsterTableContainer = document.getElementById('comp-monster-table-container');
+            const monsterTableBody = document.getElementById('comp-monster-table-body');
+            const monsterCountEl = document.getElementById('comp-monster-count');
+            
+            if (typeVal === 'monster') {
+                if (charPillsContainer) charPillsContainer.style.display = 'none';
+                if (actPillsContainer) actPillsContainer.style.display = 'flex';
+                compGrid.style.display = 'none';
+                if (monsterTableContainer) monsterTableContainer.style.display = 'block';
+                compSearch.placeholder = 'Search enemies by name, behavior, or moves...';
+            } else {
+                if (charPillsContainer) charPillsContainer.style.display = 'flex';
+                if (actPillsContainer) actPillsContainer.style.display = 'none';
+                compGrid.style.display = 'grid';
+                if (monsterTableContainer) monsterTableContainer.style.display = 'none';
+                compSearch.placeholder = 'Search cards or relics by name or description...';
+            }
+
+            compGrid.innerHTML = '';
+            if (monsterTableBody) monsterTableBody.innerHTML = '';
             
             let items = [];
             
@@ -4132,22 +4294,37 @@ $htmlTemplate = @'
             }
             
             // Filter items
-            const filteredItems = items.filter(item => {
-                // Class character filter
-                if (activeCompChar !== 'all') {
-                    if (item.category === 'card') {
-                        if (!item.color) return activeCompChar === 'shared';
-                        if (item.color.toLowerCase() !== activeCompChar) return false;
-                    } else if (item.category === 'relic') {
-                        // Relics
-                        if (activeCompChar === 'shared') {
-                            return true;
+            let filteredItems = items.filter(item => {
+                if (item.category === 'monster') {
+                    // Mobs & Bosses level filter
+                    if (typeVal === 'monster' && activeCompAct !== 'all') {
+                        const actsList = item.acts || [];
+                        if (activeCompAct === 'other') {
+                            // Mobs that don't belong to Act 1, 2, 3 or Underdocks
+                            const isStandardAct = actsList.some(a => a.includes('Act 1') || a.includes('Act 2') || a.includes('Act 3') || a.includes('Underdocks'));
+                            if (isStandardAct && actsList.length > 0) return false;
                         } else {
-                            return false;
+                            // Normal acts search
+                            const hasAct = actsList.some(a => a.toLowerCase().includes(activeCompAct.toLowerCase()));
+                            if (!hasAct) return false;
                         }
-                    } else if (item.category === 'monster') {
+                    } else if (activeCompChar !== 'all') {
                         // Monsters are not class specific, hide when a class filter is active
                         return false;
+                    }
+                } else {
+                    // Class character filter for Cards & Relics
+                    if (activeCompChar !== 'all') {
+                        if (item.category === 'card') {
+                            if (!item.color) return activeCompChar === 'shared';
+                            if (item.color.toLowerCase() !== activeCompChar) return false;
+                        } else if (item.category === 'relic') {
+                            if (activeCompChar === 'shared') {
+                                return true;
+                            } else {
+                                return false;
+                            }
+                        }
                     }
                 }
                 
@@ -4162,82 +4339,203 @@ $htmlTemplate = @'
                 
                 return true;
             });
-            
-            if (filteredItems.length === 0) {
-                compGrid.innerHTML = '<div class="no-data" style="grid-column: 1 / -1;">No items match active filters.</div>';
-                return;
-            }
-            
-            filteredItems.forEach(item => {
-                const el = document.createElement('div');
-                el.dataset.id = item.id;
-                
-                // Assign rarity/type CSS class
-                let rarityClass = '';
-                if (item.category === 'card') {
-                    rarityClass = 'rarity-' + (item.rarity || 'common').toLowerCase();
-                } else if (item.category === 'relic') {
-                    const relRarity = (item.rarity || '').replace(/ Relic/i, '').toLowerCase();
-                    rarityClass = 'rarity-' + (relRarity || 'common');
-                } else if (item.category === 'monster') {
-                    rarityClass = 'monster-' + (item.type || 'normal').toLowerCase();
+
+            if (typeVal === 'monster') {
+                // Update table header indicators
+                updateTableHeaders('monster-header-row-tr', monsterSortCol, monsterSortDir);
+
+                // Sort monsters
+                filteredItems.sort((a, b) => {
+                    let valA = a[monsterSortCol];
+                    let valB = b[monsterSortCol];
+
+                    if (monsterSortCol === 'name') {
+                        valA = (valA || '').toString().toLowerCase();
+                        valB = (valB || '').toString().toLowerCase();
+                        return monsterSortDir === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+                    } else if (monsterSortCol === 'type') {
+                        const TYPE_ORDER = { 'normal': 0, 'elite': 1, 'boss': 2 };
+                        valA = TYPE_ORDER[(valA || '').toLowerCase()] ?? 99;
+                        valB = TYPE_ORDER[(valB || '').toLowerCase()] ?? 99;
+                    } else if (monsterSortCol === 'hp') {
+                        valA = Number(a.minHp) || 0;
+                        valB = Number(b.minHp) || 0;
+                    } else if (monsterSortCol === 'acts') {
+                        valA = ((a.acts && a.acts[0]) || '').toString().toLowerCase();
+                        valB = ((b.acts && b.acts[0]) || '').toString().toLowerCase();
+                        return monsterSortDir === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+                    }
+
+                    if (valA < valB) return monsterSortDir === 'asc' ? -1 : 1;
+                    if (valA > valB) return monsterSortDir === 'asc' ? 1 : -1;
+                    return 0;
+                });
+
+                if (monsterCountEl) {
+                    monsterCountEl.textContent = `Showing ${filteredItems.length} enemies`;
                 }
-                el.className = 'compendium-card ' + rarityClass;
-                
-                // Relic badge preview or Card header
-                if (item.category === 'card') {
-                    const cleanColor = item.color ? item.color.charAt(0).toUpperCase() + item.color.slice(1).toLowerCase() : 'Neutral';
-                    el.innerHTML = `
-                        <div class="comp-card-header">
-                            <span class="comp-card-name">${item.name}</span>
-                            <span class="comp-card-cost">${item.cost !== "" ? item.cost : "No Cost"}</span>
-                        </div>
-                        <div class="comp-card-meta">
-                            <span>${item.type}</span>
-                            <span class="rarity-${item.rarity.toLowerCase()}">${item.rarity}</span>
-                        </div>
-                        <div class="comp-card-desc">${formatDescription(item.desc)}</div>
-                        <div style="font-size: 9px; color: var(--text-muted); text-align: right; margin-top: auto;">${cleanColor}</div>
-                    `;
-                } else if (item.category === 'relic') {
-                    const imgUrl = `https://spire-codex.com/static/images/relics/${item.img.toLowerCase()}`;
-                    el.innerHTML = `
-                        <div class="comp-relic-title-row">
-                            <img class="comp-relic-img-preview" src="${imgUrl}" alt="${item.name}" onerror="this.style.display='none';">
-                            <span class="comp-card-name">${item.name}</span>
-                        </div>
-                        <div class="comp-card-meta">
-                            <span>Relic</span>
-                            <span class="rarity-${item.rarity.replace(' Relic', '').toLowerCase()}">${item.rarity}</span>
-                        </div>
-                        <div class="comp-card-desc">${formatDescription(item.desc)}</div>
-                    `;
-                } else if (item.category === 'monster') {
+
+                if (filteredItems.length === 0) {
+                    if (monsterTableBody) {
+                        monsterTableBody.innerHTML = '<tr><td colspan="5" class="no-data" style="text-align:center;">No enemies match active filters.</td></tr>';
+                    }
+                    return;
+                }
+
+                filteredItems.forEach(item => {
+                    const tr = document.createElement('tr');
+                    tr.className = 'comp-monster-row';
+                    tr.style.cursor = 'help';
+                    
                     const imgUrl = `https://spire-codex.com/static/images/monsters/${item.img.toLowerCase()}`;
-                    const hpText = item.minHp === item.maxHp ? `HP: ${item.minHp}` : `HP: ${item.minHp}-${item.maxHp}`;
-                    el.innerHTML = `
-                        <div class="comp-relic-title-row">
-                            <img class="comp-relic-img-preview" src="${imgUrl}" alt="${item.name}" onerror="this.style.display='none';">
-                            <span class="comp-card-name">${item.name}</span>
-                        </div>
-                        <div class="comp-card-meta">
-                            <span class="monster-type-badge type-${item.type.toLowerCase()}" style="margin-top:0;">${item.type}</span>
-                            <span style="font-weight:600; font-size:11.5px; color:var(--text-muted);">${hpText}</span>
-                        </div>
-                        <div class="comp-card-desc">
-                            ${item.pattern ? `<div style="font-style: italic; color: #cbd5e1; margin-bottom: 4px;">Pattern: ${item.pattern}</div>` : ''}
-                            <div style="font-size: 11px; color: var(--text-muted); line-height: 1.35;">Moves: ${item.moves.map(m => m.name).join(', ')}</div>
-                        </div>
+                    const hpText = item.minHp === item.maxHp ? `${item.minHp}` : (item.maxHp ? `${item.minHp}-${item.maxHp}` : `${item.minHp}`);
+                    
+                    // Format acts list
+                    let actsHtml = '';
+                    if (item.acts && item.acts.length > 0) {
+                        actsHtml = item.acts.map(act => `<span class="comp-act-badge">${act.split(' - ')[0]}</span>`).join('');
+                    } else {
+                        actsHtml = '<span class="comp-act-badge" style="background: rgba(148, 163, 184, 0.1); color: #94a3b8; border-color: rgba(148, 163, 184, 0.2);">Special</span>';
+                    }
+
+                    // Format moves list
+                    let movesHtml = '<div class="comp-moves-container">';
+                    if (item.pattern) {
+                        movesHtml += `<div style="font-style: italic; color: #cbd5e1; font-size: 11.5px; margin-bottom: 4px;">Behavior: ${item.pattern}</div>`;
+                    }
+                    if (item.moves && item.moves.length > 0) {
+                        item.moves.forEach(m => {
+                            let intentIcon = '❓';
+                            let intentClass = 'comp-intent-unknown';
+                            
+                            const intentLower = (m.intent || '').toLowerCase();
+                            if (intentLower === 'attack') {
+                                intentIcon = '⚔️';
+                                intentClass = 'comp-intent-attack';
+                            } else if (intentLower === 'defend') {
+                                intentIcon = '🛡️';
+                                intentClass = 'comp-intent-defend';
+                            } else if (intentLower === 'buff') {
+                                intentIcon = '🧪';
+                                intentClass = 'comp-intent-buff';
+                            } else if (intentLower === 'debuff') {
+                                intentIcon = '☠️';
+                                intentClass = 'comp-intent-debuff';
+                            }
+
+                            const dmgText = m.damage ? ` (deals ${m.damage})` : '';
+                            const descText = m.desc ? `: ${m.desc}` : '';
+                            movesHtml += `
+                                <div class="comp-move-item" style="margin-bottom: 2px;">
+                                    <span class="comp-intent-badge ${intentClass}">${intentIcon} ${m.intent || 'Unknown'}</span>
+                                    <span class="comp-move-name" style="margin-left: 8px;">${m.name}</span>
+                                    <span class="comp-move-details" style="margin-left: auto;">${dmgText}${descText}</span>
+                                </div>
+                            `;
+                        });
+                    } else {
+                        movesHtml += '<div style="font-size: 11.5px; color: var(--text-muted);">No recorded moves.</div>';
+                    }
+                    movesHtml += '</div>';
+
+                    tr.innerHTML = `
+                        <td style="font-weight: 600;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <img src="${imgUrl}" alt="${item.name}" style="width: 32px; height: 32px; object-fit: cover; border-radius: 4px; border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(0, 0, 0, 0.2);" onerror="this.style.display='none';">
+                                <span>${item.name}</span>
+                            </div>
+                        </td>
+                        <td><span class="monster-type-badge type-${item.type.toLowerCase()}" style="margin: 0;">${item.type}</span></td>
+                        <td style="text-align: center; font-weight: 700; color: #ef4444;">${hpText}</td>
+                        <td>${actsHtml}</td>
+                        <td>${movesHtml}</td>
                     `;
+
+                    // Attach hover tooltips to the row
+                    tr.addEventListener('mouseenter', (e) => showTooltip(e, item.id));
+                    tr.addEventListener('mousemove', moveTooltip);
+                    tr.addEventListener('mouseleave', hideTooltip);
+
+                    monsterTableBody.appendChild(tr);
+                });
+
+            } else {
+                if (filteredItems.length === 0) {
+                    compGrid.innerHTML = '<div class="no-data" style="grid-column: 1 / -1;">No items match active filters.</div>';
+                    return;
                 }
-                
-                // Attach hover tooltips
-                el.addEventListener('mouseenter', (e) => showTooltip(e, item.id));
-                el.addEventListener('mousemove', moveTooltip);
-                el.addEventListener('mouseleave', hideTooltip);
-                
-                compGrid.appendChild(el);
-            });
+
+                filteredItems.forEach(item => {
+                    const el = document.createElement('div');
+                    el.dataset.id = item.id;
+                    
+                    // Assign rarity/type CSS class
+                    let rarityClass = '';
+                    if (item.category === 'card') {
+                        rarityClass = 'rarity-' + (item.rarity || 'common').toLowerCase();
+                    } else if (item.category === 'relic') {
+                        const relRarity = (item.rarity || '').replace(/ Relic/i, '').toLowerCase();
+                        rarityClass = 'rarity-' + (relRarity || 'common');
+                    } else if (item.category === 'monster') {
+                        rarityClass = 'monster-' + (item.type || 'normal').toLowerCase();
+                    }
+                    el.className = 'compendium-card ' + rarityClass;
+                    
+                    // Relic badge preview or Card header
+                    if (item.category === 'card') {
+                        const cleanColor = item.color ? item.color.charAt(0).toUpperCase() + item.color.slice(1).toLowerCase() : 'Neutral';
+                        el.innerHTML = `
+                            <div class="comp-card-header">
+                                <span class="comp-card-name">${item.name}</span>
+                                <span class="comp-card-cost">${item.cost !== "" ? item.cost : "No Cost"}</span>
+                            </div>
+                            <div class="comp-card-meta">
+                                <span>${item.type}</span>
+                                <span class="rarity-${item.rarity.toLowerCase()}">${item.rarity}</span>
+                            </div>
+                            <div class="comp-card-desc">${formatDescription(item.desc)}</div>
+                            <div style="font-size: 9px; color: var(--text-muted); text-align: right; margin-top: auto;">${cleanColor}</div>
+                        `;
+                    } else if (item.category === 'relic') {
+                        const imgUrl = `https://spire-codex.com/static/images/relics/${item.img.toLowerCase()}`;
+                        el.innerHTML = `
+                            <div class="comp-relic-title-row">
+                                <img class="comp-relic-img-preview" src="${imgUrl}" alt="${item.name}" onerror="this.style.display='none';">
+                                <span class="comp-card-name">${item.name}</span>
+                            </div>
+                            <div class="comp-card-meta">
+                                <span>Relic</span>
+                                <span class="rarity-${item.rarity.replace(' Relic', '').toLowerCase()}">${item.rarity}</span>
+                            </div>
+                            <div class="comp-card-desc">${formatDescription(item.desc)}</div>
+                        `;
+                    } else if (item.category === 'monster') {
+                        const imgUrl = `https://spire-codex.com/static/images/monsters/${item.img.toLowerCase()}`;
+                        const hpText = item.minHp === item.maxHp ? `HP: ${item.minHp}` : `HP: ${item.minHp}-${item.maxHp}`;
+                        el.innerHTML = `
+                            <div class="comp-relic-title-row">
+                                <img class="comp-relic-img-preview" src="${imgUrl}" alt="${item.name}" onerror="this.style.display='none';">
+                                <span class="comp-card-name">${item.name}</span>
+                            </div>
+                            <div class="comp-card-meta">
+                                <span class="monster-type-badge type-${item.type.toLowerCase()}" style="margin-top:0;">${item.type}</span>
+                                <span style="font-weight:600; font-size:11.5px; color:var(--text-muted);">${hpText}</span>
+                            </div>
+                            <div class="comp-card-desc">
+                                ${item.pattern ? `<div style="font-style: italic; color: #cbd5e1; margin-bottom: 4px;">Pattern: ${item.pattern}</div>` : ''}
+                                <div style="font-size: 11px; color: var(--text-muted); line-height: 1.35;">Moves: ${item.moves.map(m => m.name).join(', ')}</div>
+                            </div>
+                        `;
+                    }
+                    
+                    // Attach hover tooltips
+                    el.addEventListener('mouseenter', (e) => showTooltip(e, item.id));
+                    el.addEventListener('mousemove', moveTooltip);
+                    el.addEventListener('mouseleave', hideTooltip);
+                    
+                    compGrid.appendChild(el);
+                });
+            }
         }
 
         // Render Card Statistics View

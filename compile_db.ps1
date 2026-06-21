@@ -156,10 +156,23 @@ foreach ($monster in $monstersData) {
         }
     }
     
-    # Extract encounter IDs
+    # Extract encounter IDs and Acts
     $encounters = @()
+    $acts = @()
     if ($monsterEncounters.ContainsKey($fullId)) {
         $encounters = $monsterEncounters[$fullId]
+        foreach ($encId in $encounters) {
+            $rawId = $encId
+            if ($rawId.StartsWith("ENCOUNTER.")) {
+                $rawId = $rawId.Substring(10)
+            }
+            $matchEnc = $encountersData | Where-Object { $_.id.ToUpper() -eq $rawId.ToUpper() }
+            if ($matchEnc -and $matchEnc.act) {
+                if ($acts -notcontains $matchEnc.act) {
+                    $acts += $matchEnc.act
+                }
+            }
+        }
     }
     
     $database.monsters[$fullId] = @{
@@ -171,6 +184,7 @@ foreach ($monster in $monstersData) {
         img        = $imgLeaf
         pattern    = ""
         encounters = $encounters
+        acts       = $acts
     }
 }
 
@@ -312,6 +326,7 @@ $database.monsters["AEONGLASS"] = @{
     img        = "aeonglass.png"
     pattern    = "Alternates between Swipe and Stomp."
     encounters = @("AEONGLASS_BOSS", "ENCOUNTER.AEONGLASS_BOSS", "DOORMAKER_BOSS", "ENCOUNTER.DOORMAKER_BOSS")
+    acts       = @("Act 4 - Special")
     moves      = @(
         @{ name = "Swipe"; intent = "Attack"; damage = "15 (A: 17)"; desc = "" },
         @{ name = "Stomp"; intent = "Attack"; damage = "20 (A: 22)"; desc = "" },
@@ -366,6 +381,7 @@ $database.monsters["KAISER_CRAB"] = @{
     img        = "crusher.png"
     pattern    = "Contend with Crusher (Left Claw, 199/209 HP) and Rocket (Right Claw, 189/199 HP). Face different directions to block backstabs. The surviving claw buffs itself when the other dies."
     encounters = @("KAISER_CRAB_BOSS", "ENCOUNTER.KAISER_CRAB_BOSS")
+    acts       = @("Act 2 - Hive")
     moves      = @(
         @{ name = "Crusher: Thrash"; intent = "Attack"; damage = "12 (A: 14)"; desc = "" },
         @{ name = "Crusher: Bug Sting"; intent = "Attack"; damage = "6 (A: 7)"; desc = "" },

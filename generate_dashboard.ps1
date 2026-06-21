@@ -2193,6 +2193,8 @@ $htmlTemplate = @'
             <button class="sub-tab-btn" id="sub-tab-potions" onclick="switchSubTab('potions')">Potions</button>
             <button class="sub-tab-btn" id="sub-tab-campfire" onclick="switchSubTab('campfire')">Campfire</button>
             <button class="sub-tab-btn" id="sub-tab-mobs" onclick="switchSubTab('mobs')">Mobs</button>
+            <button class="sub-tab-btn" id="sub-tab-elites" onclick="switchSubTab('elites')">Elites</button>
+            <button class="sub-tab-btn" id="sub-tab-bosses" onclick="switchSubTab('bosses')">Bosses</button>
             <button class="sub-tab-btn" id="sub-tab-events" onclick="switchSubTab('events')">Events</button>
             <button class="sub-tab-btn" id="sub-tab-keywords" onclick="switchSubTab('keywords')">Keywords</button>
         </div>
@@ -2289,13 +2291,7 @@ $htmlTemplate = @'
                 <div class="search-wrapper" style="flex-grow: 1; min-width: 250px;">
                     <input type="text" id="comp-mobs-search" class="search-input" placeholder="Search enemies by name, behavior, or moves...">
                 </div>
-                
-                <div class="char-pills" id="comp-mobs-type-pills">
-                    <div class="char-pill active" data-type="all">All Types</div>
-                    <div class="char-pill" data-type="normal">Normal</div>
-                    <div class="char-pill" data-type="elite">Elite</div>
-                    <div class="char-pill" data-type="boss">Boss</div>
-                </div>
+
 
                 <div class="char-pills" id="comp-mobs-act-pills">
                     <div class="char-pill active" data-act="all">All Acts</div>
@@ -2718,7 +2714,7 @@ $htmlTemplate = @'
         let activePotionsRarity = 'all';
         let activePotionsPool = 'all';
         let activeMobsAct = 'all';
-        let activeMobsType = 'all';
+        let activeMobsType = 'normal';
         let mobsSortCol = 'name';
         let mobsSortDir = 'asc';
         let activeEventsAct = 'all';
@@ -2998,14 +2994,7 @@ $htmlTemplate = @'
 
             // Mobs Sub-view listeners
             if (compMobsSearch) compMobsSearch.addEventListener('input', renderCompendiumMobs);
-            document.querySelectorAll('#comp-mobs-type-pills .char-pill').forEach(pill => {
-                pill.addEventListener('click', () => {
-                    document.querySelectorAll('#comp-mobs-type-pills .char-pill').forEach(p => p.classList.remove('active'));
-                    pill.classList.add('active');
-                    activeMobsType = pill.dataset.type;
-                    renderCompendiumMobs();
-                });
-            });
+
             document.querySelectorAll('#comp-mobs-act-pills .char-pill').forEach(pill => {
                 pill.addEventListener('click', () => {
                     document.querySelectorAll('#comp-mobs-act-pills .char-pill').forEach(p => p.classList.remove('active'));
@@ -4611,12 +4600,27 @@ $htmlTemplate = @'
             const activeBtn = document.getElementById(`sub-tab-${subTab}`);
             if (activeBtn) activeBtn.classList.add('active');
             
+            // Map subTab to the actual view ID (elites and bosses map to the mobs view)
+            let targetView = subTab;
+            if (subTab === 'elites' || subTab === 'bosses') {
+                targetView = 'mobs';
+            }
+            
+            // Set activeMobsType state based on subTab
+            if (subTab === 'mobs') {
+                activeMobsType = 'normal';
+            } else if (subTab === 'elites') {
+                activeMobsType = 'elite';
+            } else if (subTab === 'bosses') {
+                activeMobsType = 'boss';
+            }
+            
             // Show / Hide Sub-Views
             const subViews = ['cards', 'relics', 'potions', 'campfire', 'mobs', 'events', 'keywords'];
             subViews.forEach(viewName => {
                 const viewEl = document.getElementById(`sub-view-${viewName}`);
                 if (viewEl) {
-                    viewEl.style.display = (viewName === subTab) ? 'block' : 'none';
+                    viewEl.style.display = (viewName === targetView) ? 'block' : 'none';
                 }
             });
             
@@ -4629,7 +4633,7 @@ $htmlTemplate = @'
                 renderCompendiumPotions();
             } else if (subTab === 'campfire') {
                 renderCompendiumCampfire();
-            } else if (subTab === 'mobs') {
+            } else if (subTab === 'mobs' || subTab === 'elites' || subTab === 'bosses') {
                 renderCompendiumMobs();
             } else if (subTab === 'events') {
                 renderCompendiumEvents();
@@ -5081,6 +5085,17 @@ $htmlTemplate = @'
 
             if (compMobsCount) {
                 compMobsCount.textContent = `Showing ${filteredMonsters.length} enemies`;
+            }
+
+            const headingEl = document.querySelector('#sub-view-mobs .runs-header-row h3');
+            if (headingEl) {
+                if (activeMobsType === 'normal') {
+                    headingEl.textContent = 'Normal Monsters Compendium';
+                } else if (activeMobsType === 'elite') {
+                    headingEl.textContent = 'Elite Monsters Compendium';
+                } else if (activeMobsType === 'boss') {
+                    headingEl.textContent = 'Bosses Compendium';
+                }
             }
 
             if (filteredMonsters.length === 0) {

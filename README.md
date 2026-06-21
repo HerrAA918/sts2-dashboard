@@ -13,6 +13,24 @@ This dashboard allows you to import, visualize, and analyze your runs (both Sing
 - **Offline Compendium**: A complete Slay the Spire 2 database of Cards, Relics, and Monsters with hover tooltips, rarity color-coding, and move-set/intent lists.
 - **Privacy First**: Fully client-side. No data is sent to any server. Your runs are parsed locally and stored in your browser's `localStorage` for quick access next time.
 
+## Where to Find Your Run History Files
+
+To import your runs into the dashboard, drag and drop the JSON files from your game's run history folder into the dashboard. You can find these files in the following locations:
+
+### Windows
+- **Steam Cloud Location (Recommended)**:
+  `C:\Program Files (x86)\Steam\userdata\<YOUR_STEAM_ID>\2868840\remote\profile1\saves\history\`
+- **Local AppData Location**:
+  `%AppData%\SlayTheSpire2\steam\<YOUR_STEAM_ID>\profile1\saves\history\`
+
+*(Note: Replace `<YOUR_STEAM_ID>` with your actual unique Steam numeric ID, and `profile1` with your corresponding in-game profile number if you use multiple profiles.)*
+
+### macOS
+`~/Library/Application Support/Steam/userdata/<YOUR_STEAM_ID>/2868840/remote/profile1/saves/history/`
+
+### Linux (Steam Deck / Proton)
+`~/.steam/steam/userdata/<YOUR_STEAM_ID>/2868840/remote/profile1/saves/history/`
+
 ## Files in this Repository
 
 - `sts2_dashboard.html`: The fully compiled, ready-to-use offline dashboard. You can open this in any modern web browser.

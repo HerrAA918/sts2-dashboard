@@ -2491,7 +2491,7 @@ $htmlTemplate = @'
         // Monster Encounter Mapping Helpers
         function getMonsterIdFromEncounter(encounterId) {
             if (!encounterId || !sts2Database || !sts2Database.monsters) return null;
-            let clean = encounterId.toUpperCase().replace("ENCOUNTER.", "").replace("MONSTER.", "").replace("EVENT.", "");
+            let clean = encounterId.toUpperCase().replace("ENCOUNTER.", "").replace("MONSTER.", "").replace("EVENT.", "").replace(/\s+/g, "_");
             
             // 1. Direct match on monster ID
             if (sts2Database.monsters[clean]) {
@@ -2563,6 +2563,12 @@ $htmlTemplate = @'
                 if (id.includes(cleanId) || cleanId.includes(id)) {
                     return id;
                 }
+            }
+            
+            // 4. Try matching via encounter mapping
+            let encounterResolve = getMonsterIdFromEncounter(name);
+            if (encounterResolve) {
+                return encounterResolve;
             }
             
             return null;

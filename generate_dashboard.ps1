@@ -582,6 +582,18 @@ $htmlTemplate = @'
         .char-pill[data-char="necrobinder"].active { background: var(--char-necrobinder); border-color: var(--char-necrobinder); }
         .char-pill[data-char="shared"].active { background: #64748b; border-color: #64748b; }
 
+
+        .char-icon-mini {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            margin-right: 6px;
+            vertical-align: middle;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            background: rgba(0, 0, 0, 0.3);
+            display: inline-block;
+        }
+
         .char-pill:hover {
             transform: scale(1.03);
             border-color: rgba(255, 255, 255, 0.15);
@@ -1405,6 +1417,33 @@ $htmlTemplate = @'
             font-size: 11.5px;
         }
 
+        /* Compendium Sub-Tabs Styles */
+        .sub-tab-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--text-muted);
+            font-size: 13.5px;
+            font-weight: 600;
+            padding: 6px 16px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            font-family: 'Outfit', sans-serif;
+        }
+        .sub-tab-btn:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+        .sub-tab-btn.active {
+            color: var(--accent-gold);
+            background: rgba(250, 204, 21, 0.12);
+            border-color: rgba(250, 204, 21, 0.3);
+        }
+        .comp-sub-view {
+            transition: opacity 0.15s ease-in-out;
+        }
+
         /* Events Tab Styles */
         .events-grid-layout {
             display: grid;
@@ -1794,9 +1833,7 @@ $htmlTemplate = @'
         <div class="tab-container">
             <button class="tab-btn active" id="tab-runs" onclick="switchTab('runs')">Run History</button>
             <button class="tab-btn" id="tab-multiplayer" onclick="switchTab('multiplayer')">Co-op History</button>
-            <button class="tab-btn" id="tab-compendium" onclick="switchTab('compendium')">Cards & Relics</button>
-            <button class="tab-btn" id="tab-enemies" onclick="switchTab('enemies')">Enemies</button>
-            <button class="tab-btn" id="tab-events" onclick="switchTab('events')">Events</button>
+            <button class="tab-btn" id="tab-compendium" onclick="switchTab('compendium')">Compendium</button>
             <button class="tab-btn" id="tab-card-stats" onclick="switchTab('card-stats')">Card Analytics</button>
             <button class="tab-btn" id="tab-relic-stats" onclick="switchTab('relic-stats')">Relic Analytics</button>
         </div>
@@ -2148,117 +2185,188 @@ $htmlTemplate = @'
         </div>
 
     <!-- COMPENDIUM TAB VIEW -->
-    <!-- COMPENDIUM TAB VIEW -->
     <div id="view-compendium" style="display: none;">
-        <!-- Filters panel -->
-        <div class="filter-panel">
-            <div class="search-wrapper">
-                <input type="text" id="comp-search" class="search-input" placeholder="Search cards or relics by name or description...">
-            </div>
-            
-            <select id="comp-filter-type" class="select-filter">
-                <option value="all">All Categories</option>
-                <option value="card">Cards Only</option>
-                <option value="relic">Relics Only</option>
-            </select>
-
-            <select id="comp-sort-by" class="select-filter">
-                <option value="name">Sort by Name</option>
-                <option value="rarity">Sort by Rarity</option>
-            </select>
-            
-            <div class="char-pills" id="comp-char-pills">
-                <div class="char-pill active" data-char="all">All Classes</div>
-                <div class="char-pill" data-char="ironclad">Ironclad</div>
-                <div class="char-pill" data-char="silent">Silent</div>
-                <div class="char-pill" data-char="defect">Defect</div>
-                <div class="char-pill" data-char="regent">Regent</div>
-                <div class="char-pill" data-char="necrobinder">Necrobinder</div>
-                <div class="char-pill" data-char="shared">Neutral / Shared</div>
-            </div>
+        <!-- Sub-navigation tabs -->
+        <div class="sub-tab-nav" style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding-bottom: 14px; flex-wrap: wrap;">
+            <button class="sub-tab-btn active" id="sub-tab-cards" onclick="switchSubTab('cards')">Cards</button>
+            <button class="sub-tab-btn" id="sub-tab-relics" onclick="switchSubTab('relics')">Relics</button>
+            <button class="sub-tab-btn" id="sub-tab-potions" onclick="switchSubTab('potions')">Potions</button>
+            <button class="sub-tab-btn" id="sub-tab-campfire" onclick="switchSubTab('campfire')">Campfire</button>
+            <button class="sub-tab-btn" id="sub-tab-mobs" onclick="switchSubTab('mobs')">Mobs</button>
+            <button class="sub-tab-btn" id="sub-tab-events" onclick="switchSubTab('events')">Events</button>
+            <button class="sub-tab-btn" id="sub-tab-keywords" onclick="switchSubTab('keywords')">Keywords</button>
         </div>
-        
-        <!-- Compendium cards container -->
-        <div class="compendium-grid" id="comp-grid">
-            <!-- Populated dynamically -->
-        </div>
-    </div>
 
-    <!-- ENEMIES TAB VIEW -->
-    <div id="view-enemies" style="display: none;">
-        <!-- Filters panel -->
-        <div class="filter-panel" style="flex-wrap: wrap; gap: 12px;">
-            <div class="search-wrapper" style="flex-grow: 1; min-width: 250px;">
-                <input type="text" id="enemies-search" class="search-input" placeholder="Search enemies by name, behavior, or moves...">
+        <!-- Cards Sub-View -->
+        <div id="sub-view-cards" class="comp-sub-view">
+            <div class="filter-panel">
+                <div class="search-wrapper">
+                    <input type="text" id="comp-cards-search" class="search-input" placeholder="Search cards by name or description...">
+                </div>
+                <select id="comp-cards-sort-by" class="select-filter">
+                    <option value="name">Sort by Name</option>
+                    <option value="rarity">Sort by Rarity</option>
+                </select>
+                <div class="char-pills" id="comp-cards-char-pills">
+                    <div class="char-pill active" data-char="all">All Classes</div>
+                    <div class="char-pill" data-char="ironclad"><img src="https://cdn.spire-codex.com/characters/combat_ironclad.webp" class="char-icon-mini" onerror="this.style.display='none';">Ironclad</div>
+                    <div class="char-pill" data-char="silent"><img src="https://cdn.spire-codex.com/characters/combat_silent.webp" class="char-icon-mini" onerror="this.style.display='none';">Silent</div>
+                    <div class="char-pill" data-char="defect"><img src="https://cdn.spire-codex.com/characters/combat_defect.webp" class="char-icon-mini" onerror="this.style.display='none';">Defect</div>
+                    <div class="char-pill" data-char="regent"><img src="https://cdn.spire-codex.com/characters/combat_regent.webp" class="char-icon-mini" onerror="this.style.display='none';">Regent</div>
+                    <div class="char-pill" data-char="necrobinder"><img src="https://cdn.spire-codex.com/characters/combat_necrobinder.webp" class="char-icon-mini" onerror="this.style.display='none';">Necrobinder</div>
+                    <div class="char-pill" data-char="shared">Neutral / Shared</div>
+                </div>
             </div>
-            
-            <div class="char-pills" id="enemies-type-pills">
-                <div class="char-pill active" data-type="all">All Types</div>
-                <div class="char-pill" data-type="normal">Normal</div>
-                <div class="char-pill" data-type="elite">Elite</div>
-                <div class="char-pill" data-type="boss">Boss</div>
-            </div>
-
-            <div class="char-pills" id="enemies-act-pills">
-                <div class="char-pill active" data-act="all">All Acts</div>
-                <div class="char-pill" data-act="Act 1 - Overgrowth">Act 1: Overgrowth</div>
-                <div class="char-pill" data-act="Act 2 - Hive">Act 2: Hive</div>
-                <div class="char-pill" data-act="Act 3 - Glory">Act 3: Glory</div>
-                <div class="char-pill" data-act="Underdocks">Underdocks</div>
-                <div class="char-pill" data-act="other">Other / Special</div>
+            <div class="compendium-grid" id="comp-cards-grid">
+                <!-- Populated dynamically -->
             </div>
         </div>
 
-        <!-- Compendium detailed enemy list -->
-        <div class="card runs-container" id="enemies-table-container" style="margin-top: 16px;">
-            <div class="runs-header-row">
-                <h3 style="margin: 0; font-size: 16px; font-weight: 600; color: var(--text-main);">Monsters & Bosses Compendium</h3>
-                <span class="runs-count-badge" id="enemies-count">Showing 0 enemies</span>
+        <!-- Relics Sub-View -->
+        <div id="sub-view-relics" class="comp-sub-view" style="display: none;">
+            <div class="filter-panel">
+                <div class="search-wrapper">
+                    <input type="text" id="comp-relics-search" class="search-input" placeholder="Search relics by name or description...">
+                </div>
+                <select id="comp-relics-sort-by" class="select-filter">
+                    <option value="name">Sort by Name</option>
+                    <option value="rarity">Sort by Rarity</option>
+                </select>
+                <div class="char-pills" id="comp-relics-char-pills">
+                    <div class="char-pill active" data-char="all">All Relics</div>
+                    <div class="char-pill" data-char="shared">Shared / Neutral</div>
+                </div>
             </div>
-            <div class="table-wrapper" style="max-height: 600px; margin-top: 12px;">
-                <table>
-                    <thead>
-                        <tr id="enemies-header-row-tr">
-                            <th data-sort="name" onclick="sortEnemies('name')">Enemy Name</th>
-                            <th data-sort="type" onclick="sortEnemies('type')" style="width: 120px;">Type</th>
-                            <th data-sort="hp" onclick="sortEnemies('hp')" style="text-align:center; width: 120px;">HP Range</th>
-                            <th data-sort="acts" onclick="sortEnemies('acts')">Acts / Levels</th>
-                            <th style="width: 45%;">Moves & Intents</th>
-                        </tr>
-                    </thead>
-                    <tbody id="enemies-table-body">
-                        <!-- Populated dynamically -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <!-- EVENTS TAB VIEW -->
-    <div id="view-events" style="display: none;">
-        <!-- Filters panel -->
-        <div class="filter-panel" style="flex-wrap: wrap; gap: 12px;">
-            <div class="search-wrapper" style="flex-grow: 1; min-width: 250px;">
-                <input type="text" id="events-search" class="search-input" placeholder="Search events by name, text, or choice outcomes...">
-            </div>
-
-            <div class="char-pills" id="events-act-pills">
-                <div class="char-pill active" data-act="all">All Acts</div>
-                <div class="char-pill" data-act="Act 1 - Overgrowth">Act 1: Overgrowth</div>
-                <div class="char-pill" data-act="Act 2 - Hive">Act 2: Hive</div>
-                <div class="char-pill" data-act="Act 3 - Glory">Act 3: Glory</div>
-                <div class="char-pill" data-act="Underdocks">Underdocks</div>
-                <div class="char-pill" data-act="other">Other / Special</div>
+            <div class="compendium-grid" id="comp-relics-grid">
+                <!-- Populated dynamically -->
             </div>
         </div>
 
-        <div class="card runs-container" style="margin-top: 16px; padding: 20px;">
-            <div class="runs-header-row" style="margin-bottom: 16px;">
-                <h3 style="margin: 0; font-size: 16px; font-weight: 600; color: var(--text-main);">Choose Your Path: Events</h3>
-                <span class="runs-count-badge" id="events-count">Showing 0 events</span>
+        <!-- Potions Sub-View -->
+        <div id="sub-view-potions" class="comp-sub-view" style="display: none;">
+            <div class="filter-panel">
+                <div class="search-wrapper">
+                    <input type="text" id="comp-potions-search" class="search-input" placeholder="Search potions by name or description...">
+                </div>
+                <select id="comp-potions-rarity" class="select-filter">
+                    <option value="all">All Rarities</option>
+                    <option value="Common">Common</option>
+                    <option value="Uncommon">Uncommon</option>
+                    <option value="Rare">Rare</option>
+                    <option value="Token">Token</option>
+                    <option value="Event">Event</option>
+                </select>
+                <div class="char-pills" id="comp-potions-pool-pills">
+                    <div class="char-pill active" data-pool="all">All Pools</div>
+                    <div class="char-pill" data-pool="ironclad"><img src="https://cdn.spire-codex.com/characters/combat_ironclad.webp" class="char-icon-mini" onerror="this.style.display='none';">Ironclad</div>
+                    <div class="char-pill" data-pool="silent"><img src="https://cdn.spire-codex.com/characters/combat_silent.webp" class="char-icon-mini" onerror="this.style.display='none';">Silent</div>
+                    <div class="char-pill" data-pool="defect"><img src="https://cdn.spire-codex.com/characters/combat_defect.webp" class="char-icon-mini" onerror="this.style.display='none';">Defect</div>
+                    <div class="char-pill" data-pool="regent"><img src="https://cdn.spire-codex.com/characters/combat_regent.webp" class="char-icon-mini" onerror="this.style.display='none';">Regent</div>
+                    <div class="char-pill" data-pool="necrobinder"><img src="https://cdn.spire-codex.com/characters/combat_necrobinder.webp" class="char-icon-mini" onerror="this.style.display='none';">Necrobinder</div>
+                    <div class="char-pill" data-pool="shared">Shared</div>
+                </div>
             </div>
-            
-            <div class="events-grid-layout" id="events-grid">
+            <div class="compendium-grid" id="comp-potions-grid">
+                <!-- Populated dynamically -->
+            </div>
+        </div>
+
+        <!-- Campfire Sub-View -->
+        <div id="sub-view-campfire" class="comp-sub-view" style="display: none;">
+            <div class="filter-panel">
+                <div class="search-wrapper" style="flex-grow: 1;">
+                    <input type="text" id="comp-campfire-search" class="search-input" placeholder="Search campfire abilities by name, effect, or requirement...">
+                </div>
+            </div>
+            <div class="compendium-grid" id="comp-campfire-grid">
+                <!-- Populated dynamically -->
+            </div>
+        </div>
+
+        <!-- Mobs Sub-View -->
+        <div id="sub-view-mobs" class="comp-sub-view" style="display: none;">
+            <div class="filter-panel" style="flex-wrap: wrap; gap: 12px;">
+                <div class="search-wrapper" style="flex-grow: 1; min-width: 250px;">
+                    <input type="text" id="comp-mobs-search" class="search-input" placeholder="Search enemies by name, behavior, or moves...">
+                </div>
+                
+                <div class="char-pills" id="comp-mobs-type-pills">
+                    <div class="char-pill active" data-type="all">All Types</div>
+                    <div class="char-pill" data-type="normal">Normal</div>
+                    <div class="char-pill" data-type="elite">Elite</div>
+                    <div class="char-pill" data-type="boss">Boss</div>
+                </div>
+
+                <div class="char-pills" id="comp-mobs-act-pills">
+                    <div class="char-pill active" data-act="all">All Acts</div>
+                    <div class="char-pill" data-act="Act 1 - Overgrowth">Act 1: Overgrowth</div>
+                    <div class="char-pill" data-act="Act 2 - Hive">Act 2: Hive</div>
+                    <div class="char-pill" data-act="Act 3 - Glory">Act 3: Glory</div>
+                    <div class="char-pill" data-act="Underdocks">Underdocks</div>
+                    <div class="char-pill" data-act="other">Other / Special</div>
+                </div>
+            </div>
+
+            <div class="card runs-container" style="margin-top: 16px;">
+                <div class="runs-header-row">
+                    <h3 style="margin: 0; font-size: 16px; font-weight: 600; color: var(--text-main);">Monsters & Bosses Compendium</h3>
+                    <span class="runs-count-badge" id="comp-mobs-count">Showing 0 enemies</span>
+                </div>
+                <div class="table-wrapper" style="max-height: 600px; margin-top: 12px;">
+                    <table>
+                        <thead>
+                            <tr id="comp-mobs-header-row-tr">
+                                <th data-sort="name" onclick="sortEnemies('name')">Enemy Name</th>
+                                <th data-sort="type" onclick="sortEnemies('type')" style="width: 120px;">Type</th>
+                                <th data-sort="hp" onclick="sortEnemies('hp')" style="text-align:center; width: 120px;">HP Range</th>
+                                <th data-sort="acts" onclick="sortEnemies('acts')">Acts / Levels</th>
+                                <th style="width: 45%;">Moves & Intents</th>
+                            </tr>
+                        </thead>
+                        <tbody id="comp-mobs-table-body">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Events Sub-View -->
+        <div id="sub-view-events" class="comp-sub-view" style="display: none;">
+            <div class="filter-panel" style="flex-wrap: wrap; gap: 12px;">
+                <div class="search-wrapper" style="flex-grow: 1; min-width: 250px;">
+                    <input type="text" id="comp-events-search" class="search-input" placeholder="Search events by name, text, or choice outcomes...">
+                </div>
+
+                <div class="char-pills" id="comp-events-act-pills">
+                    <div class="char-pill active" data-act="all">All Acts</div>
+                    <div class="char-pill" data-act="Act 1 - Overgrowth">Act 1: Overgrowth</div>
+                    <div class="char-pill" data-act="Act 2 - Hive">Act 2: Hive</div>
+                    <div class="char-pill" data-act="Act 3 - Glory">Act 3: Glory</div>
+                    <div class="char-pill" data-act="Underdocks">Underdocks</div>
+                    <div class="char-pill" data-act="other">Other / Special</div>
+                </div>
+            </div>
+
+            <div class="card runs-container" style="margin-top: 16px; padding: 20px;">
+                <div class="runs-header-row" style="margin-bottom: 16px;">
+                    <h3 style="margin: 0; font-size: 16px; font-weight: 600; color: var(--text-main);">Choose Your Path: Events</h3>
+                    <span class="runs-count-badge" id="comp-events-count">Showing 0 events</span>
+                </div>
+                <div class="events-grid-layout" id="comp-events-grid">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Keywords Sub-View -->
+        <div id="sub-view-keywords" class="comp-sub-view" style="display: none;">
+            <div class="filter-panel">
+                <div class="search-wrapper" style="flex-grow: 1;">
+                    <input type="text" id="comp-keywords-search" class="search-input" placeholder="Search keywords by name or description...">
+                </div>
+            </div>
+            <div class="compendium-grid" id="comp-keywords-grid">
                 <!-- Populated dynamically -->
             </div>
         </div>
@@ -2280,11 +2388,11 @@ $htmlTemplate = @'
             
             <div class="char-pills" id="card-stats-char-pills">
                 <div class="char-pill active" data-char="all">All Classes</div>
-                <div class="char-pill" data-char="ironclad">Ironclad</div>
-                <div class="char-pill" data-char="silent">Silent</div>
-                <div class="char-pill" data-char="defect">Defect</div>
-                <div class="char-pill" data-char="regent">Regent</div>
-                <div class="char-pill" data-char="necrobinder">Necrobinder</div>
+                <div class="char-pill" data-char="ironclad"><img src="https://cdn.spire-codex.com/characters/combat_ironclad.webp" class="char-icon-mini" onerror="this.style.display='none';">Ironclad</div>
+                <div class="char-pill" data-char="silent"><img src="https://cdn.spire-codex.com/characters/combat_silent.webp" class="char-icon-mini" onerror="this.style.display='none';">Silent</div>
+                <div class="char-pill" data-char="defect"><img src="https://cdn.spire-codex.com/characters/combat_defect.webp" class="char-icon-mini" onerror="this.style.display='none';">Defect</div>
+                <div class="char-pill" data-char="regent"><img src="https://cdn.spire-codex.com/characters/combat_regent.webp" class="char-icon-mini" onerror="this.style.display='none';">Regent</div>
+                <div class="char-pill" data-char="necrobinder"><img src="https://cdn.spire-codex.com/characters/combat_necrobinder.webp" class="char-icon-mini" onerror="this.style.display='none';">Necrobinder</div>
                 <div class="char-pill" data-char="shared">Neutral / Shared</div>
             </div>
         </div>
@@ -2332,11 +2440,11 @@ $htmlTemplate = @'
             
             <div class="char-pills" id="relic-stats-char-pills">
                 <div class="char-pill active" data-char="all">All Classes</div>
-                <div class="char-pill" data-char="ironclad">Ironclad</div>
-                <div class="char-pill" data-char="silent">Silent</div>
-                <div class="char-pill" data-char="defect">Defect</div>
-                <div class="char-pill" data-char="regent">Regent</div>
-                <div class="char-pill" data-char="necrobinder">Necrobinder</div>
+                <div class="char-pill" data-char="ironclad"><img src="https://cdn.spire-codex.com/characters/combat_ironclad.webp" class="char-icon-mini" onerror="this.style.display='none';">Ironclad</div>
+                <div class="char-pill" data-char="silent"><img src="https://cdn.spire-codex.com/characters/combat_silent.webp" class="char-icon-mini" onerror="this.style.display='none';">Silent</div>
+                <div class="char-pill" data-char="defect"><img src="https://cdn.spire-codex.com/characters/combat_defect.webp" class="char-icon-mini" onerror="this.style.display='none';">Defect</div>
+                <div class="char-pill" data-char="regent"><img src="https://cdn.spire-codex.com/characters/combat_regent.webp" class="char-icon-mini" onerror="this.style.display='none';">Regent</div>
+                <div class="char-pill" data-char="necrobinder"><img src="https://cdn.spire-codex.com/characters/combat_necrobinder.webp" class="char-icon-mini" onerror="this.style.display='none';">Necrobinder</div>
             </div>
         </div>
         
@@ -2595,17 +2703,18 @@ $htmlTemplate = @'
         let shareChart = null;
         let selectedRunId = null;
         
-        // Cards & Relics (Compendium) Tab state
-        let activeCompChar = 'all';
-        let compSortBy = 'name';
-
-        // Enemies Tab state
-        let activeEnemiesAct = 'all';
-        let activeEnemiesType = 'all';
-        let enemiesSortCol = 'name';
-        let enemiesSortDir = 'asc';
-
-        // Events Tab state
+        // Compendium Tab state
+        let activeCompSubTab = 'cards';
+        let activeCardsChar = 'all';
+        let cardsSortBy = 'name';
+        let activeRelicsChar = 'all';
+        let relicsSortBy = 'name';
+        let activePotionsRarity = 'all';
+        let activePotionsPool = 'all';
+        let activeMobsAct = 'all';
+        let activeMobsType = 'all';
+        let mobsSortCol = 'name';
+        let mobsSortDir = 'asc';
         let activeEventsAct = 'all';
 
         // Card Stats Tab state
@@ -2675,21 +2784,33 @@ $htmlTemplate = @'
         const runInput = document.getElementById('run-input');
         const resetBtn = document.getElementById('reset-btn');
         
-        // Compendium (Cards & Relics) DOM
-        const compSearch = document.getElementById('comp-search');
-        const compFilterType = document.getElementById('comp-filter-type');
-        const compSortBySelect = document.getElementById('comp-sort-by');
-        const compGrid = document.getElementById('comp-grid');
-
-        // Enemies DOM
-        const enemiesSearch = document.getElementById('enemies-search');
-        const enemiesTableBody = document.getElementById('enemies-table-body');
-        const enemiesCount = document.getElementById('enemies-count');
-
-        // Events DOM
-        const eventsSearch = document.getElementById('events-search');
-        const eventsGrid = document.getElementById('events-grid');
-        const eventsCount = document.getElementById('events-count');
+        // Compendium DOM Elements
+        // Cards
+        const compCardsSearch = document.getElementById('comp-cards-search');
+        const compCardsSortBy = document.getElementById('comp-cards-sort-by');
+        const compCardsGrid = document.getElementById('comp-cards-grid');
+        // Relics
+        const compRelicsSearch = document.getElementById('comp-relics-search');
+        const compRelicsSortBy = document.getElementById('comp-relics-sort-by');
+        const compRelicsGrid = document.getElementById('comp-relics-grid');
+        // Potions
+        const compPotionsSearch = document.getElementById('comp-potions-search');
+        const compPotionsRarity = document.getElementById('comp-potions-rarity');
+        const compPotionsGrid = document.getElementById('comp-potions-grid');
+        // Campfire
+        const compCampfireSearch = document.getElementById('comp-campfire-search');
+        const compCampfireGrid = document.getElementById('comp-campfire-grid');
+        // Mobs
+        const compMobsSearch = document.getElementById('comp-mobs-search');
+        const compMobsTableBody = document.getElementById('comp-mobs-table-body');
+        const compMobsCount = document.getElementById('comp-mobs-count');
+        // Events
+        const compEventsSearch = document.getElementById('comp-events-search');
+        const compEventsGrid = document.getElementById('comp-events-grid');
+        const compEventsCount = document.getElementById('comp-events-count');
+        // Keywords
+        const compKeywordsSearch = document.getElementById('comp-keywords-search');
+        const compKeywordsGrid = document.getElementById('comp-keywords-grid');
 
         // Colors
         const charColors = {
@@ -2830,53 +2951,77 @@ $htmlTemplate = @'
                 });
             });
 
-            // Cards & Relics (Compendium) event listeners
-            if (compSearch) compSearch.addEventListener('input', renderCompendium);
-            if (compFilterType) compFilterType.addEventListener('change', renderCompendium);
-            if (compSortBySelect) {
-                compSortBySelect.addEventListener('change', () => {
-                    compSortBy = compSortBySelect.value;
-                    renderCompendium();
-                });
-            }
-            document.querySelectorAll('#comp-char-pills .char-pill').forEach(pill => {
+            // Cards Sub-view listeners
+            if (compCardsSearch) compCardsSearch.addEventListener('input', renderCompendiumCards);
+            if (compCardsSortBy) compCardsSortBy.addEventListener('change', renderCompendiumCards);
+            document.querySelectorAll('#comp-cards-char-pills .char-pill').forEach(pill => {
                 pill.addEventListener('click', () => {
-                    document.querySelectorAll('#comp-char-pills .char-pill').forEach(p => p.classList.remove('active'));
+                    document.querySelectorAll('#comp-cards-char-pills .char-pill').forEach(p => p.classList.remove('active'));
                     pill.classList.add('active');
-                    activeCompChar = pill.dataset.char;
-                    renderCompendium();
+                    activeCardsChar = pill.dataset.char;
+                    renderCompendiumCards();
                 });
             });
 
-            // Enemies tab event listeners
-            if (enemiesSearch) enemiesSearch.addEventListener('input', renderEnemies);
-            document.querySelectorAll('#enemies-act-pills .char-pill').forEach(pill => {
+            // Relics Sub-view listeners
+            if (compRelicsSearch) compRelicsSearch.addEventListener('input', renderCompendiumRelics);
+            if (compRelicsSortBy) compRelicsSortBy.addEventListener('change', renderCompendiumRelics);
+            document.querySelectorAll('#comp-relics-char-pills .char-pill').forEach(pill => {
                 pill.addEventListener('click', () => {
-                    document.querySelectorAll('#enemies-act-pills .char-pill').forEach(p => p.classList.remove('active'));
+                    document.querySelectorAll('#comp-relics-char-pills .char-pill').forEach(p => p.classList.remove('active'));
                     pill.classList.add('active');
-                    activeEnemiesAct = pill.dataset.act;
-                    renderEnemies();
-                });
-            });
-            document.querySelectorAll('#enemies-type-pills .char-pill').forEach(pill => {
-                pill.addEventListener('click', () => {
-                    document.querySelectorAll('#enemies-type-pills .char-pill').forEach(p => p.classList.remove('active'));
-                    pill.classList.add('active');
-                    activeEnemiesType = pill.dataset.type;
-                    renderEnemies();
+                    activeRelicsChar = pill.dataset.char;
+                    renderCompendiumRelics();
                 });
             });
 
-            // Events tab event listeners
-            if (eventsSearch) eventsSearch.addEventListener('input', renderEvents);
-            document.querySelectorAll('#events-act-pills .char-pill').forEach(pill => {
+            // Potions Sub-view listeners
+            if (compPotionsSearch) compPotionsSearch.addEventListener('input', renderCompendiumPotions);
+            if (compPotionsRarity) compPotionsRarity.addEventListener('change', renderCompendiumPotions);
+            document.querySelectorAll('#comp-potions-pool-pills .char-pill').forEach(pill => {
                 pill.addEventListener('click', () => {
-                    document.querySelectorAll('#events-act-pills .char-pill').forEach(p => p.classList.remove('active'));
+                    document.querySelectorAll('#comp-potions-pool-pills .char-pill').forEach(p => p.classList.remove('active'));
+                    pill.classList.add('active');
+                    activePotionsPool = pill.dataset.pool;
+                    renderCompendiumPotions();
+                });
+            });
+
+            // Campfire Sub-view listeners
+            if (compCampfireSearch) compCampfireSearch.addEventListener('input', renderCompendiumCampfire);
+
+            // Mobs Sub-view listeners
+            if (compMobsSearch) compMobsSearch.addEventListener('input', renderCompendiumMobs);
+            document.querySelectorAll('#comp-mobs-type-pills .char-pill').forEach(pill => {
+                pill.addEventListener('click', () => {
+                    document.querySelectorAll('#comp-mobs-type-pills .char-pill').forEach(p => p.classList.remove('active'));
+                    pill.classList.add('active');
+                    activeMobsType = pill.dataset.type;
+                    renderCompendiumMobs();
+                });
+            });
+            document.querySelectorAll('#comp-mobs-act-pills .char-pill').forEach(pill => {
+                pill.addEventListener('click', () => {
+                    document.querySelectorAll('#comp-mobs-act-pills .char-pill').forEach(p => p.classList.remove('active'));
+                    pill.classList.add('active');
+                    activeMobsAct = pill.dataset.act;
+                    renderCompendiumMobs();
+                });
+            });
+
+            // Events Sub-view listeners
+            if (compEventsSearch) compEventsSearch.addEventListener('input', renderCompendiumEvents);
+            document.querySelectorAll('#comp-events-act-pills .char-pill').forEach(pill => {
+                pill.addEventListener('click', () => {
+                    document.querySelectorAll('#comp-events-act-pills .char-pill').forEach(p => p.classList.remove('active'));
                     pill.classList.add('active');
                     activeEventsAct = pill.dataset.act;
-                    renderEvents();
+                    renderCompendiumEvents();
                 });
             });
+
+            // Keywords Sub-view listeners
+            if (compKeywordsSearch) compKeywordsSearch.addEventListener('input', renderCompendiumKeywords);
             
             // Overview KPI cards event listeners
             document.getElementById('kpi-card-runs').addEventListener('mouseenter', (e) => showKpiTooltip(e, 'runs'));
@@ -4080,7 +4225,7 @@ $htmlTemplate = @'
             
             const mainGrid = document.getElementById('main-grid');
             
-            const tabViews = ['view-runs', 'view-multiplayer', 'view-compendium', 'view-enemies', 'view-events', 'view-card-stats', 'view-relic-stats'];
+            const tabViews = ['view-runs', 'view-multiplayer', 'view-compendium', 'view-card-stats', 'view-relic-stats'];
             tabViews.forEach(viewId => {
                 const el = document.getElementById(viewId);
                 if (el) el.style.display = 'none';
@@ -4113,15 +4258,7 @@ $htmlTemplate = @'
             } else if (tab === 'compendium') {
                 if (mainGrid) mainGrid.style.display = 'none';
                 document.getElementById('view-compendium').style.display = 'block';
-                renderCompendium();
-            } else if (tab === 'enemies') {
-                if (mainGrid) mainGrid.style.display = 'none';
-                document.getElementById('view-enemies').style.display = 'block';
-                renderEnemies();
-            } else if (tab === 'events') {
-                if (mainGrid) mainGrid.style.display = 'none';
-                document.getElementById('view-events').style.display = 'block';
-                renderEvents();
+                switchSubTab(activeCompSubTab);
             } else if (tab === 'card-stats') {
                 if (mainGrid) mainGrid.style.display = 'none';
                 document.getElementById('view-card-stats').style.display = 'block';
@@ -4453,63 +4590,84 @@ $htmlTemplate = @'
             document.getElementById('db-tooltip').style.display = 'none';
         }
 
-        // Render Compendium View
-        // Render Compendium View (Cards & Relics Only)
-        function renderCompendium() {
-            const searchVal = compSearch.value.toLowerCase();
-            const typeVal = compFilterType.value;
-            const sortByVal = compSortBySelect ? compSortBySelect.value : 'name';
+        // Switch Compendium Sub-Tabs
+        function switchSubTab(subTab) {
+            activeCompSubTab = subTab;
             
-            const charPillsContainer = document.getElementById('comp-char-pills');
-            if (charPillsContainer) charPillsContainer.style.display = 'flex';
-            compGrid.style.display = 'grid';
-            compSearch.placeholder = 'Search cards or relics by name or description...';
-
-            compGrid.innerHTML = '';
+            // Toggle active class on sub-tab buttons
+            document.querySelectorAll('.sub-tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            const activeBtn = document.getElementById(`sub-tab-${subTab}`);
+            if (activeBtn) activeBtn.classList.add('active');
             
-            let items = [];
-            
-            // Load and label items from DB
-            if (sts2Database) {
-                if (typeVal === 'all' || typeVal === 'card') {
-                    Object.entries(sts2Database.cards).forEach(([id, card]) => {
-                        items.push({ id, ...card, category: 'card' });
-                    });
+            // Show / Hide Sub-Views
+            const subViews = ['cards', 'relics', 'potions', 'campfire', 'mobs', 'events', 'keywords'];
+            subViews.forEach(viewName => {
+                const viewEl = document.getElementById(`sub-view-${viewName}`);
+                if (viewEl) {
+                    viewEl.style.display = (viewName === subTab) ? 'block' : 'none';
                 }
-                if (typeVal === 'all' || typeVal === 'relic') {
-                    Object.entries(sts2Database.relics).forEach(([id, relic]) => {
-                        items.push({ id, ...relic, category: 'relic' });
-                    });
+            });
+            
+            // Trigger correct render routine
+            if (subTab === 'cards') {
+                renderCompendiumCards();
+            } else if (subTab === 'relics') {
+                renderCompendiumRelics();
+            } else if (subTab === 'potions') {
+                renderCompendiumPotions();
+            } else if (subTab === 'campfire') {
+                renderCompendiumCampfire();
+            } else if (subTab === 'mobs') {
+                renderCompendiumMobs();
+            } else if (subTab === 'events') {
+                renderCompendiumEvents();
+            } else if (subTab === 'keywords') {
+                renderCompendiumKeywords();
+            }
+        }
+
+        // Render Cards Sub-View
+        function renderCompendiumCards() {
+            const searchVal = compCardsSearch ? compCardsSearch.value.toLowerCase() : '';
+            const sortByVal = compCardsSortBy ? compCardsSortBy.value : 'name';
+            
+            if (!compCardsGrid) return;
+            compCardsGrid.innerHTML = '';
+            
+            if (!sts2Database || !sts2Database.cards) {
+                compCardsGrid.innerHTML = '<div class="no-data" style="grid-column: 1 / -1;">No cards found in database.</div>';
+                return;
+            }
+            
+            let items = Object.entries(sts2Database.cards).map(([id, card]) => ({ id, ...card }));
+            
+            // Filter by character class color
+            if (activeCardsChar !== 'all') {
+                if (activeCardsChar === 'shared') {
+                    const knownClasses = ['ironclad', 'silent', 'defect', 'regent', 'necrobinder'];
+                    items = items.filter(c => !c.color || !knownClasses.includes(c.color.toLowerCase()));
+                } else {
+                    items = items.filter(c => c.color && c.color.toLowerCase() === activeCardsChar);
                 }
             }
             
-            // Filter items
-            let filteredItems = items.filter(item => {
-                // Class character filter for Cards & Relics
-                if (activeCompChar !== 'all') {
-                    if (item.category === 'card') {
-                        if (!item.color) return activeCompChar === 'shared';
-                        if (item.color.toLowerCase() !== activeCompChar) return false;
-                    } else if (item.category === 'relic') {
-                        if (activeCompChar === 'shared') {
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    }
-                }
-                
-                // Search term
-                if (searchVal) {
-                    const matchName = item.name.toLowerCase().includes(searchVal);
-                    const matchDesc = item.desc && item.desc.toLowerCase().includes(searchVal);
-                    if (!matchName && !matchDesc) return false;
-                }
-                
-                return true;
-            });
-
-            // Sorting logic
+            // Filter by search query
+            if (searchVal) {
+                items = items.filter(c => {
+                    const matchName = c.name && c.name.toLowerCase().includes(searchVal);
+                    const matchDesc = c.desc && c.desc.toLowerCase().includes(searchVal);
+                    const matchType = c.type && c.type.toLowerCase().includes(searchVal);
+                    return matchName || matchDesc || matchType;
+                });
+            }
+            
+            if (items.length === 0) {
+                compCardsGrid.innerHTML = '<div class="no-data" style="grid-column: 1 / -1;">No cards match active filters.</div>';
+                return;
+            }
+            
             const RARITY_ORDER = {
                 'basic': 1,
                 'starter': 1,
@@ -4527,8 +4685,90 @@ $htmlTemplate = @'
                 'none': 99,
                 'unknown': 99
             };
+            
+            items.sort((a, b) => {
+                if (sortByVal === 'rarity') {
+                    const rarityA = RARITY_ORDER[(a.rarity || '').toLowerCase()] || 99;
+                    const rarityB = RARITY_ORDER[(b.rarity || '').toLowerCase()] || 99;
+                    if (rarityA !== rarityB) {
+                        return rarityA - rarityB;
+                    }
+                }
+                return a.name.localeCompare(b.name);
+            });
+            
+            items.forEach(item => {
+                const el = document.createElement('div');
+                el.dataset.id = item.id;
+                const rarityClass = 'rarity-' + (item.rarity || 'common').toLowerCase();
+                el.className = 'compendium-card ' + rarityClass;
+                
+                const cleanColor = item.color ? item.color.charAt(0).toUpperCase() + item.color.slice(1).toLowerCase() : 'Neutral';
+                el.innerHTML = `
+                    <div class="comp-card-header">
+                        <span class="comp-card-name">${item.name}</span>
+                        <span class="comp-card-cost">${item.cost !== "" ? item.cost : "No Cost"}</span>
+                    </div>
+                    <div class="comp-card-meta">
+                        <span>${item.type}</span>
+                        <span class="rarity-${item.rarity.toLowerCase()}">${item.rarity}</span>
+                    </div>
+                    <div class="comp-card-desc">${formatDescription(item.desc)}</div>
+                    <div style="font-size: 9px; color: var(--text-muted); text-align: right; margin-top: auto; padding-top: 6px;">${cleanColor}</div>
+                `;
+                
+                // Tooltips
+                el.addEventListener('mouseenter', (e) => showTooltip(e, item.id));
+                el.addEventListener('mousemove', moveTooltip);
+                el.addEventListener('mouseleave', hideTooltip);
+                
+                compCardsGrid.appendChild(el);
+            });
+        }
 
-            filteredItems.sort((a, b) => {
+        // Render Relics Sub-View
+        function renderCompendiumRelics() {
+            const searchVal = compRelicsSearch ? compRelicsSearch.value.toLowerCase() : '';
+            const sortByVal = compRelicsSortBy ? compRelicsSortBy.value : 'name';
+            
+            if (!compRelicsGrid) return;
+            compRelicsGrid.innerHTML = '';
+            
+            if (!sts2Database || !sts2Database.relics) {
+                compRelicsGrid.innerHTML = '<div class="no-data" style="grid-column: 1 / -1;">No relics found in database.</div>';
+                return;
+            }
+            
+            let items = Object.entries(sts2Database.relics).map(([id, relic]) => ({ id, ...relic }));
+            
+            // Relic search filter
+            if (searchVal) {
+                items = items.filter(r => {
+                    const matchName = r.name && r.name.toLowerCase().includes(searchVal);
+                    const matchDesc = r.desc && r.desc.toLowerCase().includes(searchVal);
+                    return matchName || matchDesc;
+                });
+            }
+            
+            if (items.length === 0) {
+                compRelicsGrid.innerHTML = '<div class="no-data" style="grid-column: 1 / -1;">No relics match active filters.</div>';
+                return;
+            }
+            
+            const RARITY_ORDER = {
+                'starter': 1,
+                'common': 2,
+                'uncommon': 3,
+                'rare': 4,
+                'boss': 5,
+                'shop': 6,
+                'special': 7,
+                'event': 8,
+                'none': 99,
+                'unknown': 99
+            };
+            
+            items.sort((a, b) => {
                 if (sortByVal === 'rarity') {
                     const rarityA = RARITY_ORDER[(a.rarity || '').replace(' Relic', '').toLowerCase()] || 99;
                     const rarityB = RARITY_ORDER[(b.rarity || '').replace(' Relic', '').toLowerCase()] || 99;
@@ -4536,73 +4776,231 @@ $htmlTemplate = @'
                         return rarityA - rarityB;
                     }
                 }
-                // Tie breaker or sort by name
                 return a.name.localeCompare(b.name);
             });
-
-            if (filteredItems.length === 0) {
-                compGrid.innerHTML = '<div class="no-data" style="grid-column: 1 / -1;">No items match active filters.</div>';
-                return;
-            }
-
-            filteredItems.forEach(item => {
+            
+            items.forEach(item => {
                 const el = document.createElement('div');
                 el.dataset.id = item.id;
-                
-                // Assign rarity/type CSS class
-                let rarityClass = '';
-                if (item.category === 'card') {
-                    rarityClass = 'rarity-' + (item.rarity || 'common').toLowerCase();
-                } else if (item.category === 'relic') {
-                    const relRarity = (item.rarity || '').replace(/ Relic/i, '').toLowerCase();
-                    rarityClass = 'rarity-' + (relRarity || 'common');
-                }
+                const relRarity = (item.rarity || '').replace(/ Relic/i, '').toLowerCase();
+                const rarityClass = 'rarity-' + (relRarity || 'common');
                 el.className = 'compendium-card ' + rarityClass;
                 
-                if (item.category === 'card') {
-                    const cleanColor = item.color ? item.color.charAt(0).toUpperCase() + item.color.slice(1).toLowerCase() : 'Neutral';
-                    el.innerHTML = `
-                        <div class="comp-card-header">
-                            <span class="comp-card-name">${item.name}</span>
-                            <span class="comp-card-cost">${item.cost !== "" ? item.cost : "No Cost"}</span>
-                        </div>
-                        <div class="comp-card-meta">
-                            <span>${item.type}</span>
-                            <span class="rarity-${item.rarity.toLowerCase()}">${item.rarity}</span>
-                        </div>
-                        <div class="comp-card-desc">${formatDescription(item.desc)}</div>
-                        <div style="font-size: 9px; color: var(--text-muted); text-align: right; margin-top: auto;">${cleanColor}</div>
-                    `;
-                } else if (item.category === 'relic') {
-                    const imgUrl = `https://spire-codex.com/static/images/relics/${item.img.toLowerCase()}`;
-                    el.innerHTML = `
-                        <div class="comp-relic-title-row">
-                            <img class="comp-relic-img-preview" src="${imgUrl}" alt="${item.name}" onerror="this.style.display='none';">
-                            <span class="comp-card-name">${item.name}</span>
-                        </div>
-                        <div class="comp-card-meta">
-                            <span>Relic</span>
-                            <span class="rarity-${item.rarity.replace(' Relic', '').toLowerCase()}">${item.rarity}</span>
-                        </div>
-                        <div class="comp-card-desc">${formatDescription(item.desc)}</div>
-                    `;
-                }
+                const imgUrl = `https://spire-codex.com/static/images/relics/${item.img.toLowerCase()}`;
+                el.innerHTML = `
+                    <div class="comp-relic-title-row">
+                        <img class="comp-relic-img-preview" src="${imgUrl}" alt="${item.name}" onerror="this.style.display='none';">
+                        <span class="comp-card-name">${item.name}</span>
+                    </div>
+                    <div class="comp-card-meta">
+                        <span>Relic</span>
+                        <span class="rarity-${(item.rarity || '').replace(' Relic', '').toLowerCase()}">${item.rarity}</span>
+                    </div>
+                    <div class="comp-card-desc">${formatDescription(item.desc)}</div>
+                `;
                 
-                // Attach hover tooltips
+                // Tooltips
                 el.addEventListener('mouseenter', (e) => showTooltip(e, item.id));
                 el.addEventListener('mousemove', moveTooltip);
                 el.addEventListener('mouseleave', hideTooltip);
                 
-                compGrid.appendChild(el);
+                compRelicsGrid.appendChild(el);
             });
         }
 
-        // Render Enemies View
-        function renderEnemies() {
-            const searchVal = enemiesSearch ? enemiesSearch.value.toLowerCase() : '';
+        // Render Potions Sub-View
+        function renderCompendiumPotions() {
+            const searchVal = compPotionsSearch ? compPotionsSearch.value.toLowerCase() : '';
+            const rarityVal = compPotionsRarity ? compPotionsRarity.value : 'all';
             
-            if (!enemiesTableBody) return;
-            enemiesTableBody.innerHTML = '';
+            if (!compPotionsGrid) return;
+            compPotionsGrid.innerHTML = '';
+            
+            if (!sts2Database || !sts2Database.potions) {
+                compPotionsGrid.innerHTML = '<div class="no-data" style="grid-column: 1 / -1;">No potions found in database.</div>';
+                return;
+            }
+            
+            let items = Object.entries(sts2Database.potions).map(([id, p]) => ({ id, ...p }));
+            
+            // Filter by character pool
+            if (activePotionsPool !== 'all') {
+                if (activePotionsPool === 'shared') {
+                    const knownPools = ['ironclad', 'silent', 'defect', 'regent', 'necrobinder'];
+                    items = items.filter(p => !p.pool || !knownPools.includes(p.pool.toLowerCase()));
+                } else {
+                    items = items.filter(p => p.pool && p.pool.toLowerCase() === activePotionsPool);
+                }
+            }
+            
+            // Filter by rarity
+            if (rarityVal !== 'all') {
+                items = items.filter(p => p.rarity && p.rarity.toLowerCase() === rarityVal.toLowerCase());
+            }
+            
+            // Filter by search query
+            if (searchVal) {
+                items = items.filter(p => {
+                    const matchName = p.name && p.name.toLowerCase().includes(searchVal);
+                    const matchDesc = p.desc && p.desc.toLowerCase().includes(searchVal);
+                    return matchName || matchDesc;
+                });
+            }
+            
+            if (items.length === 0) {
+                compPotionsGrid.innerHTML = '<div class="no-data" style="grid-column: 1 / -1;">No potions match active filters.</div>';
+                return;
+            }
+            
+            items.sort((a, b) => a.name.localeCompare(b.name));
+            
+            items.forEach(item => {
+                const el = document.createElement('div');
+                const rarityClass = 'rarity-' + (item.rarity || 'common').toLowerCase();
+                el.className = 'compendium-card ' + rarityClass;
+                
+                const cleanPool = item.pool ? item.pool.charAt(0).toUpperCase() + item.pool.slice(1).toLowerCase() : 'Shared';
+                const imgUrl = `https://spire-codex.com/static/images/potions/${item.img.toLowerCase()}`;
+                
+                el.innerHTML = `
+                    <div class="comp-relic-title-row" style="display: flex; align-items: center; gap: 8px;">
+                        <img class="comp-relic-img-preview" src="${imgUrl}" alt="${item.name}" style="width: 24px; height: 24px;" onerror="this.src=''; this.style.display='none'; this.nextElementSibling.style.display='inline';">
+                        <span class="fallback-potion-icon" style="display: none; font-size: 20px;">🧪</span>
+                        <span class="comp-card-name" style="font-size: 15px;">${item.name}</span>
+                    </div>
+                    <div class="comp-card-meta" style="margin-top: 4px;">
+                        <span>Potion</span>
+                        <span class="rarity-${item.rarity.toLowerCase()}">${item.rarity}</span>
+                    </div>
+                    <div class="comp-card-desc" style="margin-top: 8px;">${formatDescription(item.desc)}</div>
+                    <div style="font-size: 9px; color: var(--text-muted); text-align: right; margin-top: auto; padding-top: 6px;">${cleanPool}</div>
+                `;
+                
+                compPotionsGrid.appendChild(el);
+            });
+        }
+
+        // Static Campfire Abilities
+        const staticCampfireAbilities = [
+            {
+                name: "Rest",
+                effect: "Recover 30% of your Max HP.",
+                requirement: "None (Default)",
+                type: "Default",
+                colorClass: "rarity-common"
+            },
+            {
+                name: "Forge",
+                effect: "Permanently upgrade a card in your deck.",
+                requirement: "None (Default)",
+                type: "Default",
+                colorClass: "rarity-common"
+            },
+            {
+                name: "Dig",
+                effect: "Find a random Relic.",
+                requirement: "Requires the Shovel relic.",
+                type: "Relic-Unlocked",
+                colorClass: "rarity-uncommon"
+            },
+            {
+                name: "Lift",
+                effect: "Gain 1 permanent Strength for the rest of the run.",
+                requirement: "Requires the Girya relic.",
+                type: "Relic-Unlocked",
+                colorClass: "rarity-uncommon"
+            },
+            {
+                name: "Cook",
+                effect: "Cook food to gain max HP and heal.",
+                requirement: "Requires the Meat Cleaver relic.",
+                type: "Relic-Unlocked",
+                colorClass: "rarity-uncommon"
+            },
+            {
+                name: "Clone",
+                effect: "Duplicate a card in your deck.",
+                requirement: "Requires the Pael's Growth relic.",
+                type: "Relic-Unlocked",
+                colorClass: "rarity-rare"
+            },
+            {
+                name: "Hatch",
+                effect: "Hatch a bird companion to aid you in combat.",
+                requirement: "Requires the Byrdonis Egg (from Event).",
+                type: "Event-Unlocked",
+                colorClass: "rarity-special"
+            },
+            {
+                name: "Kindle",
+                effect: "Gain special combat buffs or stats.",
+                requirement: "Requires the Pumpkin Candle relic.",
+                type: "Relic-Unlocked",
+                colorClass: "rarity-uncommon"
+            },
+            {
+                name: "Mend",
+                effect: "Heal an ally's HP (multiplayer).",
+                requirement: "Co-op / Multiplayer Mode only.",
+                type: "Co-op Exclusive",
+                colorClass: "rarity-boss"
+            }
+        ];
+
+        // Render Campfire Sub-View
+        function renderCampfire() {
+            renderCompendiumCampfire();
+        }
+
+        function renderCompendiumCampfire() {
+            const searchVal = compCampfireSearch ? compCampfireSearch.value.toLowerCase() : '';
+            
+            if (!compCampfireGrid) return;
+            compCampfireGrid.innerHTML = '';
+            
+            let filtered = staticCampfireAbilities;
+            if (searchVal) {
+                filtered = staticCampfireAbilities.filter(a => {
+                    return a.name.toLowerCase().includes(searchVal) || 
+                           a.effect.toLowerCase().includes(searchVal) || 
+                           a.requirement.toLowerCase().includes(searchVal) ||
+                           a.type.toLowerCase().includes(searchVal);
+                });
+            }
+            
+            if (filtered.length === 0) {
+                compCampfireGrid.innerHTML = '<div class="no-data" style="grid-column: 1 / -1;">No campfire abilities match search.</div>';
+                return;
+            }
+            
+            filtered.forEach(item => {
+                const el = document.createElement('div');
+                el.className = 'compendium-card ' + item.colorClass;
+                
+                el.innerHTML = `
+                    <div class="comp-card-header">
+                        <span class="comp-card-name" style="font-size: 16px;">${item.name}</span>
+                        <span style="font-size: 11px; padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.05); color: var(--text-muted);">${item.type}</span>
+                    </div>
+                    <div class="comp-card-desc" style="margin-top: 10px;">${item.effect}</div>
+                    <div style="font-size: 11px; color: var(--accent-primary); margin-top: auto; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.03);">
+                        <strong>Requirement:</strong> ${item.requirement}
+                    </div>
+                `;
+                compCampfireGrid.appendChild(el);
+            });
+        }
+
+        // Render Mobs Sub-View (formerly Enemies)
+        function renderEnemies() {
+            renderCompendiumMobs();
+        }
+
+        function renderCompendiumMobs() {
+            const searchVal = compMobsSearch ? compMobsSearch.value.toLowerCase() : '';
+            
+            if (!compMobsTableBody) return;
+            compMobsTableBody.innerHTML = '';
             
             let monsters = [];
             if (sts2Database && sts2Database.monsters) {
@@ -4611,26 +5009,26 @@ $htmlTemplate = @'
                 });
             }
             
-            // Filter enemies
+            // Filter monsters
             let filteredMonsters = monsters.filter(item => {
                 // Act filter
-                if (activeEnemiesAct !== 'all') {
+                if (activeMobsAct !== 'all') {
                     const actsList = item.acts || [];
-                    if (activeEnemiesAct === 'other') {
+                    if (activeMobsAct === 'other') {
                         const isStandardAct = actsList.some(a => a.includes('Act 1') || a.includes('Act 2') || a.includes('Act 3') || a.includes('Underdocks'));
                         if (isStandardAct && actsList.length > 0) return false;
                     } else {
-                        const hasAct = actsList.some(a => a.toLowerCase().includes(activeEnemiesAct.toLowerCase()));
+                        const hasAct = actsList.some(a => a.toLowerCase().includes(activeMobsAct.toLowerCase()));
                         if (!hasAct) return false;
                     }
                 }
                 
                 // Type filter
-                if (activeEnemiesType !== 'all') {
-                    if ((item.type || '').toLowerCase() !== activeEnemiesType.toLowerCase()) return false;
+                if (activeMobsType !== 'all') {
+                    if ((item.type || '').toLowerCase() !== activeMobsType.toLowerCase()) return false;
                 }
                 
-                // Search term
+                // Search query
                 if (searchVal) {
                     const matchName = item.name.toLowerCase().includes(searchVal);
                     const matchPattern = item.pattern && item.pattern.toLowerCase().includes(searchVal);
@@ -4642,41 +5040,41 @@ $htmlTemplate = @'
             });
 
             // Update table headers
-            updateTableHeaders('enemies-header-row-tr', enemiesSortCol, enemiesSortDir);
+            updateTableHeaders('comp-mobs-header-row-tr', mobsSortCol, mobsSortDir);
 
             // Sort enemies
             filteredMonsters.sort((a, b) => {
-                let valA = a[enemiesSortCol];
-                let valB = b[enemiesSortCol];
+                let valA = a[mobsSortCol];
+                let valB = b[mobsSortCol];
 
-                if (enemiesSortCol === 'name') {
+                if (mobsSortCol === 'name') {
                     valA = (valA || '').toString().toLowerCase();
                     valB = (valB || '').toString().toLowerCase();
-                    return enemiesSortDir === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
-                } else if (enemiesSortCol === 'type') {
+                    return mobsSortDir === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+                } else if (mobsSortCol === 'type') {
                     const TYPE_ORDER = { 'normal': 0, 'elite': 1, 'boss': 2 };
                     valA = TYPE_ORDER[(a.type || '').toLowerCase()] ?? 99;
                     valB = TYPE_ORDER[(b.type || '').toLowerCase()] ?? 99;
-                } else if (enemiesSortCol === 'hp') {
+                } else if (mobsSortCol === 'hp') {
                     valA = Number(a.minHp) || 0;
                     valB = Number(b.minHp) || 0;
-                } else if (enemiesSortCol === 'acts') {
+                } else if (mobsSortCol === 'acts') {
                     valA = ((a.acts && a.acts[0]) || '').toString().toLowerCase();
                     valB = ((b.acts && b.acts[0]) || '').toString().toLowerCase();
-                    return enemiesSortDir === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+                    return mobsSortDir === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
                 }
 
-                if (valA < valB) return enemiesSortDir === 'asc' ? -1 : 1;
-                if (valA > valB) return enemiesSortDir === 'asc' ? 1 : -1;
+                if (valA < valB) return mobsSortDir === 'asc' ? -1 : 1;
+                if (valA > valB) return mobsSortDir === 'asc' ? 1 : -1;
                 return 0;
             });
 
-            if (enemiesCount) {
-                enemiesCount.textContent = `Showing ${filteredMonsters.length} enemies`;
+            if (compMobsCount) {
+                compMobsCount.textContent = `Showing ${filteredMonsters.length} enemies`;
             }
 
             if (filteredMonsters.length === 0) {
-                enemiesTableBody.innerHTML = '<tr><td colspan="5" class="no-data" style="text-align:center;">No enemies match active filters.</td></tr>';
+                compMobsTableBody.innerHTML = '<tr><td colspan="5" class="no-data" style="text-align:center;">No enemies match active filters.</td></tr>';
                 return;
             }
 
@@ -4749,21 +5147,25 @@ $htmlTemplate = @'
                     <td>${movesHtml}</td>
                 `;
 
-                // Attach hover tooltips to the row
+                // Hover tooltips
                 tr.addEventListener('mouseenter', (e) => showTooltip(e, item.id));
                 tr.addEventListener('mousemove', moveTooltip);
                 tr.addEventListener('mouseleave', hideTooltip);
 
-                enemiesTableBody.appendChild(tr);
+                compMobsTableBody.appendChild(tr);
             });
         }
 
-        // Render Events View
+        // Render Events Sub-View
         function renderEvents() {
-            const searchVal = eventsSearch ? eventsSearch.value.toLowerCase() : '';
+            renderCompendiumEvents();
+        }
+
+        function renderCompendiumEvents() {
+            const searchVal = compEventsSearch ? compEventsSearch.value.toLowerCase() : '';
             
-            if (!eventsGrid) return;
-            eventsGrid.innerHTML = '';
+            if (!compEventsGrid) return;
+            compEventsGrid.innerHTML = '';
             
             let events = [];
             if (sts2Database && sts2Database.events) {
@@ -4784,12 +5186,12 @@ $htmlTemplate = @'
                     }
                 }
                 
-                // Search term
+                // Search query
                 if (searchVal) {
                     const matchName = item.name.toLowerCase().includes(searchVal);
                     const matchDesc = item.description && item.description.toLowerCase().includes(searchVal);
                     const matchOptions = item.options && item.options.some(o => 
-                        o.title.toLowerCase().includes(searchVal) || 
+                        (o.title && o.title.toLowerCase().includes(searchVal)) || 
                         (o.description && o.description.toLowerCase().includes(searchVal)) ||
                         (o.id && o.id.toLowerCase().includes(searchVal))
                     );
@@ -4799,15 +5201,15 @@ $htmlTemplate = @'
                 return true;
             });
 
-            // Sort alphabetically by name
+            // Sort
             filteredEvents.sort((a, b) => a.name.localeCompare(b.name));
 
-            if (eventsCount) {
-                eventsCount.textContent = `Showing ${filteredEvents.length} events`;
+            if (compEventsCount) {
+                compEventsCount.textContent = `Showing ${filteredEvents.length} events`;
             }
 
             if (filteredEvents.length === 0) {
-                eventsGrid.innerHTML = '<div class="no-data" style="grid-column: 1 / -1;">No events match active filters.</div>';
+                compEventsGrid.innerHTML = '<div class="no-data" style="grid-column: 1 / -1;">No events match active filters.</div>';
                 return;
             }
 
@@ -4815,7 +5217,6 @@ $htmlTemplate = @'
                 const el = document.createElement('div');
                 el.className = 'event-card';
                 
-                // Format options list
                 let optionsHtml = '';
                 if (item.options && item.options.length > 0) {
                     optionsHtml = `
@@ -4840,7 +5241,6 @@ $htmlTemplate = @'
                     optionsHtml = '<div style="font-size: 11.5px; color: var(--text-muted); font-style: italic;">No interactive choices.</div>';
                 }
 
-                // Format acts list
                 let actHtml = '';
                 if (item.act) {
                     actHtml = `<span class="comp-act-badge" style="margin: 0; font-size: 10px; padding: 2px 8px;">${item.act.split(' - ')[0]}</span>`;
@@ -4856,7 +5256,52 @@ $htmlTemplate = @'
                     <div class="event-desc">${formatDescription(item.description)}</div>
                     ${optionsHtml}
                 `;
-                eventsGrid.appendChild(el);
+                compEventsGrid.appendChild(el);
+            });
+        }
+
+        // Render Keywords Sub-View
+        function renderCompendiumKeywords() {
+            const searchVal = compKeywordsSearch ? compKeywordsSearch.value.toLowerCase() : '';
+            
+            if (!compKeywordsGrid) return;
+            compKeywordsGrid.innerHTML = '';
+            
+            if (!sts2Database || !sts2Database.keywords) {
+                compKeywordsGrid.innerHTML = '<div class="no-data" style="grid-column: 1 / -1;">No keywords found in database.</div>';
+                return;
+            }
+            
+            let items = Object.entries(sts2Database.keywords).map(([id, kw]) => ({ id, ...kw }));
+            
+            // Search query
+            if (searchVal) {
+                items = items.filter(kw => {
+                    const matchName = kw.name && kw.name.toLowerCase().includes(searchVal);
+                    const matchDesc = kw.desc && kw.desc.toLowerCase().includes(searchVal);
+                    return matchName || matchDesc;
+                });
+            }
+            
+            if (items.length === 0) {
+                compKeywordsGrid.innerHTML = '<div class="no-data" style="grid-column: 1 / -1;">No keywords match search.</div>';
+                return;
+            }
+            
+            items.sort((a, b) => a.name.localeCompare(b.name));
+            
+            items.forEach(item => {
+                const el = document.createElement('div');
+                el.className = 'compendium-card rarity-common';
+                
+                el.innerHTML = `
+                    <div class="comp-card-header">
+                        <span class="comp-card-name" style="color: var(--accent-primary); font-size: 16px;">${item.name}</span>
+                        <span style="font-size: 11px; padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.05); color: var(--text-muted);">Keyword</span>
+                    </div>
+                    <div class="comp-card-desc" style="margin-top: 10px; font-size: 13px; line-height: 1.5;">${formatDescription(item.desc)}</div>
+                `;
+                compKeywordsGrid.appendChild(el);
             });
         }
 

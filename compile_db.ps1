@@ -4,9 +4,11 @@ $relicsFile = Join-Path $scratchDir "relics_api.json"
 $monstersFile = Join-Path $scratchDir "monsters_api.json"
 $encountersFile = Join-Path $scratchDir "encounters_api.json"
 $eventsFile = Join-Path $scratchDir "events_api.json"
+$potionsFile = Join-Path $scratchDir "potions_api.json"
+$keywordsFile = Join-Path $scratchDir "keywords_api.json"
 $outputFile = Join-Path $scratchDir "sts2_database.json"
 
-Write-Host "Loading cards, relics, monsters, encounters, and events raw data..."
+Write-Host "Loading raw data..."
 $cardsData = Get-Content -Raw -Path $cardsFile -Encoding utf8 | ConvertFrom-Json
 $relicsData = Get-Content -Raw -Path $relicsFile -Encoding utf8 | ConvertFrom-Json
 $monstersData = Get-Content -Raw -Path $monstersFile -Encoding utf8 | ConvertFrom-Json
@@ -17,6 +19,14 @@ if (Test-Path $encountersFile) {
 $eventsData = @()
 if (Test-Path $eventsFile) {
     $eventsData = Get-Content -Raw -Path $eventsFile -Encoding utf8 | ConvertFrom-Json
+}
+$potionsData = @()
+if (Test-Path $potionsFile) {
+    $potionsData = Get-Content -Raw -Path $potionsFile -Encoding utf8 | ConvertFrom-Json
+}
+$keywordsData = @()
+if (Test-Path $keywordsFile) {
+    $keywordsData = Get-Content -Raw -Path $keywordsFile -Encoding utf8 | ConvertFrom-Json
 }
 
 # Build monster-to-encounter map
@@ -43,10 +53,12 @@ foreach ($enc in $encountersData) {
 }
 
 $database = @{
-    cards = @{}
-    relics = @{}
+    cards    = @{}
+    relics   = @{}
     monsters = @{}
-    events = @{}
+    events   = @{}
+    potions  = @{}
+    keywords = @{}
 }
 
 Write-Host "Processing $($cardsData.Count) cards..."
@@ -419,6 +431,39 @@ foreach ($event in $eventsData) {
         act         = if ($event.act) { $event.act } else { "Other / Special" }
         description = if ($event.description) { $event.description } else { "" }
         options     = $options
+    }
+}
+
+Write-Host "Processing $($potionsData.Count) potions..."
+foreach ($potion in $potionsData) {
+    if (-not $potion.id) { continue }
+    
+    $fullId = "POTION." + $potion.id.ToUpper()
+    
+    # Get image filename leaf
+    $imgLeaf = ""
+    if ($potion.image_url) {
+        $imgLeaf = Split-Path $potion.image_url -Leaf
+    }
+    
+    $database.potions[$fullId] = @{
+        name   = $potion.name
+        rarity = $potion.rarity
+        desc   = $potion.description
+        img    = $imgLeaf
+        pool   = $potion.pool
+    }
+}
+
+Write-Host "Processing $($keywordsData.Count) keywords..."
+foreach ($keyword in $keywordsData) {
+    if (-not $keyword.id) { continue }
+    
+    $fullId = "KEYWORD." + $keyword.id.ToUpper()
+    
+    $database.keywords[$fullId] = @{
+        name = $keyword.name
+        desc = $keyword.description
     }
 }
 

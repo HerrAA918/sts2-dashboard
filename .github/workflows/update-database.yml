@@ -26,6 +26,8 @@ jobs:
             "monsters_api.json"   = "https://raw.githubusercontent.com/ptrlrd/spire-codex/main/data/monsters.json"
             "encounters_api.json" = "https://raw.githubusercontent.com/ptrlrd/spire-codex/main/data/encounters.json"
             "events_api.json"     = "https://raw.githubusercontent.com/ptrlrd/spire-codex/main/data/events.json"
+            "potions_api.json"    = "https://raw.githubusercontent.com/ptrlrd/spire-codex/main/data/potions.json"
+            "keywords_api.json"   = "https://raw.githubusercontent.com/ptrlrd/spire-codex/main/data/keywords.json"
           }
 
           $changed = $false

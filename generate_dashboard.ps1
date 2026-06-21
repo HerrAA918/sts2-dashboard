@@ -4871,7 +4871,7 @@ $htmlTemplate = @'
                 el.innerHTML = `
                     <div class="comp-relic-title-row" style="display: flex; align-items: center; gap: 8px;">
                         <img class="comp-relic-img-preview" src="${imgUrl}" alt="${item.name}" style="width: 24px; height: 24px;" onerror="this.src=''; this.style.display='none'; this.nextElementSibling.style.display='inline';">
-                        <span class="fallback-potion-icon" style="display: none; font-size: 20px;">🧪</span>
+                        <span class="fallback-potion-icon" style="display: none; font-size: 20px;">&#129514;</span>
                         <span class="comp-card-name" style="font-size: 15px;">${item.name}</span>
                     </div>
                     <div class="comp-card-meta" style="margin-top: 4px;">
@@ -5107,21 +5107,21 @@ $htmlTemplate = @'
                 }
                 if (item.moves && item.moves.length > 0) {
                     item.moves.forEach(m => {
-                        let intentIcon = '❓';
+                        let intentIcon = '\u2753';
                         let intentClass = 'comp-intent-unknown';
                         
                         const intentLower = (m.intent || '').toLowerCase();
                         if (intentLower === 'attack') {
-                            intentIcon = '⚔️';
+                            intentIcon = '\u2694\uFE0F';
                             intentClass = 'comp-intent-attack';
                         } else if (intentLower === 'defend') {
-                            intentIcon = '🛡️';
+                            intentIcon = '\uD83D\uDEE1\uFE0F';
                             intentClass = 'comp-intent-defend';
                         } else if (intentLower === 'buff') {
-                            intentIcon = '🧪';
+                            intentIcon = '\uD83E\uDDEA';
                             intentClass = 'comp-intent-buff';
                         } else if (intentLower === 'debuff') {
-                            intentIcon = '☠️';
+                            intentIcon = '\u2620\uFE0F';
                             intentClass = 'comp-intent-debuff';
                         }
 

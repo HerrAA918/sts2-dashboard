@@ -1929,6 +1929,7 @@
                         <div class="detail-tabs-nav" style="display: flex; gap: 8px; margin: 16px 0 12px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 8px;">
                             <button class="detail-tab-btn active" id="detail-btn-equipment" onclick="switchDetailSubTab('equipment')">Equipment & Deck</button>
                             <button class="detail-tab-btn" id="detail-btn-map" onclick="switchDetailSubTab('map')">Run Map</button>
+                            <button class="detail-tab-btn" id="detail-btn-stats" onclick="switchDetailSubTab('stats')">Health & Gold</button>
                         </div>
 
                         <div id="detail-tab-equipment">
@@ -1951,6 +1952,12 @@
 
                         <div id="detail-tab-map" style="display:none; max-height: 480px; overflow-y: auto; padding-right: 4px; margin-top: 8px;">
                             <!-- Populated dynamically with map timeline -->
+                        </div>
+
+                        <div id="detail-tab-stats" style="display:none; padding: 12px; margin-top: 8px;">
+                            <div class="chart-wrapper" style="height: 320px; position: relative; width: 100%;">
+                                <canvas id="detail-stats-chart"></canvas>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -15508,6 +15515,7 @@
                                 pStats.push({
                                     current_hp: Number(p.current_hp) || 0,
                                     max_hp: Number(p.max_hp) || 0,
+                                    current_gold: Number(p.current_gold) || 0,
                                     damage_taken: Number(p.damage_taken) || 0,
                                     hp_healed: Number(p.hp_healed) || 0,
                                     gold_spent: Number(p.gold_spent) || 0,
@@ -16210,6 +16218,8 @@
             // Refresh detail subtab view
             if (activeDetailSubTab === 'map') {
                 renderRunMap();
+            } else if (activeDetailSubTab === 'stats') {
+                renderDetailStatsChart();
             } else {
                 switchDetailSubTab('equipment');
             }
@@ -16219,20 +16229,34 @@
             activeDetailSubTab = tab;
             const eqEl = document.getElementById('detail-tab-equipment');
             const mapEl = document.getElementById('detail-tab-map');
+            const statsEl = document.getElementById('detail-tab-stats');
             const btnEq = document.getElementById('detail-btn-equipment');
             const btnMap = document.getElementById('detail-btn-map');
+            const btnStats = document.getElementById('detail-btn-stats');
             
             if (tab === 'equipment') {
                 if (eqEl) eqEl.style.display = 'block';
                 if (mapEl) mapEl.style.display = 'none';
+                if (statsEl) statsEl.style.display = 'none';
                 if (btnEq) btnEq.className = 'detail-tab-btn active';
                 if (btnMap) btnMap.className = 'detail-tab-btn';
-            } else {
+                if (btnStats) btnStats.className = 'detail-tab-btn';
+            } else if (tab === 'map') {
                 if (eqEl) eqEl.style.display = 'none';
                 if (mapEl) mapEl.style.display = 'block';
+                if (statsEl) statsEl.style.display = 'none';
                 if (btnEq) btnEq.className = 'detail-tab-btn';
                 if (btnMap) btnMap.className = 'detail-tab-btn active';
+                if (btnStats) btnStats.className = 'detail-tab-btn';
                 renderRunMap();
+            } else if (tab === 'stats') {
+                if (eqEl) eqEl.style.display = 'none';
+                if (mapEl) mapEl.style.display = 'none';
+                if (statsEl) statsEl.style.display = 'block';
+                if (btnEq) btnEq.className = 'detail-tab-btn';
+                if (btnMap) btnMap.className = 'detail-tab-btn';
+                if (btnStats) btnStats.className = 'detail-tab-btn active';
+                renderDetailStatsChart();
             }
         }
         
@@ -16419,7 +16443,162 @@
                 mapContainer.appendChild(actDiv);
             });
         }
-        
+
+        let detailStatsChartInstance = null;
+
+        function renderDetailStatsChart() {
+            const run = allRuns.find(r => r.id === selectedRunId);
+            if (!run) return;
+            
+            const canvas = document.getElementById('detail-stats-chart');
+            if (!canvas) return;
+            
+            // Extract HP and Gold data floor-by-floor
+            let labels = [];
+            let hpData = [];
+            let maxHpData = [];
+            let goldData = [];
+            
+            let floorIndex = 0;
+            if (run.mapPointHistory) {
+                run.mapPointHistory.forEach((act, actIdx) => {
+                    if (!act) return;
+                    act.forEach(node => {
+                        let floorLabel = `F${floorIndex}`;
+                        if (node.map_point_type) {
+                            floorLabel += ` (${node.map_point_type})`;
+                        }
+                        labels.push(floorLabel);
+                        
+                        const pIdx = activeDetailPlayerIndex < (node.player_stats ? node.player_stats.length : 1) ? activeDetailPlayerIndex : 0;
+                        const stats = node.player_stats && node.player_stats[pIdx];
+                        if (stats) {
+                            hpData.push(stats.current_hp);
+                            maxHpData.push(stats.max_hp);
+                            goldData.push(stats.current_gold !== undefined ? stats.current_gold : 0);
+                        } else {
+                            hpData.push(null);
+                            maxHpData.push(null);
+                            goldData.push(null);
+                        }
+                        floorIndex++;
+                    });
+                });
+            }
+            
+            if (detailStatsChartInstance) {
+                detailStatsChartInstance.destroy();
+            }
+            
+            const ctx = canvas.getContext('2d');
+            detailStatsChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Current HP',
+                            data: hpData,
+                            borderColor: '#ef4444',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.1,
+                            yAxisID: 'y-hp',
+                            fill: true
+                        },
+                        {
+                            label: 'Max HP',
+                            data: maxHpData,
+                            borderColor: '#fca5a5',
+                            borderWidth: 1.5,
+                            borderDash: [5, 5],
+                            tension: 0.1,
+                            yAxisID: 'y-hp',
+                            fill: false
+                        },
+                        {
+                            label: 'Gold',
+                            data: goldData,
+                            borderColor: '#fbbf24',
+                            backgroundColor: 'rgba(251, 191, 36, 0.05)',
+                            borderWidth: 2,
+                            tension: 0.1,
+                            yAxisID: 'y-gold',
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                boxWidth: 12,
+                                font: { family: 'Outfit' }
+                            }
+                        },
+                        tooltip: {
+                            bodyFont: { family: 'Outfit' },
+                            titleFont: { family: 'Outfit' }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                font: { family: 'Outfit', size: 9 },
+                                maxRotation: 45,
+                                autoSkip: true,
+                                autoSkipPadding: 15
+                            }
+                        },
+                        'y-hp': {
+                            type: 'linear',
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Hit Points (HP)',
+                                color: '#ef4444',
+                                font: { family: 'Outfit', weight: 'bold' }
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            },
+                            ticks: {
+                                color: '#ef4444',
+                                font: { family: 'Outfit' }
+                            },
+                            min: 0
+                        },
+                        'y-gold': {
+                            type: 'linear',
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'Gold',
+                                color: '#fbbf24',
+                                font: { family: 'Outfit', weight: 'bold' }
+                            },
+                            grid: {
+                                drawOnChartArea: false
+                            },
+                            ticks: {
+                                color: '#fbbf24',
+                                font: { family: 'Outfit' }
+                            },
+                            min: 0
+                        }
+                    }
+                }
+            });
+        }
+
         function formatModelName(id) {
             if (!id) return '';
             let s = id.replace(/^(CARD|RELIC|ENCOUNTER|EVENT|MONSTER|TREASURE)\./, '');

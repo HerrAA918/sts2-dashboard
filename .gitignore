@@ -8,3 +8,8 @@ desktop.ini
 
 # Log files
 *.log
+
+# Personal Slay the Spire 2 save data (never commit your own runs/progress)
+*.run
+*.save
+progress.save

@@ -6,6 +6,8 @@ $encountersFile = Join-Path $scratchDir "encounters_api.json"
 $eventsFile = Join-Path $scratchDir "events_api.json"
 $potionsFile = Join-Path $scratchDir "potions_api.json"
 $keywordsFile = Join-Path $scratchDir "keywords_api.json"
+$epochsFile = Join-Path $scratchDir "epochs_api.json"
+$achievementsFile = Join-Path $scratchDir "achievements_api.json"
 $outputFile = Join-Path $scratchDir "sts2_database.json"
 
 Write-Host "Loading raw data..."
@@ -27,6 +29,14 @@ if (Test-Path $potionsFile) {
 $keywordsData = @()
 if (Test-Path $keywordsFile) {
     $keywordsData = Get-Content -Raw -Path $keywordsFile -Encoding utf8 | ConvertFrom-Json
+}
+$epochsData = @()
+if (Test-Path $epochsFile) {
+    $epochsData = Get-Content -Raw -Path $epochsFile -Encoding utf8 | ConvertFrom-Json
+}
+$achievementsData = @()
+if (Test-Path $achievementsFile) {
+    $achievementsData = Get-Content -Raw -Path $achievementsFile -Encoding utf8 | ConvertFrom-Json
 }
 
 # Build monster-to-encounter map
@@ -53,12 +63,14 @@ foreach ($enc in $encountersData) {
 }
 
 $database = @{
-    cards    = @{}
-    relics   = @{}
-    monsters = @{}
-    events   = @{}
-    potions  = @{}
-    keywords = @{}
+    cards        = @{}
+    relics       = @{}
+    monsters     = @{}
+    events       = @{}
+    potions      = @{}
+    keywords     = @{}
+    epochs       = @{}
+    achievements = @{}
 }
 
 Write-Host "Processing $($cardsData.Count) cards..."
@@ -529,6 +541,42 @@ foreach ($keyword in $keywordsData) {
     $database.keywords[$fullId] = @{
         name = $keyword.name
         desc = $keyword.description
+    }
+}
+
+Write-Host "Processing $($epochsData.Count) epochs..."
+foreach ($epoch in $epochsData) {
+    if (-not $epoch.id) { continue }
+
+    # Prefix the unlocked item IDs so they match the card/relic/potion keys used elsewhere.
+    # Wrap with the unary comma operator so single-element lists still serialize as JSON arrays.
+    $cardIds = @()
+    foreach ($c in $epoch.unlocks_cards)   { if ($c) { $cardIds   += "CARD."   + $c.ToString().ToUpper() } }
+    $relicIds = @()
+    foreach ($r in $epoch.unlocks_relics)  { if ($r) { $relicIds  += "RELIC."  + $r.ToString().ToUpper() } }
+    $potionIds = @()
+    foreach ($p in $epoch.unlocks_potions) { if ($p) { $potionIds += "POTION." + $p.ToString().ToUpper() } }
+
+    $database.epochs[$epoch.id.ToUpper()] = @{
+        title           = $epoch.title
+        story           = $epoch.story_id
+        era             = $epoch.era
+        sortOrder       = $epoch.sort_order
+        description     = if ($epoch.description) { $epoch.description } else { "" }
+        unlockInfo      = if ($epoch.unlock_info) { $epoch.unlock_info } else { "" }
+        unlocks_cards   = @($cardIds)
+        unlocks_relics  = @($relicIds)
+        unlocks_potions = @($potionIds)
+    }
+}
+
+Write-Host "Processing $($achievementsData.Count) achievements..."
+foreach ($ach in $achievementsData) {
+    if (-not $ach.id) { continue }
+
+    $database.achievements[$ach.id.ToUpper()] = @{
+        name = $ach.name
+        desc = $ach.description
     }
 }
 

@@ -28,6 +28,8 @@ jobs:
             "events_api.json"     = "https://raw.githubusercontent.com/ptrlrd/spire-codex/main/data/events.json"
             "potions_api.json"    = "https://raw.githubusercontent.com/ptrlrd/spire-codex/main/data/potions.json"
             "keywords_api.json"   = "https://raw.githubusercontent.com/ptrlrd/spire-codex/main/data/keywords.json"
+            "epochs_api.json"     = "https://raw.githubusercontent.com/ptrlrd/spire-codex/main/data/epochs.json"
+            "achievements_api.json" = "https://raw.githubusercontent.com/ptrlrd/spire-codex/main/data/achievements.json"
           }
 
           $changed = $false
@@ -86,6 +88,7 @@ jobs:
           # Stage only the data + dashboard files, never the whole tree.
           git add cards_api.json relics_api.json monsters_api.json encounters_api.json \
                   events_api.json potions_api.json keywords_api.json \
+                  epochs_api.json achievements_api.json \
                   sts2_database.json sts2_dashboard.html
           git diff --cached --quiet && echo "No changes to commit" && exit 0
           git commit -m "Auto-update: refresh embedded game data from Spire Codex"

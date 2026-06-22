@@ -4,6 +4,8 @@ A fully offline, self-contained run analytics dashboard and database compendium 
 
 This dashboard allows you to import, visualize, and analyze your runs (both Single Player and Co-op) directly from your game run files.
 
+![Slay the Spire 2 Dashboard — Compendium view](docs/dashboard.png)
+
 ## Features
 
 - **Run History**: Table views of all loaded single player and co-op runs with pagination, search, and sorting.
@@ -11,7 +13,9 @@ This dashboard allows you to import, visualize, and analyze your runs (both Sing
 - **Card & Relic Analytics**: Win rates, pick rates, survival distributions, and playstyle correlation tables based on your uploaded history.
 - **Survival & Playstyle Charts**: Floor-by-floor survival rates and radar charts depicting your playstyle (Aggressive, Defensive, Tactical, Wealthy).
 - **Offline Compendium**: A complete Slay the Spire 2 database of Cards, Relics, and Monsters with hover tooltips, rarity color-coding, and move-set/intent lists.
-- **Privacy First**: Fully client-side. No data is sent to any server. Your runs are parsed locally and stored in your browser's `localStorage` for quick access next time.
+- **Unlocks & Progression**: Import your `progress.save` to see a **Progression** tab (unlock timeline grouped by character, collection-completion bars, lifetime stats, and an achievements checklist) plus an **"Unlocked this run"** section on each run, correlated by timestamp.
+- **Share / Export**: Bundle your imported runs + progression into a single `.json` file with the **Export / Share** button. Send it to anyone — they drop it onto their dashboard to view your snapshot (a banner reminds them they're viewing shared data and to load their own save).
+- **Privacy First**: Fully client-side. No data is sent to any server. Your runs and progress are parsed locally and stored in your browser's `localStorage` for quick access next time.
 
 ## Where to Find Your Run History Files
 
@@ -24,6 +28,18 @@ To import your runs into the dashboard, drag and drop the JSON files from your g
   `%AppData%\SlayTheSpire2\steam\<YOUR_STEAM_ID>\profile1\saves\history\`
 
 *(Note: Replace `<YOUR_STEAM_ID>` with your actual unique Steam numeric ID, and `profile1` with your corresponding in-game profile number if you use multiple profiles.)*
+
+### Tracking Unlocks & Progression (optional)
+
+To populate the **Progression** tab and per-run "Unlocked this run" sections, also import your **`progress.save`** file. It sits one level **above** the `history` folder (in the `saves` directory) — e.g. on Windows Steam Cloud:
+
+`C:\Program Files (x86)\Steam\userdata\<YOUR_STEAM_ID>\2868840\remote\profile1\saves\progress.save`
+
+Drag it onto the dashboard or use the **Import Progress** button. (Note: in-game achievements are tracked by Steam and are *not* stored in `progress.save`, so the achievements checklist shows progress only if the file happens to contain unlocked-achievement data.)
+
+### Sharing Your Dashboard With Someone
+
+Click **Export / Share** to download a single `sts2-dashboard-export-<date>.json` containing your runs and progression. Anyone can load it by dragging it onto their own dashboard (or onto the hosted GitHub Pages link). While viewing a shared snapshot, a banner reads *"Shared snapshot — you're viewing someone else's runs"* with a **Load my save** shortcut, so recipients always know what they're looking at. Imported runs merge with theirs (duplicates are skipped), and **Reset to Default** clears everything, including the shared snapshot.
 
 ### macOS
 `~/Library/Application Support/Steam/userdata/<YOUR_STEAM_ID>/2868840/remote/profile1/saves/history/`
@@ -47,8 +63,8 @@ Game data and the dashboard's UI are therefore updated independently:
 - `sts2_dashboard.html`: The ready-to-use offline dashboard, hand-maintained. Open in any modern web browser.
 - `compile_db.ps1`: Database compiler — pulls raw game data from the Spire Codex API and builds `sts2_database.json`.
 - `embed_database.ps1`: Injects `sts2_database.json` into the dashboard's embedded database block (between the `STS2_DATABASE` markers), without regenerating the rest of the HTML.
-- `sts2_database.json`: The compiled database of cards, relics, potions, monsters, events, and keywords used by the dashboard.
-- `cards_api.json`, `relics_api.json`, `monsters_api.json`, `encounters_api.json`, `events_api.json`, `potions_api.json`, `keywords_api.json`: Source API data caches.
+- `sts2_database.json`: The compiled database of cards, relics, potions, monsters, events, keywords, epochs (unlocks), and achievements used by the dashboard.
+- `cards_api.json`, `relics_api.json`, `monsters_api.json`, `encounters_api.json`, `events_api.json`, `potions_api.json`, `keywords_api.json`, `epochs_api.json`, `achievements_api.json`: Source API data caches.
 - `validate_js.js`: Helper that verifies the syntax of every `<script>` block in `sts2_dashboard.html`. Run `node validate_js.js` after editing the dashboard's JS.
 - `generate_dashboard.ps1`: **Deprecated / disabled.** Original full-HTML generator, kept for reference only.
 

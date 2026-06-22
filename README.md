@@ -1,6 +1,6 @@
 # Slay the Spire 2 Run History Dashboard
 
-A fully offline, self-contained run analytics dashboard and database compendium for **Slay the Spire 2**. 
+A privacy-first, browser-based run analytics dashboard and database compendium for **Slay the Spire 2**. Everything runs client-side — your runs are parsed in your browser and never leave your device — and the full game database is embedded in the page, so the compendium is populated the moment you open it.
 
 This dashboard allows you to import, visualize, and analyze your runs (both Single Player and Co-op) directly from your game run files.
 
@@ -12,10 +12,12 @@ This dashboard allows you to import, visualize, and analyze your runs (both Sing
 - **Run Map Timeline**: Detailed interactive step-by-step path visualizer for each run showing floors, events, combats, rest sites, shops, and boss nodes.
 - **Card & Relic Analytics**: Win rates, pick rates, survival distributions, and playstyle correlation tables based on your uploaded history.
 - **Survival & Playstyle Charts**: Floor-by-floor survival rates and radar charts depicting your playstyle (Aggressive, Defensive, Tactical, Wealthy).
-- **Offline Compendium**: A complete Slay the Spire 2 database of Cards, Relics, and Monsters with hover tooltips, rarity color-coding, and move-set/intent lists.
+- **Built-in Compendium**: A complete Slay the Spire 2 database of Cards, Relics, and Monsters with hover tooltips, rarity color-coding, and move-set/intent lists — embedded in the page, so it's populated without importing anything (the artwork itself loads from public CDNs).
 - **Unlocks & Progression**: Import your `progress.save` to see a **Progression** tab (unlock timeline grouped by character, collection-completion bars, lifetime stats, and an achievements checklist) plus an **"Unlocked this run"** section on each run, correlated by timestamp.
 - **Share / Export**: Bundle your imported runs + progression into a single `.json` file with the **Export / Share** button. Send it to anyone — they drop it onto their dashboard to view your snapshot (a banner reminds them they're viewing shared data and to load their own save).
-- **Privacy First**: Fully client-side. No data is sent to any server. Your runs and progress are parsed locally and stored in your browser's `localStorage` for quick access next time.
+- **Privacy First**: Your runs and progress are parsed locally and stored only in your browser's `localStorage` for quick access next time — none of your data is ever uploaded or sent to any server. (The page does fetch static assets — the charting library, web fonts, and entity art — from public CDNs, but those requests never carry your run data.)
+
+> **Connectivity:** The dashboard runs entirely in your browser and the game database is embedded, but a few assets load from public CDNs — **Chart.js** (charts), **JSZip** (`.zip` imports), **Google Fonts**, and the card/relic/monster/character **artwork**. With no internet, your runs and stats still load and every analytic still computes, but charts won't render, `.zip` import is unavailable, fonts fall back to system defaults, and missing artwork is hidden (each image is guarded so nothing else breaks). Everything else works offline.
 
 ## Dashboard Tour
 
@@ -32,7 +34,7 @@ The same breakdown for multiplayer runs. Each entry shows both players' characte
 ### Compendium
 ![Compendium](docs/section-compendium.png)
 
-A complete offline database of **Cards, Relics, Potions, Mobs, Elites, Bosses, Events, Keywords, and Ancients** — with real game art, rarity color-coding, hover tooltips, an upgraded-card toggle, and click-to-zoom detail. It's fully populated without importing anything.
+A complete built-in database of **Cards, Relics, Potions, Mobs, Elites, Bosses, Events, Keywords, and Ancients** — with real game art, rarity color-coding, hover tooltips, an upgraded-card toggle, and click-to-zoom detail. The data is embedded in the page, so it's fully populated without importing anything; the artwork is pulled from public CDNs and degrades gracefully if you're offline.
 
 ### Card Analytics
 ![Card Analytics](docs/section-card-analytics.png)
@@ -97,7 +99,7 @@ Game data and the dashboard's UI are therefore updated independently:
 
 ## Files in this Repository
 
-- `sts2_dashboard.html`: The ready-to-use offline dashboard, hand-maintained. Open in any modern web browser.
+- `sts2_dashboard.html`: The ready-to-use dashboard, hand-maintained. Open in any modern web browser. (The game database is embedded; the charting library, ZIP-import helper, web fonts, and entity art load from public CDNs — see **Connectivity** above.)
 - `compile_db.ps1`: Database compiler — pulls raw game data from the Spire Codex API and builds `sts2_database.json`.
 - `embed_database.ps1`: Injects `sts2_database.json` into the dashboard's embedded database block (between the `STS2_DATABASE` markers), without regenerating the rest of the HTML.
 - `sts2_database.json`: The compiled database of cards, relics, potions, monsters, events, keywords, epochs (unlocks), and achievements used by the dashboard.

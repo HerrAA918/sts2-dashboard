@@ -15,16 +15,16 @@
     
     <style>
         :root {
-            --bg-color: #080c14;
-            --card-bg: rgba(15, 23, 42, 0.65);
-            --card-border: rgba(255, 255, 255, 0.06);
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --accent-primary: #8b5cf6;
-            --accent-primary-hover: #7c3aed;
-            --accent-success: #10b981;
-            --accent-danger: #ef4444;
-            --accent-warning: #f59e0b;
+            --bg-color: #0a1118;
+            --card-bg: rgba(19, 32, 40, 0.65);
+            --card-border: rgba(42, 69, 85, 0.4);
+            --text-main: #e0ddd8;
+            --text-muted: #8a9298;
+            --accent-primary: #e8b830;
+            --accent-primary-hover: #cc9f23;
+            --accent-success: #34d399;
+            --accent-danger: #c41e3a;
+            --accent-warning: #fbd91e;
             
             --char-ironclad: #d53b27;
             --char-silent: #23935b;
@@ -42,10 +42,10 @@
 
         body {
             background-color: var(--bg-color);
-            background-image: 
-                radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.12) 0px, transparent 50%),
-                radial-gradient(at 50% 0%, rgba(59, 130, 246, 0.08) 0px, transparent 50%),
-                radial-gradient(at 100% 0%, rgba(20, 184, 166, 0.12) 0px, transparent 50%);
+            background-image:
+                radial-gradient(at 0% 0%, rgba(232, 184, 48, 0.10) 0px, transparent 50%),
+                radial-gradient(at 50% 0%, rgba(196, 30, 58, 0.08) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(69, 207, 216, 0.10) 0px, transparent 50%);
             background-attachment: fixed;
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             color: var(--text-main);
@@ -96,13 +96,13 @@
             justify-content: center;
             font-weight: 800;
             font-size: 22px;
-            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+            box-shadow: 0 4px 15px rgba(232, 184, 48, 0.4);
         }
 
         h1 {
-            font-family: 'Outfit', sans-serif;
-            font-size: 26px;
-            font-weight: 800;
+            font-family: 'Kreon', 'Outfit', sans-serif;
+            font-size: 27px;
+            font-weight: 700;
             background: linear-gradient(to right, #f8fafc, #cbd5e1);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -159,13 +159,13 @@
             font-weight: 700;
             cursor: pointer;
             border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.25);
+            box-shadow: 0 4px 12px rgba(232, 184, 48, 0.25);
             transition: all 0.2s ease;
         }
 
         .import-btn:hover {
             transform: translateY(-1px);
-            box-shadow: 0 6px 16px rgba(139, 92, 246, 0.35);
+            box-shadow: 0 6px 16px rgba(232, 184, 48, 0.35);
             background: linear-gradient(135deg, var(--accent-primary-hover), #6d28d9);
         }
 
@@ -236,7 +236,7 @@
         }
 
         .tab-btn.active {
-            background: rgba(139, 92, 246, 0.2);
+            background: rgba(232, 184, 48, 0.2);
             color: #d8b4fe;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
@@ -266,6 +266,7 @@
             border-color: rgba(255, 255, 255, 0.12);
             transform: translateY(-2px);
             box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.35);
+            z-index: 5;
         }
 
         .card-glow {
@@ -304,6 +305,39 @@
         
         .kpi-card {
             cursor: help;
+        }
+
+        .kpi-top-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .kpi-top-row + .kpi-top-row {
+            margin-top: 10px;
+        }
+
+        .kpi-char-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(0, 0, 0, 0.3);
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .kpi-top-value {
+            font-family: 'Outfit', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-main);
+            line-height: 1.2;
+        }
+
+        .kpi-top-label {
+            font-size: 11px;
+            color: var(--text-muted);
         }
 
         /* Filter Panel */
@@ -404,6 +438,8 @@
         .char-pill:hover {
             transform: scale(1.03);
             border-color: rgba(255, 255, 255, 0.15);
+            position: relative;
+            z-index: 5;
         }
 
         /* Layout Grid */
@@ -477,7 +513,7 @@
         }
 
         .runs-count-badge {
-            background: rgba(139, 92, 246, 0.2);
+            background: rgba(232, 184, 48, 0.2);
             color: #c084fc;
             padding: 4px 10px;
             border-radius: 12px;
@@ -535,7 +571,7 @@
         }
 
         tr.selected {
-            background: rgba(139, 92, 246, 0.12) !important;
+            background: rgba(232, 184, 48, 0.12) !important;
             border-left: 3px solid var(--accent-primary);
         }
 
@@ -598,7 +634,7 @@
 
         .detail-tab-btn.active {
             color: #a78bfa;
-            background: rgba(139, 92, 246, 0.15);
+            background: rgba(232, 184, 48, 0.15);
             font-weight: 600;
         }
 
@@ -640,7 +676,7 @@
         /* Run Details Card */
         .details-card {
             background: linear-gradient(135deg, rgba(20, 26, 46, 0.7), rgba(15, 23, 42, 0.55));
-            border-color: rgba(139, 92, 246, 0.15);
+            border-color: rgba(232, 184, 48, 0.15);
         }
 
         .details-header {
@@ -732,14 +768,14 @@
         }
 
         .detail-badge.relic-badge {
-            background: rgba(139, 92, 246, 0.06);
-            border-color: rgba(139, 92, 246, 0.15);
+            background: rgba(232, 184, 48, 0.06);
+            border-color: rgba(232, 184, 48, 0.15);
             color: #d8b4fe;
         }
 
         .detail-badge.relic-badge:hover {
-            background: rgba(139, 92, 246, 0.12);
-            border-color: rgba(139, 92, 246, 0.3);
+            background: rgba(232, 184, 48, 0.12);
+            border-color: rgba(232, 184, 48, 0.3);
         }
 
         .card-count-badge {
@@ -828,9 +864,10 @@
             position: absolute;
             z-index: 9999;
             background: rgba(10, 15, 30, 0.95);
-            border: 1px solid rgba(139, 92, 246, 0.45);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 20px rgba(139, 92, 246, 0.25);
+            border: 1px solid rgba(232, 184, 48, 0.45);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 20px rgba(232, 184, 48, 0.25);
             border-radius: 12px;
+            min-width: 240px;
             max-width: 320px;
             padding: 16px;
             pointer-events: none;
@@ -866,6 +903,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 14px;
         }
 
         .tooltip-title {
@@ -906,13 +944,29 @@
         }
 
         .rarity-common { color: #e2e8f0; }
-        .rarity-uncommon { color: #60a5fa; }
+        .rarity-uncommon { color: #67e8f9; }
         .rarity-rare { color: #fbbf24; }
-        .rarity-starter { color: #34d399; }
+        .rarity-starter,
+        .rarity-basic { color: #34d399; }
         .rarity-ancient,
         .rarity-special { color: #c084fc; }
         .rarity-boss { color: #a855f7; }
         .rarity-shop { color: #14b8a6; }
+        .rarity-curse { color: #c41e3a; }
+        .rarity-status,
+        .rarity-token { color: var(--text-muted); }
+        .rarity-quest { color: #45cfd8; }
+        .rarity-event { color: var(--accent-primary); }
+
+        /* Relic rarities use their own colors, distinct from card rarities
+           (e.g. relic Uncommon is blue, card Uncommon is cyan) */
+        .relic-rarity-starter { color: #94a3b8; }
+        .relic-rarity-common { color: #cbd5e1; }
+        .relic-rarity-uncommon { color: #60a5fa; }
+        .relic-rarity-rare { color: #e8b830; }
+        .relic-rarity-shop { color: #34d399; }
+        .relic-rarity-event { color: #22d3ee; }
+        .relic-rarity-ancient { color: #c084fc; }
 
         .tooltip-desc {
             font-size: 13px;
@@ -1059,7 +1113,89 @@
             color: #fbbf24;
         }
 
-        /* Relic Rarity Colors */
+        /* Relic-specific Rarity Colors (relics use different hues than cards
+           for the same rarity name, e.g. relic Uncommon is blue vs card cyan) */
+        .compendium-card.relic-rarity-starter {
+            border-color: rgba(148, 163, 184, 0.3);
+            border-top: 2px solid rgba(148, 163, 184, 0.5);
+        }
+        .compendium-card.relic-rarity-starter:hover {
+            border-color: rgba(148, 163, 184, 0.5);
+            box-shadow: 0 8px 25px rgba(148, 163, 184, 0.1);
+        }
+
+        .compendium-card.relic-rarity-common {
+            border-color: rgba(203, 213, 225, 0.2);
+            border-top: 2px solid rgba(203, 213, 225, 0.4);
+        }
+        .compendium-card.relic-rarity-common:hover {
+            border-color: rgba(203, 213, 225, 0.4);
+            box-shadow: 0 8px 25px rgba(203, 213, 225, 0.1);
+        }
+
+        .compendium-card.relic-rarity-uncommon {
+            border-color: rgba(96, 165, 250, 0.25);
+            border-top: 2px solid rgba(96, 165, 250, 0.5);
+        }
+        .compendium-card.relic-rarity-uncommon:hover {
+            border-color: rgba(96, 165, 250, 0.45);
+            box-shadow: 0 8px 25px rgba(96, 165, 250, 0.12);
+        }
+        .compendium-card.relic-rarity-uncommon .comp-card-name {
+            color: #60a5fa;
+        }
+
+        .compendium-card.relic-rarity-rare {
+            border-color: rgba(232, 184, 48, 0.25);
+            border-top: 2px solid rgba(232, 184, 48, 0.6);
+            background: linear-gradient(165deg, rgba(232, 184, 48, 0.04) 0%, var(--card-bg) 40%);
+        }
+        .compendium-card.relic-rarity-rare:hover {
+            border-color: rgba(232, 184, 48, 0.45);
+            box-shadow: 0 8px 30px rgba(232, 184, 48, 0.12);
+        }
+        .compendium-card.relic-rarity-rare .comp-card-name {
+            color: #e8b830;
+        }
+
+        .compendium-card.relic-rarity-shop {
+            border-color: rgba(52, 211, 153, 0.2);
+            border-top: 2px solid rgba(52, 211, 153, 0.5);
+        }
+        .compendium-card.relic-rarity-shop:hover {
+            border-color: rgba(52, 211, 153, 0.4);
+            box-shadow: 0 8px 25px rgba(52, 211, 153, 0.1);
+        }
+        .compendium-card.relic-rarity-shop .comp-card-name {
+            color: #34d399;
+        }
+
+        .compendium-card.relic-rarity-event {
+            border-color: rgba(34, 211, 238, 0.2);
+            border-top: 2px solid rgba(34, 211, 238, 0.5);
+        }
+        .compendium-card.relic-rarity-event:hover {
+            border-color: rgba(34, 211, 238, 0.4);
+            box-shadow: 0 8px 25px rgba(34, 211, 238, 0.12);
+        }
+        .compendium-card.relic-rarity-event .comp-card-name {
+            color: #22d3ee;
+        }
+
+        .compendium-card.relic-rarity-ancient {
+            border-color: rgba(168, 85, 247, 0.25);
+            border-top: 2px solid rgba(168, 85, 247, 0.55);
+            background: linear-gradient(165deg, rgba(168, 85, 247, 0.04) 0%, var(--card-bg) 40%);
+        }
+        .compendium-card.relic-rarity-ancient:hover {
+            border-color: rgba(168, 85, 247, 0.45);
+            box-shadow: 0 8px 30px rgba(168, 85, 247, 0.12);
+        }
+        .compendium-card.relic-rarity-ancient .comp-card-name {
+            color: #c084fc;
+        }
+
+        /* Legacy shared rarity classes (kept for cards' Basic tier) */
         .compendium-card.rarity-starter {
             border-color: rgba(100, 116, 139, 0.3);
             border-top: 2px solid rgba(100, 116, 139, 0.5);
@@ -1389,7 +1525,7 @@
         .comp-card-upgrade-btn.active {
             background: var(--accent-primary);
             border-color: var(--accent-primary);
-            box-shadow: 0 0 8px rgba(139, 92, 246, 0.6);
+            box-shadow: 0 0 8px rgba(232, 184, 48, 0.6);
         }
 
         .comp-card-run-stat {
@@ -1591,7 +1727,7 @@
 
         .comp-card-cost {
             font-size: 11px;
-            background: rgba(139, 92, 246, 0.15);
+            background: rgba(232, 184, 48, 0.15);
             color: #c084fc;
             padding: 2px 8px;
             border-radius: 4px;
@@ -1865,9 +2001,9 @@
                     <span id="card-zoom-cost" class="comp-card-cost"></span>
                 </div>
                 <div class="card-zoom-meta">
-                    <span id="card-zoom-type"></span>
+                    <span id="card-zoom-color" style="font-weight: 700;"></span>
                     <span id="card-zoom-rarity"></span>
-                    <span id="card-zoom-color"></span>
+                    <span id="card-zoom-type"></span>
                 </div>
                 <div id="card-zoom-desc" class="card-zoom-desc"></div>
                 <div id="card-zoom-upgrade-desc" class="card-zoom-upgrade-desc" style="display: none;"></div>
@@ -1962,6 +2098,24 @@
                 <div class="card-title">Max Ascension</div>
                 <div class="card-value" id="kpi-max-asc">A0</div>
                 <div class="card-subtext" id="kpi-sub-fav-char">Preferred Character</div>
+            </div>
+            <div class="card kpi-card" id="kpi-card-top">
+                <div class="card-glow" style="background: var(--char-necrobinder);"></div>
+                <div class="card-title">Top Performers</div>
+                <div class="kpi-top-row">
+                    <img id="kpi-best-winrate-icon" class="kpi-char-icon" src="" alt="" onerror="this.style.display='none';">
+                    <div class="kpi-top-text">
+                        <div class="kpi-top-value" id="kpi-best-winrate-value">—</div>
+                        <div class="kpi-top-label">Best Win Rate</div>
+                    </div>
+                </div>
+                <div class="kpi-top-row">
+                    <img id="kpi-best-floor-icon" class="kpi-char-icon" src="" alt="" onerror="this.style.display='none';">
+                    <div class="kpi-top-text">
+                        <div class="kpi-top-value" id="kpi-best-floor-value">—</div>
+                        <div class="kpi-top-label">Highest Avg Floor</div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -15433,6 +15587,10 @@
         const kpiSubAvgTime = document.getElementById('kpi-sub-avg-time');
         const kpiMaxAsc = document.getElementById('kpi-max-asc');
         const kpiSubFavChar = document.getElementById('kpi-sub-fav-char');
+        const kpiBestWinrateIcon = document.getElementById('kpi-best-winrate-icon');
+        const kpiBestWinrateValue = document.getElementById('kpi-best-winrate-value');
+        const kpiBestFloorIcon = document.getElementById('kpi-best-floor-icon');
+        const kpiBestFloorValue = document.getElementById('kpi-best-floor-value');
         
         const searchInput = document.getElementById('search-seed');
         const filterResult = document.getElementById('filter-result');
@@ -16127,6 +16285,37 @@
                 }
             }
             kpiSubFavChar.textContent = favChar !== 'None' ? `Most Played: ${favChar} (${maxCount} runs)` : "Preferred Character";
+
+            // Best win rate / highest avg floor by character (solo runs only)
+            const KPI_CHARACTERS = ['Ironclad', 'Silent', 'Defect', 'Regent', 'Necrobinder'];
+            let bestWinrateChar = null, bestWinrate = -1;
+            let bestFloorChar = null, bestFloorAvg = -1;
+            KPI_CHARACTERS.forEach(char => {
+                const charRuns = allRuns.filter(r => r.character && r.character.toLowerCase() === char.toLowerCase());
+                if (charRuns.length === 0) return;
+                const wins = charRuns.filter(r => r.win).length;
+                const rate = (wins / charRuns.length) * 100;
+                if (rate > bestWinrate) { bestWinrate = rate; bestWinrateChar = char; }
+                const avgFloor = charRuns.reduce((acc, r) => acc + (r.floors || 0), 0) / charRuns.length;
+                if (avgFloor > bestFloorAvg) { bestFloorAvg = avgFloor; bestFloorChar = char; }
+            });
+
+            if (bestWinrateChar) {
+                kpiBestWinrateIcon.src = `https://cdn.spire-codex.com/characters/combat_${bestWinrateChar.toLowerCase()}.webp`;
+                kpiBestWinrateIcon.style.display = '';
+                kpiBestWinrateValue.textContent = `${bestWinrateChar} (${Math.round(bestWinrate)}%)`;
+            } else {
+                kpiBestWinrateValue.textContent = '—';
+            }
+
+            if (bestFloorChar) {
+                kpiBestFloorIcon.src = `https://cdn.spire-codex.com/characters/combat_${bestFloorChar.toLowerCase()}.webp`;
+                kpiBestFloorIcon.style.display = '';
+                kpiBestFloorValue.textContent = `${bestFloorChar} (${bestFloorAvg.toFixed(1)})`;
+            } else {
+                kpiBestFloorValue.textContent = '—';
+            }
+
             updateHeaderMeta();
         }
 
@@ -16733,6 +16922,7 @@
                     content.style.transition = 'all 0.2s';
                     
                     const header = document.createElement('div');
+                    header.className = 'timeline-node-header';
                     header.style.display = 'flex';
                     header.style.justifyContent = 'space-between';
                     header.style.alignItems = 'center';
@@ -16836,6 +17026,17 @@
                 
                 actDiv.appendChild(timeline);
                 mapContainer.appendChild(actDiv);
+            });
+
+            requestAnimationFrame(() => {
+                mapContainer.querySelectorAll('.timeline-node').forEach(nodeDiv => {
+                    const marker = nodeDiv.querySelector('.timeline-marker');
+                    const header = nodeDiv.querySelector('.timeline-node-header');
+                    if (marker && header) {
+                        const top = header.offsetTop + (header.offsetHeight / 2) - (marker.offsetHeight / 2);
+                        marker.style.top = top + 'px';
+                    }
+                });
             });
         }
 
@@ -17290,7 +17491,7 @@
                                 <img class="tooltip-relic-img" src="${imgUrl}" alt="${relic.name}" onerror="this.style.display='none';">
                                 <div class="relic-tooltip-title-area">
                                     <div class="tooltip-title">${relic.name}</div>
-                                    <div class="tooltip-rarity rarity-${relic.rarity.replace(' Relic', '').toLowerCase()}">${relic.rarity}</div>
+                                    <div class="tooltip-rarity relic-rarity-${relic.rarity.replace(' Relic', '').toLowerCase()}">${relic.rarity}</div>
                                 </div>
                             </div>
                             <div class="tooltip-desc">${formatDescription(relic.desc)}</div>
@@ -18952,6 +19153,7 @@
                     const s = getCachedCardStats(item.id);
                     runStatHtml = `<div class="comp-card-run-stat">Picked ${s.timesPicked}x &bull; ${s.winRate}% win rate</div>`;
                 }
+                const charColorHex = charColors[cleanColor] || 'var(--text-muted)';
                 el.innerHTML = `
                     ${imgHtml}
                     <div class="comp-card-header">
@@ -18959,13 +19161,13 @@
                         <span class="comp-card-cost">${item.cost !== "" ? item.cost : "No Cost"}</span>
                     </div>
                     <div class="comp-card-meta">
-                        <span>${item.type}</span>
+                        <span style="color: ${charColorHex}; font-weight: 700;">${cleanColor}</span>
                         <span class="rarity-${item.rarity.toLowerCase()}">${item.rarity}</span>
+                        <span>${item.type}</span>
                     </div>
                     ${runStatHtml}
                     <div class="comp-card-desc">${formatDescription(item.desc)}</div>
                     <div class="comp-card-upgrade-desc" style="display: none;"></div>
-                    <div style="font-size: 9px; color: var(--text-muted); text-align: right; margin-top: auto; padding-top: 6px;">${cleanColor}</div>
                 `;
 
                 // Upgrade toggle
@@ -19094,10 +19296,15 @@
                 upgradeBtn.onclick = null;
             }
 
+            const zoomCleanColor = item.color ? item.color.charAt(0).toUpperCase() + item.color.slice(1).toLowerCase() : 'Neutral';
             document.getElementById('card-zoom-name').textContent = item.name;
             document.getElementById('card-zoom-type').textContent = item.type || '';
-            document.getElementById('card-zoom-rarity').textContent = item.rarity || '';
-            document.getElementById('card-zoom-color').textContent = item.color ? item.color.charAt(0).toUpperCase() + item.color.slice(1).toLowerCase() : 'Neutral';
+            const rarityEl = document.getElementById('card-zoom-rarity');
+            rarityEl.textContent = item.rarity || '';
+            rarityEl.className = 'rarity-' + (item.rarity || 'common').toLowerCase();
+            const colorEl = document.getElementById('card-zoom-color');
+            colorEl.textContent = zoomCleanColor;
+            colorEl.style.color = charColors[zoomCleanColor] || 'var(--text-muted)';
             applyDisplay(false);
 
             const stats = getCardRunStats(cardId);
@@ -19207,9 +19414,9 @@
                 const el = document.createElement('div');
                 el.dataset.id = item.id;
                 const relRarity = (item.rarity || '').replace(/ Relic/i, '').toLowerCase();
-                const rarityClass = 'rarity-' + (relRarity || 'common');
+                const rarityClass = 'relic-rarity-' + (relRarity || 'common');
                 el.className = 'compendium-card ' + rarityClass;
-                
+
                 const imgUrl = `https://spire-codex.com/static/images/relics/${item.img.toLowerCase()}`;
                 el.innerHTML = `
                     <div class="comp-relic-title-row">
@@ -19218,7 +19425,7 @@
                     </div>
                     <div class="comp-card-meta">
                         <span>Relic</span>
-                        <span class="rarity-${(item.rarity || '').replace(' Relic', '').toLowerCase()}">${item.rarity}</span>
+                        <span class="relic-rarity-${relRarity || 'common'}">${item.rarity}</span>
                     </div>
                     <div class="comp-card-desc">${formatDescription(item.desc)}</div>
                 `;
@@ -19506,7 +19713,7 @@
                         <h4 style="margin: 0; font-size: 18px; font-weight: 600; color: var(--accent-primary);">${ancient.name}</h4>
                         <p style="margin: 4px 0 0 0; font-size: 12px; color: var(--text-muted);">${ancient.description}</p>
                     </div>
-                    <span class="runs-count-badge" style="background: rgba(139, 92, 246, 0.2); color: var(--accent-primary); border: 1px solid rgba(139, 92, 246, 0.3); font-weight: 600;">${ancient.act}</span>
+                    <span class="runs-count-badge" style="background: rgba(232, 184, 48, 0.2); color: var(--accent-primary); border: 1px solid rgba(232, 184, 48, 0.3); font-weight: 600;">${ancient.act}</span>
                 `;
                 
                 section.appendChild(header);
@@ -19521,7 +19728,7 @@
                     ancient.relics.forEach(item => {
                         const card = document.createElement('div');
                         card.dataset.id = item.id;
-                        card.className = 'compendium-card rarity-ancient';
+                        card.className = 'compendium-card relic-rarity-ancient';
                         
                         const imgUrl = `https://spire-codex.com/static/images/relics/${item.img.toLowerCase()}`;
                         card.innerHTML = `
@@ -19531,7 +19738,7 @@
                             </div>
                             <div class="comp-card-meta">
                                 <span>Relic</span>
-                                <span class="rarity-ancient">Ancient</span>
+                                <span class="relic-rarity-ancient">Ancient</span>
                             </div>
                             <div class="comp-card-desc">${formatDescription(item.desc)}</div>
                         `;
@@ -20167,15 +20374,15 @@
                 let rarityColor = 'var(--text-muted)';
                 if (cleanRarity === 'Starter') rarityColor = '#94a3b8';
                 else if (cleanRarity === 'Common') rarityColor = '#cbd5e1';
-                else if (cleanRarity === 'Uncommon') rarityColor = '#3b82f6';
-                else if (cleanRarity === 'Rare') rarityColor = '#f59e0b';
-                else if (cleanRarity === 'Boss') rarityColor = '#8b5cf6';
-                else if (cleanRarity === 'Shop') rarityColor = '#14b8a6';
-                else if (cleanRarity === 'Special') rarityColor = '#ef4444';
+                else if (cleanRarity === 'Uncommon') rarityColor = '#60a5fa';
+                else if (cleanRarity === 'Rare') rarityColor = '#e8b830';
+                else if (cleanRarity === 'Shop') rarityColor = '#34d399';
+                else if (cleanRarity === 'Event') rarityColor = '#22d3ee';
+                else if (cleanRarity === 'Ancient') rarityColor = '#c084fc';
                 
                 tr.innerHTML = `
                     <td class="char-cell" style="font-weight:600;"><span class="char-indicator" style="background: ${rarityColor}"></span>${stat.name}</td>
-                    <td><span class="rarity-${cleanRarity.toLowerCase().replace(' ', '-')}" style="font-size:12px; font-weight:600;">${stat.rarity}</span></td>
+                    <td><span style="font-size:12px; font-weight:600; color: ${rarityColor};">${stat.rarity}</span></td>
                     <td style="font-weight:700; text-align:center;">${stat.timesPicked}</td>
                     <td style="text-align:center;"><span class="text-win">${stat.wins}</span> - <span class="text-loss">${stat.losses}</span></td>
                     <td>
@@ -20288,7 +20495,7 @@
                         type: 'line',
                         borderColor: '#cbd5e1',
                         borderWidth: 2,
-                        pointBackgroundColor: '#8b5cf6',
+                        pointBackgroundColor: '#e8b830',
                         pointBorderColor: '#fff',
                         pointHoverRadius: 6,
                         yAxisID: 'y1'
@@ -20739,13 +20946,13 @@
                     datasets: [{
                         label: charFilter === 'all' ? 'All Classes' : charFilter,
                         data: traitData,
-                        backgroundColor: 'rgba(139, 92, 246, 0.15)',
-                        borderColor: '#8b5cf6',
+                        backgroundColor: 'rgba(232, 184, 48, 0.15)',
+                        borderColor: '#e8b830',
                         borderWidth: 2,
-                        pointBackgroundColor: '#8b5cf6',
+                        pointBackgroundColor: '#e8b830',
                         pointBorderColor: '#fff',
                         pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: '#8b5cf6'
+                        pointHoverBorderColor: '#e8b830'
                     }]
                 },
                 options: {

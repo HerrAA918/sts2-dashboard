@@ -1102,6 +1102,7 @@ $htmlTemplate = @'
         .rarity-uncommon { color: #60a5fa; }
         .rarity-rare { color: #fbbf24; }
         .rarity-starter { color: #34d399; }
+        .rarity-ancient,
         .rarity-special { color: #c084fc; }
         .rarity-boss { color: #a855f7; }
         .rarity-shop { color: #14b8a6; }
@@ -2199,6 +2200,7 @@ $htmlTemplate = @'
             <button class="sub-tab-btn" id="sub-tab-relics" onclick="switchSubTab('relics')">Relics</button>
             <button class="sub-tab-btn" id="sub-tab-potions" onclick="switchSubTab('potions')">Potions</button>
             <button class="sub-tab-btn" id="sub-tab-campfire" onclick="switchSubTab('campfire')">Campfire</button>
+            <button class="sub-tab-btn" id="sub-tab-ancients" onclick="switchSubTab('ancients')">Ancients</button>
             <button class="sub-tab-btn" id="sub-tab-mobs" onclick="switchSubTab('mobs')">Mobs</button>
             <button class="sub-tab-btn" id="sub-tab-elites" onclick="switchSubTab('elites')">Elites</button>
             <button class="sub-tab-btn" id="sub-tab-bosses" onclick="switchSubTab('bosses')">Bosses</button>
@@ -2288,6 +2290,13 @@ $htmlTemplate = @'
                 </div>
             </div>
             <div class="compendium-grid" id="comp-campfire-grid">
+                <!-- Populated dynamically -->
+            </div>
+        </div>
+
+        <!-- Ancients Sub-View -->
+        <div id="sub-view-ancients" class="comp-sub-view" style="display: none;">
+            <div id="comp-ancients-list" style="display: flex; flex-direction: column; gap: 32px; margin-top: 16px;">
                 <!-- Populated dynamically -->
             </div>
         </div>
@@ -2809,6 +2818,8 @@ $htmlTemplate = @'
         // Campfire
         const compCampfireSearch = document.getElementById('comp-campfire-search');
         const compCampfireGrid = document.getElementById('comp-campfire-grid');
+        // Ancients
+        const compAncientsList = document.getElementById('comp-ancients-list');
         // Mobs
         const compMobsSearch = document.getElementById('comp-mobs-search');
         const compMobsTableBody = document.getElementById('comp-mobs-table-body');
@@ -4813,7 +4824,7 @@ $htmlTemplate = @'
             }
             
             // Show / Hide Sub-Views
-            const subViews = ['cards', 'relics', 'potions', 'campfire', 'mobs', 'events', 'keywords'];
+            const subViews = ['cards', 'relics', 'potions', 'campfire', 'ancients', 'mobs', 'events', 'keywords'];
             subViews.forEach(viewName => {
                 const viewEl = document.getElementById(`sub-view-${viewName}`);
                 if (viewEl) {
@@ -4830,6 +4841,8 @@ $htmlTemplate = @'
                 renderCompendiumPotions();
             } else if (subTab === 'campfire') {
                 renderCompendiumCampfire();
+            } else if (subTab === 'ancients') {
+                renderCompendiumAncients();
             } else if (subTab === 'mobs' || subTab === 'elites' || subTab === 'bosses') {
                 renderCompendiumMobs();
             } else if (subTab === 'events') {
@@ -5199,6 +5212,141 @@ $htmlTemplate = @'
                     </div>
                 `;
                 compCampfireGrid.appendChild(el);
+            });
+        }
+
+        function renderCompendiumAncients() {
+            if (!compAncientsList) return;
+            compAncientsList.innerHTML = '';
+            
+            if (!sts2Database || !sts2Database.relics) {
+                compAncientsList.innerHTML = '<div class="no-data">No relics found in database.</div>';
+                return;
+            }
+            
+            // Define the groups
+            const paelRelics = new Set([
+                "Pael's Tears", "Pael's Horn", "Pael's Blood", "Pael's Claw", "Pael's Tooth", 
+                "Pael's Wing", "Pael's Flesh", "Pael's Legion", "Sere Talon", "Toy Box", 
+                "Fiddle", "Toasty Mittens", "Prismatic Gem", "Whispering Earring", "Calling Bell", 
+                "Lord's Parasol", "Ectoplasm", "Black Star", "War Hammer", "Runic Pyramid", 
+                "Philosopher's Stone", "Astrolabe"
+            ]);
+            
+            const orobasRelics = new Set([
+                "Touch of Orobas", "Alchemical Coffer", "Archaic Tooth", "Electric Shrymp", 
+                "Glass Eye", "Pumpkin Candle", "Tri-Boomerang", "Spiked Gauntlets", "Precision Scale", 
+                "Hourglass", "Glitter", "Jeweled Mask", "Seal of Gold", "Brilliant Scarf", 
+                "Throwing Axe", "Sozu", "New Leaf", "Golden Compass"
+            ]);
+            
+            const ancients = [
+                {
+                    name: "Neow",
+                    act: "Act 1",
+                    description: "The Ancient of Act 1 who guides the heroes, offering a pool of powerful starting relics at the start of each run.",
+                    relics: []
+                },
+                {
+                    name: "Orobas",
+                    act: "Act 2",
+                    description: "The Ancient of Act 2 encountered at the end of the Act, offering relics that alter gameplay dynamics and resources.",
+                    relics: []
+                },
+                {
+                    name: "Pael",
+                    act: "Act 3",
+                    description: "The Ancient of Act 3, a dragon-like entity that offers high-impact boss relics to finalize your build before the climax.",
+                    relics: []
+                }
+            ];
+            
+            // Gather relics that have rarity "Ancient"
+            const allAncientRelics = Object.entries(sts2Database.relics)
+                .map(([id, relic]) => ({ id, ...relic }))
+                .filter(r => r.rarity && r.rarity.toLowerCase().includes('ancient'));
+                
+            allAncientRelics.forEach(r => {
+                const name = r.name;
+                if (paelRelics.has(name)) {
+                    ancients[2].relics.push(r);
+                } else if (orobasRelics.has(name)) {
+                    ancients[1].relics.push(r);
+                } else {
+                    ancients[0].relics.push(r);
+                }
+            });
+            
+            // Sort relics alphabetically for consistency
+            ancients.forEach(a => {
+                a.relics.sort((r1, r2) => r1.name.localeCompare(r2.name));
+            });
+            
+            // Render each ancient
+            ancients.forEach(ancient => {
+                const section = document.createElement('div');
+                section.className = 'ancient-section';
+                section.style.background = 'rgba(15, 23, 42, 0.45)';
+                section.style.borderRadius = '12px';
+                section.style.padding = '20px';
+                section.style.border = '1px solid rgba(255, 255, 255, 0.05)';
+                
+                const header = document.createElement('div');
+                header.style.display = 'flex';
+                header.style.justifyContent = 'space-between';
+                header.style.alignItems = 'center';
+                header.style.marginBottom = '16px';
+                header.style.borderBottom = '1px solid rgba(255, 255, 255, 0.05)';
+                header.style.paddingBottom = '12px';
+                header.style.flexWrap = 'wrap';
+                header.style.gap = '12px';
+                
+                header.innerHTML = `
+                    <div style="flex: 1; min-width: 200px;">
+                        <h4 style="margin: 0; font-size: 18px; font-weight: 600; color: var(--accent-primary);">${ancient.name}</h4>
+                        <p style="margin: 4px 0 0 0; font-size: 12px; color: var(--text-muted);">${ancient.description}</p>
+                    </div>
+                    <span class="runs-count-badge" style="background: rgba(139, 92, 246, 0.2); color: var(--accent-primary); border: 1px solid rgba(139, 92, 246, 0.3); font-weight: 600;">${ancient.act}</span>
+                `;
+                
+                section.appendChild(header);
+                
+                const grid = document.createElement('div');
+                grid.className = 'compendium-grid';
+                grid.style.marginTop = '16px';
+                
+                if (ancient.relics.length === 0) {
+                    grid.innerHTML = '<div class="no-data" style="grid-column: 1 / -1;">No relics in this choice pool.</div>';
+                } else {
+                    ancient.relics.forEach(item => {
+                        const card = document.createElement('div');
+                        card.dataset.id = item.id;
+                        card.className = 'compendium-card rarity-ancient';
+                        
+                        const imgUrl = `https://spire-codex.com/static/images/relics/${item.img.toLowerCase()}`;
+                        card.innerHTML = `
+                            <div class="comp-relic-title-row">
+                                <img class="comp-relic-img-preview" src="${imgUrl}" alt="${item.name}" onerror="this.style.display='none';">
+                                <span class="comp-card-name">${item.name}</span>
+                            </div>
+                            <div class="comp-card-meta">
+                                <span>Relic</span>
+                                <span class="rarity-ancient">Ancient</span>
+                            </div>
+                            <div class="comp-card-desc">${formatDescription(item.desc)}</div>
+                        `;
+                        
+                        // Tooltips
+                        card.addEventListener('mouseenter', (e) => showTooltip(e, item.id));
+                        card.addEventListener('mousemove', moveTooltip);
+                        card.addEventListener('mouseleave', hideTooltip);
+                        
+                        grid.appendChild(card);
+                    });
+                }
+                
+                section.appendChild(grid);
+                compAncientsList.appendChild(section);
             });
         }
 

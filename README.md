@@ -4,7 +4,7 @@ A fully offline, self-contained run analytics dashboard and database compendium 
 
 This dashboard allows you to import, visualize, and analyze your runs (both Single Player and Co-op) directly from your game run files.
 
-![Slay the Spire 2 Dashboard — Compendium view](docs/dashboard.png)
+![Slay the Spire 2 Dashboard — Run History overview](docs/section-runs.png)
 
 ## Features
 
@@ -16,6 +16,43 @@ This dashboard allows you to import, visualize, and analyze your runs (both Sing
 - **Unlocks & Progression**: Import your `progress.save` to see a **Progression** tab (unlock timeline grouped by character, collection-completion bars, lifetime stats, and an achievements checklist) plus an **"Unlocked this run"** section on each run, correlated by timestamp.
 - **Share / Export**: Bundle your imported runs + progression into a single `.json` file with the **Export / Share** button. Send it to anyone — they drop it onto their dashboard to view your snapshot (a banner reminds them they're viewing shared data and to load their own save).
 - **Privacy First**: Fully client-side. No data is sent to any server. Your runs and progress are parsed locally and stored in your browser's `localStorage` for quick access next time.
+
+## Dashboard Tour
+
+### Run History
+![Run History](docs/section-runs.png)
+
+Your home base. Headline KPIs (total runs, overall win rate, total playtime, max ascension, and your best-performing characters), a **Wins & Runs by Character** bar chart, a **Run Distribution** donut, and **Top Death Causes**. Pick any run to open a detail panel with its deck, relics, an interactive **Run Map** timeline, a floor-by-floor **Health & Gold** chart, and the unlocks earned during that run.
+
+### Co-op History
+![Co-op History](docs/section-coop.png)
+
+The same breakdown for multiplayer runs. Each entry shows both players' characters, the shared result, floors reached, and what ended the run; the detail panel has a per-player selector so you can inspect each teammate's deck and relics.
+
+### Compendium
+![Compendium](docs/section-compendium.png)
+
+A complete offline database of **Cards, Relics, Potions, Mobs, Elites, Bosses, Events, Keywords, and Ancients** — with real game art, rarity color-coding, hover tooltips, an upgraded-card toggle, and click-to-zoom detail. It's fully populated without importing anything.
+
+### Card Analytics
+![Card Analytics](docs/section-card-analytics.png)
+
+How every card actually performs in *your* games: runs contained, win–loss record, win rate, and average floor/ascension. Filter by character class and sort by any column.
+
+### Relic Analytics
+![Relic Analytics](docs/section-relic-analytics.png)
+
+The same performance view for relics, with co-op inventory awareness so each player's relics are counted correctly.
+
+### Monster Analytics
+![Monster Analytics](docs/section-monster-analytics.png)
+
+Encounter stats for normal mobs, elites, and bosses: how often you've fought each, how many runs faced them, how many runs they **ended**, and the win rate of runs that encountered them. Filter by Normal / Elite / Boss.
+
+### Progression
+![Progression](docs/section-progression.png)
+
+Built from your `progress.save`: lifetime stats (unlocks, epochs, floors climbed, playtime), **collection-completion** bars for cards/relics/potions/events, an **achievements** checklist, and an **unlock timeline** grouped by character showing exactly which cards and relics each milestone granted.
 
 ## Where to Find Your Run History Files
 

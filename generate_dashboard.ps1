@@ -336,6 +336,29 @@ $htmlTemplate = @'
             gap: 16px;
         }
 
+        .import-drop-zone {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 12px;
+            border: 1px dashed rgba(255, 255, 255, 0.16);
+            border-radius: 18px;
+            transition: all 0.2s ease;
+            min-width: 320px;
+            background: rgba(15, 23, 42, 0.45);
+        }
+        .import-drop-zone.drag-over {
+            background: rgba(14, 165, 233, 0.1);
+            border-color: rgba(14, 165, 233, 0.9);
+        }
+        .drop-zone-hint {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-align: center;
+            line-height: 1.4;
+            user-select: none;
+        }
+
         .btn-group {
             display: flex;
             gap: 8px;
@@ -1840,21 +1863,24 @@ $htmlTemplate = @'
         </div>
         
         <div class="header-actions">
-            <div class="btn-group">
-                <button class="reset-btn" id="reset-btn" style="display: none;">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
-                    Reset to Default
-                </button>
-                <label class="import-btn" style="background: linear-gradient(135deg, #0ea5e9, #0284c7);box-shadow: 0 4px 12px rgba(14,165,233,0.25);">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
-                    Add Runs
-                    <input type="file" id="run-input" accept=".run" multiple style="display: none;">
-                </label>
-                <label class="import-btn">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-                    Import ZIP
-                    <input type="file" id="zip-input" accept=".zip" style="display: none;">
-                </label>
+            <div class="import-drop-zone" id="run-drop-zone">
+                <div class="btn-group">
+                    <button class="reset-btn" id="reset-btn" style="display: none;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                        Reset to Default
+                    </button>
+                    <label class="import-btn" style="background: linear-gradient(135deg, #0ea5e9, #0284c7);box-shadow: 0 4px 12px rgba(14,165,233,0.25);">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+                        Add Runs
+                        <input type="file" id="run-input" accept=".run" multiple style="display: none;">
+                    </label>
+                    <label class="import-btn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                        Import ZIP
+                        <input type="file" id="zip-input" accept=".zip" style="display: none;">
+                    </label>
+                </div>
+                <div class="drop-zone-hint">Drop .run or .zip files here to import your runs directly.</div>
             </div>
             <div class="meta-info">
                 <div id="meta-source">Source: None</div>
@@ -1917,6 +1943,11 @@ $htmlTemplate = @'
                 <option value="win">Wins Only</option>
                 <option value="loss">Losses Only</option>
                 <option value="abandoned">Abandoned Only</option>
+            </select>
+
+            <select class="select-filter" id="filter-version">
+                <option value="all">All Versions</option>
+                <!-- Generated dynamically -->
             </select>
 
             <select class="select-filter" id="filter-asc">
@@ -2779,6 +2810,7 @@ $htmlTemplate = @'
         
         const searchInput = document.getElementById('search-seed');
         const filterResult = document.getElementById('filter-result');
+        const filterVersion = document.getElementById('filter-version');
         const filterAsc = document.getElementById('filter-asc');
         const runsFilteredCount = document.getElementById('runs-filtered-count');
         const runsTableBody = document.getElementById('runs-table-body');
@@ -2800,6 +2832,7 @@ $htmlTemplate = @'
         const deathListBody = document.getElementById('death-list-body');
         const zipInput = document.getElementById('zip-input');
         const runInput = document.getElementById('run-input');
+        const runDropZone = document.getElementById('run-drop-zone');
         const resetBtn = document.getElementById('reset-btn');
         
         // Compendium DOM Elements
@@ -2882,6 +2915,7 @@ $htmlTemplate = @'
             filteredRuns = [...allRuns];
 
             populateAscensionFilter();
+            populateVersionFilter();
             populateMultiplayerAscensionFilter();
             calculateKPIs();
             renderTopDeaths();
@@ -3074,7 +3108,20 @@ $htmlTemplate = @'
 
         searchInput.addEventListener('input', applyFilters);
         filterResult.addEventListener('change', applyFilters);
+        if (filterVersion) filterVersion.addEventListener('change', applyFilters);
         filterAsc.addEventListener('change', applyFilters);
+
+        function formatRunDate(timestamp) {
+            const dateObj = new Date(timestamp * 1000);
+            return dateObj.toLocaleString(undefined, {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            });
+        }
 
         // Shared run parser: takes raw JSON data and a filename, returns a parsed run object
         function parseRunFile(data, fileName) {
@@ -3104,7 +3151,7 @@ $htmlTemplate = @'
             const deck = players.length > 0 ? players[0].deck : [];
             
             const startTimeRaw = data.start_time || Math.floor(Date.now() / 1000);
-            const date = new Date(startTimeRaw * 1000).toISOString().replace('T', ' ').substring(0, 19);
+            const date = formatRunDate(startTimeRaw);
             
             let minMap = [];
             if (data.map_point_history) {
@@ -3228,11 +3275,69 @@ $htmlTemplate = @'
             alert(message);
         }
 
-        // ZIP Import Logic
-        zipInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
+        function mergeNewRunsIntoExisting(existingRuns, newRuns) {
+            const existingIds = new Set(existingRuns.map(r => r.id));
+            const uniqueNewRuns = [];
+            let duplicateCount = 0;
+            newRuns.forEach(r => {
+                if (!existingIds.has(r.id)) {
+                    existingIds.add(r.id);
+                    uniqueNewRuns.push(r);
+                } else {
+                    duplicateCount++;
+                }
+            });
+            return {
+                mergedRuns: [...existingRuns, ...uniqueNewRuns],
+                duplicateCount,
+                uniqueCount: uniqueNewRuns.length
+            };
+        }
 
+        function importRunFiles(files) {
+            const promises = [];
+            const parsedRuns = [];
+            let failCount = 0;
+
+            files.forEach(file => {
+                const promise = new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = function(evt) {
+                        try {
+                            const data = JSON.parse(evt.target.result);
+                            parsedRuns.push(parseRunFile(data, file.name));
+                        } catch (err) {
+                            console.error("Failed to parse run file: " + file.name, err);
+                            failCount++;
+                        }
+                        resolve();
+                    };
+                    reader.onerror = function() {
+                        console.error("Failed to read file: " + file.name);
+                        failCount++;
+                        resolve();
+                    };
+                    reader.readAsText(file);
+                });
+                promises.push(promise);
+            });
+
+            Promise.all(promises).then(() => {
+                if (parsedRuns.length > 0) {
+                    const { mergedRuns, duplicateCount, uniqueCount } = mergeNewRunsIntoExisting(allRuns, parsedRuns);
+                    let msg = `Successfully added ${uniqueCount} run${uniqueCount !== 1 ? 's' : ''}!`;
+                    if (duplicateCount > 0) msg += ` (${duplicateCount} duplicate${duplicateCount !== 1 ? 's' : ''} skipped)`;
+                    if (failCount > 0) msg += ` (${failCount} file${failCount !== 1 ? 's' : ''} failed to parse)`;
+                    refreshAfterImport(mergedRuns, msg);
+                } else {
+                    let msg = 'No valid .run files could be parsed.';
+                    if (failCount > 0) msg += ` ${failCount} file${failCount !== 1 ? 's' : ''} failed.`;
+                    alert(msg);
+                }
+            });
+        }
+
+        function importZipFile(file) {
             const reader = new FileReader();
             reader.onload = function(evt) {
                 const zip = new JSZip();
@@ -3256,7 +3361,12 @@ $htmlTemplate = @'
                     
                     Promise.all(promises).then(() => {
                         if (newRuns.length > 0) {
-                            refreshAfterImport(newRuns, `Successfully imported ${newRuns.length} runs from ${file.name}!`);
+                            const { mergedRuns, duplicateCount, uniqueCount } = mergeNewRunsIntoExisting(allRuns, newRuns);
+                            let msg = `Successfully imported ${uniqueCount} run${uniqueCount !== 1 ? 's' : ''} from ${file.name}!`;
+                            if (duplicateCount > 0) {
+                                msg += ` (${duplicateCount} duplicate${duplicateCount !== 1 ? 's' : ''} skipped)`;
+                            }
+                            refreshAfterImport(mergedRuns, msg);
                         } else {
                             alert("No Slay the Spire 2 .run files found in this zip.");
                         }
@@ -3266,6 +3376,31 @@ $htmlTemplate = @'
                 });
             };
             reader.readAsArrayBuffer(file);
+        }
+
+        function handleDropFiles(files) {
+            if (!files || files.length === 0) return;
+            const droppedRunFiles = files.filter(f => f.name.toLowerCase().endsWith('.run'));
+            const droppedZipFiles = files.filter(f => f.name.toLowerCase().endsWith('.zip'));
+
+            if (droppedRunFiles.length === 0 && droppedZipFiles.length === 0) {
+                alert('Please drop only .run or .zip files.');
+                return;
+            }
+
+            if (droppedRunFiles.length > 0) {
+                importRunFiles(droppedRunFiles);
+            }
+            if (droppedZipFiles.length > 0) {
+                droppedZipFiles.forEach(importZipFile);
+            }
+        }
+
+        // ZIP Import Logic
+        zipInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            importZipFile(file);
             zipInput.value = '';
         });
 
@@ -3273,56 +3408,30 @@ $htmlTemplate = @'
         runInput.addEventListener('change', function(e) {
             const files = Array.from(e.target.files);
             if (files.length === 0) return;
-            
-            const promises = [];
-            const parsedRuns = [];
-            let failCount = 0;
-            
-            files.forEach(file => {
-                const promise = new Promise((resolve) => {
-                    const reader = new FileReader();
-                    reader.onload = function(evt) {
-                        try {
-                            const data = JSON.parse(evt.target.result);
-                            parsedRuns.push(parseRunFile(data, file.name));
-                        } catch (err) {
-                            console.error("Failed to parse run file: " + file.name, err);
-                            failCount++;
-                        }
-                        resolve();
-                    };
-                    reader.onerror = function() {
-                        console.error("Failed to read file: " + file.name);
-                        failCount++;
-                        resolve();
-                    };
-                    reader.readAsText(file);
-                });
-                promises.push(promise);
-            });
-            
-            Promise.all(promises).then(() => {
-                if (parsedRuns.length > 0) {
-                    // Merge with existing runs, avoiding duplicates by ID
-                    const existingIds = new Set(allRuns.map(r => r.id));
-                    const uniqueNew = parsedRuns.filter(r => !existingIds.has(r.id));
-                    const duplicateCount = parsedRuns.length - uniqueNew.length;
-                    
-                    const merged = [...allRuns, ...uniqueNew];
-                    
-                    let msg = `Successfully added ${uniqueNew.length} run${uniqueNew.length !== 1 ? 's' : ''}!`;
-                    if (duplicateCount > 0) msg += ` (${duplicateCount} duplicate${duplicateCount !== 1 ? 's' : ''} skipped)`;
-                    if (failCount > 0) msg += ` (${failCount} file${failCount !== 1 ? 's' : ''} failed to parse)`;
-                    
-                    refreshAfterImport(merged, msg);
-                } else {
-                    let msg = 'No valid .run files could be parsed.';
-                    if (failCount > 0) msg += ` ${failCount} file${failCount !== 1 ? 's' : ''} failed.`;
-                    alert(msg);
-                }
-            });
+            importRunFiles(files);
             runInput.value = '';
         });
+
+        if (runDropZone) {
+            ['dragenter', 'dragover'].forEach(evt => {
+                runDropZone.addEventListener(evt, function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    runDropZone.classList.add('drag-over');
+                });
+            });
+            ['dragleave', 'drop'].forEach(evt => {
+                runDropZone.addEventListener(evt, function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    runDropZone.classList.remove('drag-over');
+                });
+            });
+            runDropZone.addEventListener('drop', function(e) {
+                const items = Array.from(e.dataTransfer.files || []);
+                handleDropFiles(items);
+            });
+        }
 
         // Reset to default
         resetBtn.addEventListener('click', function() {
@@ -3339,6 +3448,19 @@ $htmlTemplate = @'
                 opt.value = asc;
                 opt.textContent = `Ascension A${asc}`;
                 filterAsc.appendChild(opt);
+            });
+        }
+
+        function populateVersionFilter() {
+            if (!filterVersion) return;
+            filterVersion.innerHTML = '<option value="all">All Versions</option>';
+            const versions = [...new Set(allRuns.filter(r => !r.isMultiplayer).map(r => r.version || 'Unknown'))];
+            versions.sort((a, b) => compareVersions(a, b));
+            versions.forEach(version => {
+                const opt = document.createElement('option');
+                opt.value = version;
+                opt.textContent = version;
+                filterVersion.appendChild(opt);
             });
         }
 
@@ -3394,9 +3516,8 @@ $htmlTemplate = @'
                 const latestRun = allRuns.reduce((latest, r) => {
                     return (!latest || r.timestamp > latest.timestamp) ? r : latest;
                 }, null);
-                if (latestRun && latestRun.date) {
-                    const dateOnly = latestRun.date.split(' ')[0];
-                    metaUpdated.textContent = `Last Run: ${dateOnly}`;
+                if (latestRun && latestRun.timestamp) {
+                    metaUpdated.textContent = `Last Run: ${formatRunDate(latestRun.timestamp)}`;
                 } else {
                     metaUpdated.textContent = 'Last Run: Unknown';
                 }
@@ -3464,10 +3585,13 @@ $htmlTemplate = @'
         function applyFilters() {
             const searchVal = searchInput.value.toLowerCase();
             const resultVal = filterResult.value;
+            const versionVal = filterVersion ? filterVersion.value : 'all';
             const ascVal = filterAsc.value;
             
             filteredRuns = allRuns.filter(r => {
                 if (r.isMultiplayer) return false;
+                
+                if (versionVal !== 'all' && (r.version || 'Unknown') !== versionVal) return false;
                 
                 // Character Filter
                 if (activeChar !== 'all' && (!r.character || r.character.toLowerCase() !== activeChar)) return false;

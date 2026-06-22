@@ -4089,6 +4089,7 @@ $htmlTemplate = @'
             
             // Extract HP and Gold data floor-by-floor
             let labels = [];
+            let floorDescriptions = [];
             let hpData = [];
             let maxHpData = [];
             let goldData = [];
@@ -4098,11 +4099,22 @@ $htmlTemplate = @'
                 run.mapPointHistory.forEach((act, actIdx) => {
                     if (!act) return;
                     act.forEach(node => {
-                        let floorLabel = `F${floorIndex}`;
-                        if (node.map_point_type) {
-                            floorLabel += ` (${node.map_point_type})`;
+                        labels.push(`F${floorIndex}`);
+                        
+                        // Extract friendly name for the tooltip
+                        let typeName = node.map_point_type ? formatModelName(node.map_point_type) : 'Unknown';
+                        let encounterName = '';
+                        if (node.rooms && node.rooms[0] && node.rooms[0].model_id) {
+                            encounterName = formatModelName(node.rooms[0].model_id);
                         }
-                        labels.push(floorLabel);
+                        
+                        let desc = `Floor ${floorIndex}`;
+                        if (encounterName) {
+                            desc += `: ${encounterName} (${typeName})`;
+                        } else {
+                            desc += `: ${typeName}`;
+                        }
+                        floorDescriptions.push(desc);
                         
                         const pIdx = activeDetailPlayerIndex < (node.player_stats ? node.player_stats.length : 1) ? activeDetailPlayerIndex : 0;
                         const stats = node.player_stats && node.player_stats[pIdx];
@@ -4178,6 +4190,12 @@ $htmlTemplate = @'
                             }
                         },
                         tooltip: {
+                            callbacks: {
+                                title: function(context) {
+                                    const index = context[0].dataIndex;
+                                    return floorDescriptions[index] || '';
+                                }
+                            },
                             bodyFont: { family: 'Outfit' },
                             titleFont: { family: 'Outfit' }
                         }

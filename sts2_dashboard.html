@@ -2012,6 +2012,49 @@
             </div>
         </div>
     </div>
+
+    <!-- Relic Zoom Modal -->
+    <div id="relic-zoom-modal" class="card-zoom-modal" style="display: none;">
+        <div class="card-zoom-backdrop"></div>
+        <div class="card-zoom-content">
+            <button type="button" class="card-zoom-close" title="Close">&times;</button>
+            <div class="card-zoom-img-col">
+                <img id="relic-zoom-img" class="card-zoom-img" src="" alt="" style="object-fit: contain; background: rgba(0,0,0,0.25);">
+            </div>
+            <div class="card-zoom-stats-col">
+                <div class="card-zoom-header">
+                    <span id="relic-zoom-name" class="card-zoom-name"></span>
+                </div>
+                <div class="card-zoom-meta">
+                    <span id="relic-zoom-rarity"></span>
+                    <span id="relic-zoom-pool"></span>
+                </div>
+                <div id="relic-zoom-desc" class="card-zoom-desc"></div>
+                <div class="card-zoom-stats-label">Your Run Stats</div>
+                <div id="relic-zoom-stats-body" class="card-zoom-stats-body"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Generic Item Zoom Modal (Potions, Campfire, Mobs, Events, Keywords) -->
+    <div id="item-zoom-modal" class="card-zoom-modal" style="display: none;">
+        <div class="card-zoom-backdrop"></div>
+        <div class="card-zoom-content">
+            <button type="button" class="card-zoom-close" title="Close">&times;</button>
+            <div class="card-zoom-img-col" id="item-zoom-img-col">
+                <img id="item-zoom-img" class="card-zoom-img" src="" alt="" style="object-fit: contain; background: rgba(0,0,0,0.25);">
+                <div id="item-zoom-fallback" style="display: none;"></div>
+            </div>
+            <div class="card-zoom-stats-col">
+                <div class="card-zoom-header">
+                    <span id="item-zoom-name" class="card-zoom-name"></span>
+                </div>
+                <div class="card-zoom-meta" id="item-zoom-meta"></div>
+                <div id="item-zoom-desc" class="card-zoom-desc"></div>
+                <div id="item-zoom-extra"></div>
+            </div>
+        </div>
+    </div>
     <script>
         window.addEventListener('error', function(e) {
             const overlay = document.getElementById('error-overlay');
@@ -2038,6 +2081,7 @@
             <button class="tab-btn" id="tab-compendium" onclick="switchTab('compendium')">Compendium</button>
             <button class="tab-btn" id="tab-card-stats" onclick="switchTab('card-stats')">Card Analytics</button>
             <button class="tab-btn" id="tab-relic-stats" onclick="switchTab('relic-stats')">Relic Analytics</button>
+            <button class="tab-btn" id="tab-monster-stats" onclick="switchTab('monster-stats')">Monster Analytics</button>
         </div>
         
         <div class="header-actions">
@@ -2471,6 +2515,8 @@
                 <select id="comp-relics-sort-by" class="select-filter">
                     <option value="name">Sort by Name</option>
                     <option value="rarity">Sort by Rarity</option>
+                    <option value="picked">Sort by Most Picked</option>
+                    <option value="winrate">Sort by Win Rate</option>
                 </select>
                 <div class="char-pills" id="comp-relics-char-pills">
                     <div class="char-pill active" data-char="all">All Relics</div>
@@ -2716,6 +2762,58 @@
         </div>
     </div>
 
+    <!-- MONSTER STATISTICS TAB VIEW -->
+    <div id="view-monster-stats" style="display: none;">
+        <!-- Filters panel -->
+        <div class="filter-panel">
+            <div class="search-wrapper">
+                <input type="text" id="monster-stats-search" class="search-input" placeholder="Search monsters by name...">
+            </div>
+
+            <select id="monster-stats-sort" class="select-filter">
+                <option value="frequency">Sort by Times Fought (Most)</option>
+                <option value="deaths">Sort by Deaths Caused</option>
+                <option value="winrate">Sort by Win Rate (%)</option>
+                <option value="name">Sort by Name</option>
+            </select>
+
+            <div class="char-pills" id="monster-stats-type-pills">
+                <div class="char-pill active" data-type="all">All Types</div>
+                <div class="char-pill" data-type="normal"><span class="char-indicator" style="background:#f97316"></span>Normal</div>
+                <div class="char-pill" data-type="elite"><span class="char-indicator" style="background:#ef4444"></span>Elite</div>
+                <div class="char-pill" data-type="boss"><span class="char-indicator" style="background:#a855f7"></span>Boss</div>
+            </div>
+        </div>
+
+        <!-- Table container -->
+        <div class="card runs-container">
+            <div class="runs-header-row">
+                <h3>Monster Analytics</h3>
+                <span class="runs-count-badge" id="monster-stats-count">Showing 0 monsters</span>
+            </div>
+            <div class="table-wrapper" style="max-height: 520px;">
+                <table>
+                    <thead>
+                        <tr id="monster-header-row-tr">
+                            <th data-sort="name" onclick="sortMonsters('name')">Monster Name</th>
+                            <th data-sort="type" onclick="sortMonsters('type')">Type</th>
+                            <th data-sort="acts" onclick="sortMonsters('acts')">Act</th>
+                            <th data-sort="timesFought" onclick="sortMonsters('timesFought')" style="text-align:center;">Times Fought</th>
+                            <th data-sort="runsContained" onclick="sortMonsters('runsContained')" style="text-align:center;">Runs Faced</th>
+                            <th data-sort="deaths" onclick="sortMonsters('deaths')" style="text-align:center;">Deaths Caused</th>
+                            <th data-sort="winRate" onclick="sortMonsters('winRate')">Win Rate (%)</th>
+                            <th data-sort="avgFloors" onclick="sortMonsters('avgFloors')" style="text-align:center;">Avg. Floor</th>
+                            <th data-sort="avgAscension" onclick="sortMonsters('avgAscension')" style="text-align:center;">Avg. Ascension</th>
+                        </tr>
+                    </thead>
+                    <tbody id="monster-stats-table-body">
+                        <!-- Populated dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
 
 
     <!-- Floating Tooltip -->
@@ -2724,6 +2822,7 @@
     <!-- Data Injection -->
     <script>
         const rawRunData = [];
+        /* STS2_DATABASE_START : embedded copy of sts2_database.json, auto-updated by CI. Do NOT hand-edit between the START/END markers. */
         const sts2Database = {
     "cards":  {
                   "CARD.REAP":  {
@@ -15307,6 +15406,7 @@
                                      }
                  }
 };
+        /* STS2_DATABASE_END */
     </script>
 
     <!-- Dashboard Logic -->
@@ -15577,7 +15677,10 @@
         let cardSortDir = 'desc';
         let relicSortCol = 'timesPicked';
         let relicSortDir = 'desc';
-        
+        let monsterSortCol = 'timesFought';
+        let monsterSortDir = 'desc';
+        let activeMonsterStatsType = 'all';
+
         // DOM Elements
         const kpiTotalRuns = document.getElementById('kpi-total-runs');
         const kpiSubTotal = document.getElementById('kpi-sub-total');
@@ -15789,6 +15892,41 @@
                 });
             });
 
+            // Monster stats event listeners
+            const monsterStatsSearchInput = document.getElementById('monster-stats-search');
+            if (monsterStatsSearchInput) {
+                monsterStatsSearchInput.addEventListener('input', renderMonsterStats);
+            }
+            const monsterStatsSortSelect = document.getElementById('monster-stats-sort');
+            if (monsterStatsSortSelect) {
+                monsterStatsSortSelect.addEventListener('change', () => {
+                    const val = monsterStatsSortSelect.value;
+                    if (val === 'frequency') {
+                        monsterSortCol = 'timesFought';
+                        monsterSortDir = 'desc';
+                    } else if (val === 'deaths') {
+                        monsterSortCol = 'deaths';
+                        monsterSortDir = 'desc';
+                    } else if (val === 'winrate') {
+                        monsterSortCol = 'winRate';
+                        monsterSortDir = 'desc';
+                    } else if (val === 'name') {
+                        monsterSortCol = 'name';
+                        monsterSortDir = 'asc';
+                    }
+                    renderMonsterStats();
+                    updateTableHeaders('monster-header-row-tr', monsterSortCol, monsterSortDir);
+                });
+            }
+            document.querySelectorAll('#monster-stats-type-pills .char-pill').forEach(pill => {
+                pill.addEventListener('click', () => {
+                    document.querySelectorAll('#monster-stats-type-pills .char-pill').forEach(p => p.classList.remove('active'));
+                    pill.classList.add('active');
+                    activeMonsterStatsType = pill.dataset.type;
+                    renderMonsterStats();
+                });
+            });
+
             // Cards Sub-view listeners
             if (compCardsSearch) compCardsSearch.addEventListener('input', renderCompendiumCards);
             if (compCardsSortBy) compCardsSortBy.addEventListener('change', renderCompendiumCards);
@@ -15878,6 +16016,7 @@
             updateTableHeaders('multi-header-row-tr', multiSortCol, multiSortDir);
             updateTableHeaders('card-header-row-tr', cardSortCol, cardSortDir);
             updateTableHeaders('relic-header-row-tr', relicSortCol, relicSortDir);
+            updateTableHeaders('monster-header-row-tr', monsterSortCol, monsterSortDir);
         }
 
         // Setup Event Listeners
@@ -17357,6 +17496,45 @@
             updateTableHeaders('relic-header-row-tr', relicSortCol, relicSortDir);
         }
 
+        function sortMonsters(col) {
+            if (monsterSortCol === col) {
+                monsterSortDir = monsterSortDir === 'asc' ? 'desc' : 'asc';
+            } else {
+                monsterSortCol = col;
+                if (col === 'name' || col === 'acts') {
+                    monsterSortDir = 'asc';
+                } else {
+                    monsterSortDir = 'desc';
+                }
+            }
+
+            // Sync dropdown
+            const sortInputEl = document.getElementById('monster-stats-sort');
+            if (sortInputEl) {
+                if (monsterSortCol === 'timesFought' && monsterSortDir === 'desc') {
+                    sortInputEl.value = 'frequency';
+                } else if (monsterSortCol === 'deaths' && monsterSortDir === 'desc') {
+                    sortInputEl.value = 'deaths';
+                } else if (monsterSortCol === 'winRate' && monsterSortDir === 'desc') {
+                    sortInputEl.value = 'winrate';
+                } else if (monsterSortCol === 'name' && monsterSortDir === 'asc') {
+                    sortInputEl.value = 'name';
+                } else {
+                    let customOpt = sortInputEl.querySelector('option[value="custom"]');
+                    if (!customOpt) {
+                        customOpt = document.createElement('option');
+                        customOpt.value = 'custom';
+                        customOpt.textContent = 'Custom Sort';
+                        customOpt.style.display = 'none';
+                        sortInputEl.appendChild(customOpt);
+                    }
+                    sortInputEl.value = 'custom';
+                }
+            }
+            renderMonsterStats();
+            updateTableHeaders('monster-header-row-tr', monsterSortCol, monsterSortDir);
+        }
+
         function sortEnemies(col) {
             if (enemiesSortCol === col) {
                 enemiesSortDir = enemiesSortDir === 'asc' ? 'desc' : 'asc';
@@ -17379,7 +17557,7 @@
             
             const mainGrid = document.getElementById('main-grid');
             
-            const tabViews = ['view-runs', 'view-multiplayer', 'view-compendium', 'view-card-stats', 'view-relic-stats'];
+            const tabViews = ['view-runs', 'view-multiplayer', 'view-compendium', 'view-card-stats', 'view-relic-stats', 'view-monster-stats'];
             tabViews.forEach(viewId => {
                 const el = document.getElementById(viewId);
                 if (el) el.style.display = 'none';
@@ -17421,6 +17599,10 @@
                 if (mainGrid) mainGrid.style.display = 'none';
                 document.getElementById('view-relic-stats').style.display = 'block';
                 renderRelicStats();
+            } else if (tab === 'monster-stats') {
+                if (mainGrid) mainGrid.style.display = 'none';
+                document.getElementById('view-monster-stats').style.display = 'block';
+                renderMonsterStats();
             }
         }
 
@@ -17612,11 +17794,15 @@
             const abandoned = allRuns.filter(r => r.abandoned).length;
             
             const chars = ['Ironclad', 'Silent', 'Regent', 'Defect', 'Necrobinder'];
-            
+            const runHasChar = (r, c) => {
+                if (!r.character) return false;
+                return r.character.toLowerCase().split(' + ').includes(c.toLowerCase());
+            };
+
             if (type === 'runs') {
                 let charBreakdown = '';
                 chars.forEach(c => {
-                    const count = allRuns.filter(r => r.character === c).length;
+                    const count = allRuns.filter(r => runHasChar(r, c)).length;
                     const pct = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
                     charBreakdown += `
                         <div style="display: flex; justify-content: space-between; font-size: 12px; margin-top: 4px;">
@@ -17648,7 +17834,7 @@
             } else if (type === 'winrate') {
                 let winRateBreakdown = '';
                 chars.forEach(c => {
-                    const charRuns = allRuns.filter(r => r.character === c);
+                    const charRuns = allRuns.filter(r => runHasChar(r, c));
                     const count = charRuns.length;
                     const charWins = charRuns.filter(r => r.win).length;
                     const rate = count > 0 ? ((charWins / count) * 100).toFixed(1) : '0.0';
@@ -17669,7 +17855,7 @@
             } else if (type === 'playtime') {
                 let playtimeBreakdown = '';
                 chars.forEach(c => {
-                    const charRuns = allRuns.filter(r => r.character === c);
+                    const charRuns = allRuns.filter(r => runHasChar(r, c));
                     const count = charRuns.length;
                     const totalSecs = charRuns.reduce((acc, r) => acc + r.runTime, 0);
                     const avgSecs = count > 0 ? Math.floor(totalSecs / count) : 0;
@@ -17690,7 +17876,7 @@
             } else if (type === 'maxasc') {
                 let ascBreakdown = '';
                 chars.forEach(c => {
-                    const charRuns = allRuns.filter(r => r.character === c);
+                    const charRuns = allRuns.filter(r => runHasChar(r, c));
                     const maxAsc = charRuns.reduce((max, r) => r.ascension > max ? r.ascension : max, 0);
                     ascBreakdown += `
                         <div style="display: flex; justify-content: space-between; font-size: 12px; margin-top: 4px;">
@@ -19239,6 +19425,32 @@
             return stats;
         }
 
+        function getRelicRunStats(relicId) {
+            const stats = { timesPicked: 0, wins: 0, losses: 0, totalFloors: 0, totalAscension: 0 };
+            allRuns.forEach(run => {
+                const uniqueRelicsInRun = new Set(run.relics);
+                let matched = uniqueRelicsInRun.has(relicId);
+                if (!matched) {
+                    for (const r of uniqueRelicsInRun) {
+                        if (!sts2Database.relics[r]) {
+                            const resolved = findIdByName(r, 'relic');
+                            if (resolved === relicId) { matched = true; break; }
+                        }
+                    }
+                }
+                if (matched) {
+                    stats.timesPicked++;
+                    if (run.win) stats.wins++; else stats.losses++;
+                    stats.totalFloors += run.floors;
+                    stats.totalAscension += run.ascension;
+                }
+            });
+            stats.winRate = stats.timesPicked > 0 ? Math.round((stats.wins / stats.timesPicked) * 100) : 0;
+            stats.avgFloors = stats.timesPicked > 0 ? (stats.totalFloors / stats.timesPicked).toFixed(1) : '0.0';
+            stats.avgAscension = stats.timesPicked > 0 ? (stats.totalAscension / stats.timesPicked).toFixed(1) : '0.0';
+            return stats;
+        }
+
         function openCardZoom(cardId) {
             const item = sts2Database && sts2Database.cards ? sts2Database.cards[cardId] : null;
             if (!item) return;
@@ -19340,20 +19552,127 @@
             requestAnimationFrame(() => modal.classList.add('open'));
         }
 
-        function closeCardZoom() {
-            const modal = document.getElementById('card-zoom-modal');
+        function closeZoomModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (!modal) return;
             modal.classList.remove('open');
             setTimeout(() => { modal.style.display = 'none'; }, 180);
         }
+        function closeCardZoom() { closeZoomModal('card-zoom-modal'); }
+        function closeRelicZoom() { closeZoomModal('relic-zoom-modal'); }
+        function closeItemZoom() { closeZoomModal('item-zoom-modal'); }
+
+        function openRelicZoom(relicId) {
+            const item = sts2Database && sts2Database.relics ? sts2Database.relics[relicId] : null;
+            if (!item) return;
+            const modal = document.getElementById('relic-zoom-modal');
+            const imgUrl = `https://spire-codex.com/static/images/relics/${item.img.toLowerCase()}`;
+            const imgEl = document.getElementById('relic-zoom-img');
+            imgEl.onerror = () => { imgEl.style.display = 'none'; };
+            imgEl.style.display = '';
+            imgEl.src = imgUrl;
+            document.getElementById('relic-zoom-name').textContent = item.name;
+
+            const relRarity = (item.rarity || '').replace(/ Relic/i, '').toLowerCase();
+            const rarityEl = document.getElementById('relic-zoom-rarity');
+            rarityEl.textContent = item.rarity;
+            rarityEl.className = 'relic-rarity-' + (relRarity || 'common');
+
+            const cleanPool = item.pool ? item.pool.charAt(0).toUpperCase() + item.pool.slice(1).toLowerCase() : 'Shared';
+            const poolEl = document.getElementById('relic-zoom-pool');
+            poolEl.textContent = cleanPool;
+            poolEl.style.color = charColors[cleanPool] || 'var(--text-muted)';
+            poolEl.style.fontWeight = '700';
+
+            document.getElementById('relic-zoom-desc').innerHTML = formatDescription(item.desc);
+
+            const stats = getRelicRunStats(relicId);
+            const statsBody = document.getElementById('relic-zoom-stats-body');
+            if (stats.timesPicked === 0) {
+                statsBody.innerHTML = '<div class="card-zoom-no-data">This relic hasn\'t appeared in any tracked runs yet.</div>';
+            } else {
+                statsBody.innerHTML = `
+                    <div class="card-zoom-stat">
+                        <div class="card-zoom-stat-value">${stats.timesPicked}</div>
+                        <div class="card-zoom-stat-label">Runs Picked</div>
+                    </div>
+                    <div class="card-zoom-stat">
+                        <div class="card-zoom-stat-value">${stats.winRate}%</div>
+                        <div class="card-zoom-stat-label">Win Rate</div>
+                    </div>
+                    <div class="card-zoom-stat">
+                        <div class="card-zoom-stat-value">${stats.wins}-${stats.losses}</div>
+                        <div class="card-zoom-stat-label">Wins-Losses</div>
+                    </div>
+                    <div class="card-zoom-stat">
+                        <div class="card-zoom-stat-value">${stats.avgFloors}</div>
+                        <div class="card-zoom-stat-label">Avg Floors Reached</div>
+                    </div>
+                    <div class="card-zoom-stat">
+                        <div class="card-zoom-stat-value">${stats.avgAscension}</div>
+                        <div class="card-zoom-stat-label">Avg Ascension</div>
+                    </div>
+                `;
+            }
+
+            modal.style.display = 'flex';
+            requestAnimationFrame(() => modal.classList.add('open'));
+        }
+
+        function openItemZoom(config) {
+            const modal = document.getElementById('item-zoom-modal');
+            const imgEl = document.getElementById('item-zoom-img');
+            const imgCol = document.getElementById('item-zoom-img-col');
+            const fallbackEl = document.getElementById('item-zoom-fallback');
+
+            if (config.imgUrl) {
+                imgCol.style.display = '';
+                imgEl.style.display = '';
+                fallbackEl.style.display = 'none';
+                imgEl.onerror = () => {
+                    imgEl.style.display = 'none';
+                    if (config.imgFallbackHtml) {
+                        fallbackEl.innerHTML = config.imgFallbackHtml;
+                        fallbackEl.style.display = '';
+                    } else {
+                        imgCol.style.display = 'none';
+                    }
+                };
+                imgEl.src = config.imgUrl;
+            } else if (config.imgFallbackHtml) {
+                imgCol.style.display = '';
+                imgEl.style.display = 'none';
+                fallbackEl.innerHTML = config.imgFallbackHtml;
+                fallbackEl.style.display = '';
+            } else {
+                imgCol.style.display = 'none';
+            }
+
+            document.getElementById('item-zoom-name').textContent = config.name || '';
+            const metaEl = document.getElementById('item-zoom-meta');
+            metaEl.innerHTML = (config.meta || [])
+                .map(m => `<span${m.color ? ` style="color:${m.color}; font-weight:700;"` : ''}>${m.text}</span>`)
+                .join('');
+            document.getElementById('item-zoom-desc').innerHTML = config.descHtml || '';
+            document.getElementById('item-zoom-extra').innerHTML = config.extraHtml || '';
+
+            modal.style.display = 'flex';
+            requestAnimationFrame(() => modal.classList.add('open'));
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
-            const modal = document.getElementById('card-zoom-modal');
-            if (modal) {
-                modal.querySelector('.card-zoom-backdrop').addEventListener('click', closeCardZoom);
-                modal.querySelector('.card-zoom-close').addEventListener('click', closeCardZoom);
-            }
+            ['card-zoom-modal', 'relic-zoom-modal', 'item-zoom-modal'].forEach(id => {
+                const modal = document.getElementById(id);
+                if (!modal) return;
+                modal.querySelector('.card-zoom-backdrop').addEventListener('click', () => closeZoomModal(id));
+                modal.querySelector('.card-zoom-close').addEventListener('click', () => closeZoomModal(id));
+            });
             document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') closeCardZoom();
+                if (e.key === 'Escape') {
+                    closeCardZoom();
+                    closeRelicZoom();
+                    closeItemZoom();
+                }
             });
         });
 
@@ -19399,6 +19718,16 @@
                 'unknown': 99
             };
             
+            const relicStatsCache = {};
+            const getCachedRelicStats = (id) => {
+                if (!relicStatsCache[id]) relicStatsCache[id] = getRelicRunStats(id);
+                return relicStatsCache[id];
+            };
+
+            if (sortByVal === 'picked' || sortByVal === 'winrate') {
+                items.forEach(item => { getCachedRelicStats(item.id); });
+            }
+
             items.sort((a, b) => {
                 if (sortByVal === 'rarity') {
                     const rarityA = RARITY_ORDER[(a.rarity || '').replace(' Relic', '').toLowerCase()] || 99;
@@ -19406,10 +19735,19 @@
                     if (rarityA !== rarityB) {
                         return rarityA - rarityB;
                     }
+                } else if (sortByVal === 'picked') {
+                    const pickedA = getCachedRelicStats(a.id).timesPicked;
+                    const pickedB = getCachedRelicStats(b.id).timesPicked;
+                    if (pickedA !== pickedB) return pickedB - pickedA;
+                } else if (sortByVal === 'winrate') {
+                    const statsA = getCachedRelicStats(a.id);
+                    const statsB = getCachedRelicStats(b.id);
+                    if (statsA.winRate !== statsB.winRate) return statsB.winRate - statsA.winRate;
+                    if (statsA.timesPicked !== statsB.timesPicked) return statsB.timesPicked - statsA.timesPicked;
                 }
                 return a.name.localeCompare(b.name);
             });
-            
+
             items.forEach(item => {
                 const el = document.createElement('div');
                 el.dataset.id = item.id;
@@ -19418,6 +19756,13 @@
                 el.className = 'compendium-card ' + rarityClass;
 
                 const imgUrl = `https://spire-codex.com/static/images/relics/${item.img.toLowerCase()}`;
+
+                let runStatHtml = '';
+                if (sortByVal === 'picked' || sortByVal === 'winrate') {
+                    const s = getCachedRelicStats(item.id);
+                    runStatHtml = `<div class="comp-card-run-stat">Picked ${s.timesPicked}x &bull; ${s.winRate}% win rate</div>`;
+                }
+
                 el.innerHTML = `
                     <div class="comp-relic-title-row">
                         <img class="comp-relic-img-preview" src="${imgUrl}" alt="${item.name}" onerror="this.style.display='none';">
@@ -19427,14 +19772,18 @@
                         <span>Relic</span>
                         <span class="relic-rarity-${relRarity || 'common'}">${item.rarity}</span>
                     </div>
+                    ${runStatHtml}
                     <div class="comp-card-desc">${formatDescription(item.desc)}</div>
                 `;
-                
+
                 // Tooltips
                 el.addEventListener('mouseenter', (e) => showTooltip(e, item.id));
                 el.addEventListener('mousemove', moveTooltip);
                 el.addEventListener('mouseleave', hideTooltip);
-                
+
+                // Click to zoom
+                el.addEventListener('click', () => openRelicZoom(item.id));
+
                 compRelicsGrid.appendChild(el);
             });
         }
@@ -19506,9 +19855,32 @@
                     <div class="comp-card-desc" style="margin-top: 8px;">${formatDescription(item.desc)}</div>
                     <div style="font-size: 9px; color: var(--text-muted); text-align: right; margin-top: auto; padding-top: 6px;">${cleanPool}</div>
                 `;
-                
+
+                el.addEventListener('click', () => openItemZoom({
+                    imgUrl: imgUrl,
+                    imgFallbackHtml: '<div style="font-size: 64px; text-align: center;">&#129514;</div>',
+                    name: item.name,
+                    meta: [
+                        { text: 'Potion' },
+                        { text: item.rarity, color: rarityColorFor(item.rarity) },
+                        { text: cleanPool, color: charColors[cleanPool] }
+                    ],
+                    descHtml: formatDescription(item.desc)
+                }));
+
                 compPotionsGrid.appendChild(el);
             });
+        }
+
+        function rarityColorFor(rarity) {
+            const map = {
+                common: '#e2e8f0', uncommon: '#67e8f9', rare: '#fbbf24',
+                starter: '#34d399', basic: '#34d399', ancient: '#c084fc', special: '#c084fc',
+                boss: '#a855f7', shop: '#14b8a6', curse: '#c41e3a',
+                status: 'var(--text-muted)', token: 'var(--text-muted)',
+                quest: '#45cfd8', event: 'var(--accent-primary)'
+            };
+            return map[(rarity || '').toLowerCase()] || 'var(--text-muted)';
         }
 
         // Static Campfire Abilities
@@ -19618,6 +19990,14 @@
                         <strong>Requirement:</strong> ${item.requirement}
                     </div>
                 `;
+
+                el.addEventListener('click', () => openItemZoom({
+                    name: item.name,
+                    meta: [{ text: item.type }],
+                    descHtml: item.effect,
+                    extraHtml: `<div class="card-zoom-stats-label" style="margin-top: 14px;">Requirement</div><div class="card-zoom-desc" style="margin-top: 8px;">${item.requirement}</div>`
+                }));
+
                 compCampfireGrid.appendChild(el);
             });
         }
@@ -19747,7 +20127,10 @@
                         card.addEventListener('mouseenter', (e) => showTooltip(e, item.id));
                         card.addEventListener('mousemove', moveTooltip);
                         card.addEventListener('mouseleave', hideTooltip);
-                        
+
+                        // Click to zoom (Ancients are relics, so they get the full relic zoom + run stats)
+                        card.addEventListener('click', () => openRelicZoom(item.id));
+
                         grid.appendChild(card);
                     });
                 }
@@ -19929,6 +20312,19 @@
                 tr.addEventListener('mousemove', moveTooltip);
                 tr.addEventListener('mouseleave', hideTooltip);
 
+                // Click to zoom
+                tr.style.cursor = 'pointer';
+                tr.addEventListener('click', () => openItemZoom({
+                    imgUrl: imgUrl,
+                    name: item.name,
+                    meta: [
+                        { text: item.type },
+                        { text: `HP: ${hpText}`, color: '#ef4444' }
+                    ],
+                    descHtml: actsHtml,
+                    extraHtml: `<div class="card-zoom-stats-label" style="margin-top: 14px;">Moves</div><div style="margin-top: 8px;">${movesHtml}</div>`
+                }));
+
                 compMobsTableBody.appendChild(tr);
             });
         }
@@ -20033,6 +20429,15 @@
                     <div class="event-desc">${formatDescription(item.description)}</div>
                     ${optionsHtml}
                 `;
+
+                el.style.cursor = 'pointer';
+                el.addEventListener('click', () => openItemZoom({
+                    name: item.name,
+                    meta: [{ text: item.act ? item.act.split(' - ')[0] : 'Special' }],
+                    descHtml: formatDescription(item.description),
+                    extraHtml: optionsHtml
+                }));
+
                 compEventsGrid.appendChild(el);
             });
         }
@@ -20078,6 +20483,13 @@
                     </div>
                     <div class="comp-card-desc" style="margin-top: 10px; font-size: 13px; line-height: 1.5;">${formatDescription(item.desc)}</div>
                 `;
+
+                el.addEventListener('click', () => openItemZoom({
+                    name: item.name,
+                    meta: [{ text: 'Keyword' }],
+                    descHtml: formatDescription(item.desc)
+                }));
+
                 compKeywordsGrid.appendChild(el);
             });
         }
@@ -20402,6 +20814,177 @@
                 tr.addEventListener('mousemove', moveTooltip);
                 tr.addEventListener('mouseleave', hideTooltip);
                 
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Render Monster Statistics View (normal monsters, elites, and bosses)
+        function renderMonsterStats() {
+            const searchInputEl = document.getElementById('monster-stats-search');
+            const countEl = document.getElementById('monster-stats-count');
+
+            const searchVal = searchInputEl ? searchInputEl.value.toLowerCase() : '';
+
+            if (!sts2Database || !sts2Database.monsters) return;
+
+            const TYPE_COLORS = { normal: '#f97316', elite: '#ef4444', boss: '#a855f7' };
+            const monsterStats = {};
+
+            // Initialize stats for each monster in the database
+            Object.keys(sts2Database.monsters).forEach(monsterId => {
+                const m = sts2Database.monsters[monsterId];
+                monsterStats[monsterId] = {
+                    id: monsterId,
+                    name: m.name,
+                    type: m.type || 'Normal',
+                    acts: (m.acts && m.acts.length) ? m.acts.join(', ') : '',
+                    timesFought: 0,
+                    runIds: new Set(),
+                    wins: 0,
+                    losses: 0,
+                    deaths: 0,
+                    totalFloors: 0,
+                    totalAscension: 0
+                };
+            });
+
+            // Accumulate stats from all runs by walking the map point history
+            allRuns.forEach(run => {
+                const monstersInRun = new Set();
+                if (run.mapPointHistory) {
+                    run.mapPointHistory.forEach(act => {
+                        if (!act) return;
+                        act.forEach(node => {
+                            const t = node.map_point_type;
+                            if (t === 'monster' || t === 'elite' || t === 'boss') {
+                                const room = node.rooms && node.rooms[0];
+                                if (room && room.model_id) {
+                                    const mid = getMonsterIdFromEncounter(room.model_id);
+                                    if (mid && monsterStats[mid]) {
+                                        monsterStats[mid].timesFought++;
+                                        monstersInRun.add(mid);
+                                    }
+                                }
+                            }
+                        });
+                    });
+                }
+
+                // Per-run aggregates counted once per unique monster faced
+                monstersInRun.forEach(mid => {
+                    const stat = monsterStats[mid];
+                    stat.runIds.add(run.id);
+                    if (run.win) {
+                        stat.wins++;
+                    } else {
+                        stat.losses++;
+                    }
+                    stat.totalFloors += run.floors;
+                    stat.totalAscension += run.ascension;
+                });
+
+                // Tally the monster that killed the player on losing runs
+                if (!run.win && run.killedByEncounter) {
+                    const killerId = getMonsterIdFromEncounter(run.killedByEncounter);
+                    if (killerId && monsterStats[killerId]) {
+                        monsterStats[killerId].deaths++;
+                    }
+                }
+            });
+
+            // Convert to array
+            let statsArray = Object.values(monsterStats);
+
+            // Filter by monster type
+            if (activeMonsterStatsType !== 'all') {
+                statsArray = statsArray.filter(stat => (stat.type || '').toLowerCase() === activeMonsterStatsType);
+            }
+
+            // Filter by search term
+            if (searchVal) {
+                statsArray = statsArray.filter(stat => stat.name.toLowerCase().includes(searchVal));
+            }
+
+            // Calculate final metrics
+            statsArray.forEach(stat => {
+                stat.runsContained = stat.runIds.size;
+                stat.winRate = stat.runsContained > 0 ? Math.round((stat.wins / stat.runsContained) * 100) : 0;
+                stat.avgFloors = stat.runsContained > 0 ? (stat.totalFloors / stat.runsContained).toFixed(1) : '0.0';
+                stat.avgAscension = stat.runsContained > 0 ? (stat.totalAscension / stat.runsContained).toFixed(1) : '0.0';
+            });
+
+            // Only show monsters faced in at least 1 run (unless searched)
+            statsArray = statsArray.filter(stat => stat.timesFought > 0 || searchVal !== '');
+
+            // Sort
+            const TYPE_ORDER = { 'normal': 0, 'elite': 1, 'boss': 2, 'minion': 0 };
+            statsArray.sort((a, b) => {
+                let valA = a[monsterSortCol];
+                let valB = b[monsterSortCol];
+
+                if (monsterSortCol === 'name' || monsterSortCol === 'acts') {
+                    valA = (valA || '').toString().toLowerCase();
+                    valB = (valB || '').toString().toLowerCase();
+                    return monsterSortDir === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+                } else if (monsterSortCol === 'type') {
+                    valA = TYPE_ORDER[(a.type || '').toLowerCase()] ?? -1;
+                    valB = TYPE_ORDER[(b.type || '').toLowerCase()] ?? -1;
+                } else {
+                    valA = Number(valA) || 0;
+                    valB = Number(valB) || 0;
+                }
+
+                if (valA < valB) return monsterSortDir === 'asc' ? -1 : 1;
+                if (valA > valB) return monsterSortDir === 'asc' ? 1 : -1;
+                return 0;
+            });
+
+            // Render count
+            if (countEl) {
+                countEl.textContent = `Showing ${statsArray.length} monsters`;
+            }
+
+            // Render table rows
+            const tbody = document.getElementById('monster-stats-table-body');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            if (statsArray.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" class="no-data" style="text-align:center;">No monster analytics match filters.</td></tr>';
+                return;
+            }
+
+            statsArray.forEach(stat => {
+                const tr = document.createElement('tr');
+                tr.className = 'monster-stats-row';
+                tr.style.cursor = 'help';
+
+                const typeColor = TYPE_COLORS[(stat.type || '').toLowerCase()] || 'var(--text-muted)';
+
+                tr.innerHTML = `
+                    <td class="char-cell" style="font-weight:600;"><span class="char-indicator" style="background: ${typeColor}"></span>${stat.name}</td>
+                    <td><span style="font-size:12px; font-weight:600; color: ${typeColor};">${stat.type}</span></td>
+                    <td style="font-size:12px; color: var(--text-muted);">${stat.acts || '—'}</td>
+                    <td style="font-weight:700; text-align:center;">${stat.timesFought}</td>
+                    <td style="text-align:center; font-weight:600;">${stat.runsContained}</td>
+                    <td style="text-align:center; font-weight:700; color: ${stat.deaths > 0 ? 'var(--accent-danger, #ef4444)' : 'var(--text-muted)'};">${stat.deaths}</td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 8px; justify-content: flex-start;">
+                            <div class="death-bar-container" style="width: 70px; height: 6px; margin: 0; background: rgba(239, 68, 68, 0.25);">
+                                <div class="death-bar" style="width: ${stat.winRate}%; background: var(--accent-success); height: 6px;"></div>
+                            </div>
+                            <span style="font-weight:700; min-width:32px;">${stat.winRate}%</span>
+                        </div>
+                    </td>
+                    <td style="text-align:center; font-weight:600;">${stat.avgFloors}</td>
+                    <td style="text-align:center; font-weight:600;">A${stat.avgAscension}</td>
+                `;
+
+                // Attach hover tooltip for the monster details!
+                tr.addEventListener('mouseenter', (e) => showTooltip(e, stat.id));
+                tr.addEventListener('mousemove', moveTooltip);
+                tr.addEventListener('mouseleave', hideTooltip);
+
                 tbody.appendChild(tr);
             });
         }

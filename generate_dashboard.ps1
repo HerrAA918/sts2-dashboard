@@ -1,3 +1,15 @@
+# =============================================================================
+# DEPRECATED - DO NOT RUN. This script is NO LONGER the source of truth.
+# -----------------------------------------------------------------------------
+# sts2_dashboard.html is now hand-maintained directly. Running this generator
+# would OVERWRITE the dashboard from this stale embedded template and destroy
+# the current CSS/JS/markup (card art, zoom modals, theming, KPIs, etc.).
+#
+# To refresh game data, run compile_db.ps1 then embed_database.ps1 instead.
+# This file is kept only as a reference for the original run-parsing logic.
+# =============================================================================
+throw "generate_dashboard.ps1 is deprecated and disabled. Use compile_db.ps1 + embed_database.ps1 to update game data. Delete this throw only if you intend to rebuild the dashboard from scratch."
+
 # Disable local saves scanning by default to start the dashboard in a clean, blank state.
 # To scan local Steam saves, uncomment the lines below and set your own Steam user ID.
 # $runsDir = "C:\Program Files (x86)\Steam\userdata\<YOUR_STEAM_ID>\2868840\remote\profile1\saves\history"

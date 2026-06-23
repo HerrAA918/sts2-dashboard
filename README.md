@@ -15,9 +15,9 @@ This dashboard allows you to import, visualize, and analyze your runs (both Sing
 - **Built-in Compendium**: A complete Slay the Spire 2 database of Cards, Relics, and Monsters with hover tooltips, rarity color-coding, and move-set/intent lists — embedded in the page, so it's populated without importing anything (the artwork itself loads from public CDNs).
 - **Unlocks & Progression**: Import your `progress.save` to see a **Progression** tab (unlock timeline grouped by character, collection-completion bars, lifetime stats, and an achievements checklist) plus an **"Unlocked this run"** section on each run, correlated by timestamp.
 - **Share / Export**: Bundle your imported runs + progression into a single `.json` file with the **Export / Share** button. Send it to anyone — they drop it onto their dashboard to view your snapshot (a banner reminds them they're viewing shared data and to load their own save).
-- **Privacy First**: Your runs and progress are parsed locally and stored only in your browser's `localStorage` for quick access next time — none of your data is ever uploaded or sent to any server. (The page does fetch static assets — the charting library, web fonts, and entity art — from public CDNs, but those requests never carry your run data.)
+- **Privacy First**: Your runs and progress are parsed locally and stored only in your browser's `localStorage` for quick access next time — none of your data is ever uploaded or sent to any server. (The page does fetch web fonts and entity art from public CDNs, but those requests never carry your run data.)
 
-> **Connectivity:** The dashboard runs entirely in your browser and the game database is embedded, but a few assets load from public CDNs — **Chart.js** (charts), **JSZip** (`.zip` imports), **Google Fonts**, and the card/relic/monster/character **artwork**. With no internet, your runs and stats still load and every analytic still computes, but charts won't render, `.zip` import is unavailable, fonts fall back to system defaults, and missing artwork is hidden (each image is guarded so nothing else breaks). Everything else works offline.
+> **Connectivity:** The dashboard runs entirely in your browser, and the game database, charting library (**Chart.js**), and `.zip` reader (**JSZip**) are all bundled into the page — so importing runs, every analytic, and all charts work with **no internet**. The only things fetched from public CDNs are **Google Fonts** and the card/relic/monster/character **artwork**; offline, fonts fall back to system defaults and missing artwork is hidden (each image is guarded so nothing else breaks). Everything else works fully offline.
 
 ## Dashboard Tour
 
@@ -99,7 +99,7 @@ Game data and the dashboard's UI are therefore updated independently:
 
 ## Files in this Repository
 
-- `sts2_dashboard.html`: The ready-to-use dashboard, hand-maintained. Open in any modern web browser. (The game database is embedded; the charting library, ZIP-import helper, web fonts, and entity art load from public CDNs — see **Connectivity** above.)
+- `sts2_dashboard.html`: The ready-to-use dashboard, hand-maintained. Open in any modern web browser. (The game database, charting library, and ZIP reader are all bundled in; only web fonts and entity art load from public CDNs — see **Connectivity** above.)
 - `compile_db.ps1`: Database compiler — pulls raw game data from the Spire Codex API and builds `sts2_database.json`.
 - `embed_database.ps1`: Injects `sts2_database.json` into the dashboard's embedded database block (between the `STS2_DATABASE` markers), without regenerating the rest of the HTML.
 - `sts2_database.json`: The compiled database of cards, relics, potions, monsters, events, keywords, epochs (unlocks), and achievements used by the dashboard.

@@ -2138,6 +2138,40 @@
             gap: 4px;
             margin-right: 6px;
         }
+
+        /* Non-blocking toast notifications (replaces blocking alert() for import feedback,
+           which used to freeze the event loop before Chart.js could paint the new charts) */
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+        .toast {
+            min-width: 220px;
+            max-width: 380px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            line-height: 1.35;
+            color: #0a1118;
+            background: var(--accent-success, #34d399);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+            border-left: 4px solid rgba(0, 0, 0, 0.25);
+            opacity: 0;
+            transform: translateX(20px);
+            transition: opacity 0.25s ease, transform 0.25s ease;
+            pointer-events: auto;
+        }
+        .toast.toast-show { opacity: 1; transform: translateX(0); }
+        .toast.toast-info { background: var(--accent-primary, #e8b830); color: #0a1118; }
+        .toast.toast-error { background: var(--accent-danger, #c41e3a); color: #ffffff; }
     </style>
 </head>
 <body>
@@ -17697,6 +17731,29 @@
         }
 
         // Shared post-import refresh
+        // Non-blocking notification. A native alert() here would freeze the event loop
+        // synchronously right after new Chart() runs, so Chart.js never gets the animation
+        // frame to paint — the freshly-created charts would sit blank until the user clicked OK.
+        function showToast(message, type = 'success') {
+            let container = document.getElementById('toast-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'toast-container';
+                document.body.appendChild(container);
+            }
+            const toast = document.createElement('div');
+            toast.className = 'toast toast-' + type;
+            toast.setAttribute('role', 'status');
+            toast.setAttribute('aria-live', 'polite');
+            toast.textContent = message;
+            container.appendChild(toast);
+            requestAnimationFrame(() => toast.classList.add('toast-show'));
+            setTimeout(() => {
+                toast.classList.remove('toast-show');
+                setTimeout(() => toast.remove(), 300);
+            }, 4500);
+        }
+
         function refreshAfterImport(runs, message) {
             runs.sort((a, b) => a.timestamp - b.timestamp);
             
@@ -17716,7 +17773,7 @@
             applyFilters();
             
             selectRun(allRuns[allRuns.length - 1].id);
-            alert(message);
+            showToast(message);
         }
 
         function mergeNewRunsIntoExisting(existingRuns, newRuns) {
@@ -17853,7 +17910,7 @@
                 }
                 applyProgressData();
                 const unlockCount = asArray(data.epochs).length;
-                alert(`Progression imported from ${file.name}! ${unlockCount} unlock epoch${unlockCount !== 1 ? 's' : ''} loaded.`);
+                showToast(`Progression imported from ${file.name}! ${unlockCount} unlock epoch${unlockCount !== 1 ? 's' : ''} loaded.`);
             };
             reader.onerror = function() { alert("Failed to read " + file.name); };
             reader.readAsText(file);
@@ -17950,7 +18007,7 @@
                 applyProgressData();
             } else if (data.progress) {
                 applyProgressData();
-                alert('Shared progression imported!');
+                showToast('Shared progression imported!');
             } else {
                 alert('This shared file contains no runs or progression.');
             }
@@ -17974,7 +18031,7 @@
                     progressData = data;
                     try { localStorage.setItem('sts2_progress_data', JSON.stringify(data)); } catch (e) {}
                     applyProgressData();
-                    alert('Progression imported!');
+                    showToast('Progression imported!');
                 } else if (data && (data.map_point_history || data.acts)) {
                     // A single .run renamed to .json
                     try {
@@ -19167,7 +19224,7 @@
         function copySeed() {
             const seedText = detailSeed.textContent;
             navigator.clipboard.writeText(seedText).then(() => {
-                alert(`Seed copied to clipboard: ${seedText}`);
+                showToast(`Seed copied to clipboard: ${seedText}`, 'info');
             }).catch(err => {
                 console.error('Failed to copy seed: ', err);
             });

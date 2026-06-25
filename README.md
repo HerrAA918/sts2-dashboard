@@ -11,7 +11,7 @@ This dashboard allows you to import, visualize, and analyze your runs (both Sing
 - **Run History**: Table views of all loaded single player and co-op runs with pagination, search, and sorting.
 - **Run Map Timeline**: Detailed interactive step-by-step path visualizer for each run showing floors, events, combats, rest sites, shops, and boss nodes.
 - **Card & Relic Analytics**: Win rates, pick rates, survival distributions, and playstyle correlation tables based on your uploaded history.
-- **Survival & Playstyle Charts**: Floor-by-floor survival rates and radar charts depicting your playstyle (Aggressive, Defensive, Tactical, Wealthy).
+- **Survival & Playstyle Charts**: Floor-by-floor survival rates plus a six-axis playstyle radar — **Route Discipline**, **Deck Cohesion**, **Boss Conversion**, **Clutch Survival**, **Elite Tempo**, and **Resource Efficiency** — distilled from your run history.
 - **Built-in Compendium**: A complete Slay the Spire 2 database of Cards, Relics, and Monsters with hover tooltips, rarity color-coding, and move-set/intent lists — embedded in the page, so it's populated without importing anything (the artwork itself loads from public CDNs).
 - **Unlocks & Progression**: Import your `progress.save` to see a **Progression** tab (unlock timeline grouped by character, collection-completion bars, lifetime stats, and an achievements checklist) plus an **"Unlocked this run"** section on each run, correlated by timestamp.
 - **Share / Export**: Bundle your imported runs + progression into a single `.json` file with the **Export / Share** button. Send it to anyone — they drop it onto their dashboard to view your snapshot (a banner reminds them they're viewing shared data and to load their own save).
@@ -34,7 +34,7 @@ The same breakdown for multiplayer runs. Each entry shows both players' characte
 ### Compendium
 ![Compendium](docs/section-compendium.png)
 
-A complete built-in database of **Cards, Relics, Potions, Mobs, Elites, Bosses, Events, Keywords, and Ancients** — with real game art, rarity color-coding, hover tooltips, an upgraded-card toggle, and click-to-zoom detail. The data is embedded in the page, so it's fully populated without importing anything; the artwork is pulled from public CDNs and degrades gracefully if you're offline.
+A complete built-in database of **Cards, Relics, Potions, Campfire options, Ancients, Mobs, Elites, Bosses, Events, and Keywords** — with real game art, rarity color-coding, hover tooltips, an upgraded-card toggle, and click-to-zoom detail. The data is embedded in the page, so it's fully populated without importing anything; the artwork is pulled from public CDNs and degrades gracefully if you're offline.
 
 ### Card Analytics
 ![Card Analytics](docs/section-card-analytics.png)

@@ -8,11 +8,11 @@ This dashboard allows you to import, visualize, and analyze your runs (both Sing
 
 ## Features
 
-- **Run History**: Table views of all loaded single player and co-op runs with pagination, search, and sorting.
+- **Run History**: Table views of all loaded single player and co-op runs with search and sorting.
 - **Run Map Timeline**: Detailed interactive step-by-step path visualizer for each run showing floors, events, combats, rest sites, shops, and boss nodes.
-- **Card & Relic Analytics**: Win rates, pick rates, survival distributions, and playstyle correlation tables based on your uploaded history.
+- **Card & Relic Analytics**: How every card and relic performs in your uploaded history — runs contained, win–loss record, win rate, and average floor/ascension — filterable by character class and sortable by any column.
 - **Survival & Playstyle Charts**: Floor-by-floor survival rates plus a six-axis playstyle radar — **Route Discipline**, **Deck Cohesion**, **Boss Conversion**, **Clutch Survival**, **Elite Tempo**, and **Resource Efficiency** — distilled from your run history.
-- **Built-in Compendium**: A complete Slay the Spire 2 database of Cards, Relics, and Monsters with hover tooltips, rarity color-coding, and move-set/intent lists — embedded in the page, so it's populated without importing anything (the artwork itself loads from public CDNs).
+- **Built-in Compendium**: A complete Slay the Spire 2 database — cards, relics, monsters, events, and more — with hover tooltips, rarity color-coding, and move-set/intent lists, embedded in the page so it's populated without importing anything (the full tab list is in the Compendium tour below; the artwork itself loads from public CDNs).
 - **Unlocks & Progression**: Import your `progress.save` to see a **Progression** tab (unlock timeline grouped by character, collection-completion bars, lifetime stats, and an achievements checklist) plus an **"Unlocked this run"** section on each run, correlated by timestamp.
 - **Share / Export**: Bundle your imported runs + progression into a single `.json` file with the **Export / Share** button. Send it to anyone — they drop it onto their dashboard to view your snapshot (a banner reminds them they're viewing shared data and to load their own save).
 - **Privacy First**: Your runs and progress are parsed locally and stored only in your browser's `localStorage` for quick access next time — none of your data is ever uploaded or sent to any server. (The page does fetch web fonts and entity art from public CDNs, but those requests never carry your run data.)
@@ -24,7 +24,7 @@ This dashboard allows you to import, visualize, and analyze your runs (both Sing
 ### Run History
 ![Run History](docs/section-runs.png)
 
-Your home base. Headline KPIs (total runs, overall win rate, total playtime, max ascension, and your best-performing characters), a **Wins & Runs by Character** bar chart, a **Run Distribution** donut, and **Top Death Causes**. Pick any run to open a detail panel with its deck, relics, an interactive **Run Map** timeline, a floor-by-floor **Health & Gold** chart, and the unlocks earned during that run.
+Your home base. Headline KPIs (total runs, overall win rate, total playtime, max ascension, and your best-performing characters), a **Win Rate & Runs by Character** bar chart, a **Run Distribution** donut, and **Top Death Causes** — plus, lower on the page, the six-axis **Playstyle Traits** radar and the **Survival By Floor** chart. Pick any run to open a detail panel with its deck, relics, an interactive **Run Map** timeline, a floor-by-floor **Health & Gold** chart, and the unlocks earned during that run.
 
 ### Co-op History
 ![Co-op History](docs/section-coop.png)
@@ -34,7 +34,7 @@ The same breakdown for multiplayer runs. Each entry shows both players' characte
 ### Compendium
 ![Compendium](docs/section-compendium.png)
 
-A complete built-in database of **Cards, Relics, Potions, Campfire options, Ancients, Mobs, Elites, Bosses, Events, and Keywords** — with real game art, rarity color-coding, hover tooltips, an upgraded-card toggle, and click-to-zoom detail. The data is embedded in the page, so it's fully populated without importing anything; the artwork is pulled from public CDNs and degrades gracefully if you're offline.
+A complete built-in database of **Cards, Relics, Potions, Campfire, Ancients, Mobs, Elites, Bosses, Events, and Keywords** — with real game art, rarity color-coding, hover tooltips, an upgraded-card toggle, and click-to-zoom detail. The data is embedded in the page, so it's fully populated without importing anything; the artwork is pulled from public CDNs and degrades gracefully if you're offline.
 
 ### Card Analytics
 ![Card Analytics](docs/section-card-analytics.png)
@@ -58,7 +58,7 @@ Built from your `progress.save`: lifetime stats (unlocks, epochs, floors climbed
 
 ## Where to Find Your Run History Files
 
-To import your runs into the dashboard, drag and drop the JSON files from your game's run history folder into the dashboard. You can find these files in the following locations:
+To import your runs, drag and drop the `.run` files from your game's run history folder onto the dashboard — a `.zip` of them works too. You can find these files in the following locations:
 
 ### Windows
 - **Steam Cloud Location (Recommended)**:
@@ -100,7 +100,8 @@ Game data and the dashboard's UI are therefore updated independently:
 ## Files in this Repository
 
 - `sts2_dashboard.html`: The ready-to-use dashboard, hand-maintained. Open in any modern web browser. (The game database, charting library, and ZIP reader are all bundled in; only web fonts and entity art load from public CDNs — see **Connectivity** above.)
-- `compile_db.ps1`: Database compiler — pulls raw game data from the Spire Codex API and builds `sts2_database.json`.
+- `index.html`: GitHub Pages entry point — a tiny redirect page that forwards visitors to `sts2_dashboard.html` (this is what the hosted link serves).
+- `compile_db.ps1`: Database compiler — builds `sts2_database.json` from the local `*_api.json` caches (fresh Spire Codex data is downloaded by the auto-update workflow, not this script).
 - `embed_database.ps1`: Injects `sts2_database.json` into the dashboard's embedded database block (between the `STS2_DATABASE` markers), without regenerating the rest of the HTML.
 - `sts2_database.json`: The compiled database of cards, relics, potions, monsters, events, keywords, epochs (unlocks), and achievements used by the dashboard.
 - `cards_api.json`, `relics_api.json`, `monsters_api.json`, `encounters_api.json`, `events_api.json`, `potions_api.json`, `keywords_api.json`, `epochs_api.json`, `achievements_api.json`: Source API data caches.
@@ -124,7 +125,7 @@ This repository includes a GitHub Actions workflow that **automatically checks f
 
 ### How it works
 
-1. Every day at 06:00 UTC, the workflow downloads the latest card, relic, monster, encounter, event, potion, and keyword data from the [Spire Codex](https://github.com/ptrlrd/spire-codex) repository.
+1. Every day at 06:00 UTC, the workflow downloads the latest card, relic, monster, encounter, event, potion, keyword, epoch (unlock), and achievement data from the [Spire Codex](https://github.com/ptrlrd/spire-codex) repository.
 2. It compares the downloaded data against the committed API JSON files.
 3. If any changes are detected, it rebuilds the compiled database (`compile_db.ps1` → `sts2_database.json`) and embeds it into the dashboard's database block (`embed_database.ps1` → `sts2_dashboard.html`). The dashboard UI is left untouched.
 4. The updated data files and dashboard are automatically committed and pushed back to the repository.
